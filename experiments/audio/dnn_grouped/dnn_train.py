@@ -3,8 +3,8 @@ import torch.nn as nn
 import numpy as np
 from experiments.audio.util import util
 import torch.utils.data as utils
-from collections import Counter
-from itertools import chain
+from sklearn.metrics import recall_score
+from nltk.metrics import ConfusionMatrix, accuracy
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -22,6 +22,8 @@ label_to_id = {
     "neu":"3",
 }
 
+print("##### Train #####")
+
 train_vectors, train_labels = util.get_and_norm_train_data(TRAIN_FILE_AUDIO, label_to_id, EXPERIMENT_PATH)
 
 labels_count = len(set(list(label_to_id.values())))
@@ -35,25 +37,35 @@ print("number of features: " + str(features_count))
 print("train vectors shape: " + str(train_vectors.shape))
 print("train labels shape: " + str(train_labels.shape))
 
-
 train_labels = np.array(train_labels).reshape(-1,1)
-print(train_labels.shape)
-#one_hot_encoding = np.zeros((instances_count, labels_count))
-#one_hot_encoding[np.arange(instances_count), train_labels] = 1
 
+tensor_train_x = torch.stack([torch.Tensor(i) for i in train_vectors])
+tensor_train_y = torch.stack([torch.Tensor(i) for i in train_labels])
 
-tensor_x = torch.stack([torch.Tensor(i) for i in train_vectors]) # transform to torch tensors
+train_dataset = utils.TensorDataset(tensor_train_x,tensor_train_y) # create your datset
+train_dataloader = utils.DataLoader(train_dataset, batch_size=32) # create your dataloader
 
-tensor_y = torch.stack([torch.Tensor(i) for i in train_labels])
+print("##### Test #####")
 
-my_dataset = utils.TensorDataset(tensor_x,tensor_y) # create your datset
-my_dataloader = utils.DataLoader(my_dataset, batch_size=32) # create your dataloader
+test_vectors, test_labels = util.get_and_norm_test_data(DEV_FILE_AUDIO, label_to_id, EXPERIMENT_PATH)
 
-print("loaded data")
+instances_test_count = test_vectors.shape[0]
+
+print("number of instances: " + str(instances_count))
+
+print("test vectors shape: " + str(test_vectors.shape))
+print("test labels shape: " + str(test_labels.shape))
+
+test_labels = np.array(test_labels).reshape(-1,1)
+
+tensor_test_x = torch.stack([torch.Tensor(i) for i in test_vectors])
+tensor_test_y = torch.stack([torch.Tensor(i) for i in test_labels])
+
+test_dataset = utils.TensorDataset(tensor_test_x,tensor_test_y) # create your datset
+test_dataloader = utils.DataLoader(test_dataset, batch_size=32) # create your dataloader
 
 # Hyper-parameters
-num_epochs = 5
-
+num_epochs = 20
 hidden_size = 1024
 batch_size = 32
 learning_rate = 0.01
@@ -63,8 +75,10 @@ class Net(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(input_dim, hidden_size)
+        self.fc1_drop = nn.Dropout(p=0.5)
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc2_drop = nn.Dropout(p=0.5)
         self.relu2 = nn.ReLU()
         self.fc3 = nn.Linear(hidden_size, output_dim)
 
@@ -72,9 +86,11 @@ class Net(nn.Module):
     def forward(self, x):
         out = self.fc1(x)
         out = self.relu(out)
+        out = self.fc1_drop(out)
 
         out = self.fc2(out)
         out = self.relu2(out)
+        out = self.fc2_drop(out)
 
         out = self.fc3(out)
         return out
@@ -87,10 +103,10 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr = learning_rate, momentum=0.9)
 
 # Train the model
-total_step = len(my_dataloader)
+total_step = len(train_dataloader)
 print("start train")
 for epoch in range(num_epochs):
-    for i, (train_vectors, labels) in enumerate(my_dataloader):
+    for i, (train_vectors, labels) in enumerate(train_dataloader):
         # Move tensors to the configured device
         train_vectors = train_vectors.to(device)
         labels = labels.to(device, dtype=torch.int64).view(-1)
@@ -107,3 +123,28 @@ for epoch in range(num_epochs):
         if (i + 1) % 100 == 0:
             print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                   .format(epoch + 1, num_epochs, i + 1, total_step, loss.item()))
+
+predictions = []
+gold = []
+
+with torch.no_grad():
+    correct = 0
+    total = 0
+    for test_vectors, labels in test_dataloader:
+        test_vectors = test_vectors.to(device)
+        labels = labels.to(device, dtype=torch.int64).view(-1)
+
+        outputs = model(test_vectors)
+        _, predicted = torch.max(outputs.data, 1)
+
+        predictions += predicted.data.tolist()
+        gold += labels.data.tolist()
+
+print("#########################\n")
+print("UAR: " + str(recall_score(gold, predictions, average='macro')))
+print("Accuracy:" + str(accuracy(gold, predictions)))
+print("#########################\n")
+
+cm = ConfusionMatrix(gold, predictions)
+print(cm)
+
