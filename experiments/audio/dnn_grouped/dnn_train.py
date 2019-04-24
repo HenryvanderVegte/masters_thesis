@@ -86,11 +86,11 @@ class Net(nn.Module):
     def forward(self, x):
         out = self.fc1(x)
         out = self.relu(out)
-        out = self.fc1_drop(out)
+        #out = self.fc1_drop(out)
 
         out = self.fc2(out)
         out = self.relu2(out)
-        out = self.fc2_drop(out)
+        #out = self.fc2_drop(out)
 
         out = self.fc3(out)
         return out
@@ -123,6 +123,20 @@ for epoch in range(num_epochs):
         if (i + 1) % 100 == 0:
             print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                   .format(epoch + 1, num_epochs, i + 1, total_step, loss.item()))
+
+    correct = 0
+    total = 0
+    for test_vectors, labels in test_dataloader:
+        test_vectors = test_vectors.to(device)
+        labels = labels.to(device, dtype=torch.int64).view(-1)
+
+        outputs = model(test_vectors)
+        _, predicted = torch.max(outputs.data, 1)
+
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+    print('Dev set accuracy: {} %'.format(100 * correct / total))
+
 
 predictions = []
 gold = []
