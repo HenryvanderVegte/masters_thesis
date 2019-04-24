@@ -7,6 +7,14 @@ TEST_FILE = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//split//dev.tx
 ALL_WORDS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//experiments//Naive Bayes//all_words.txt"
 PICKLE = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//experiments//Naive Bayes//naive_bayes.pickle"
 
+label_to_id = {
+    "hap":"0",
+    "exc":"0",
+    "sad":"1",
+    "ang":"2",
+    "neu":"3",
+}
+
 def get_all_words(lines):
     all_words = set([])
     for line in lines:
@@ -19,10 +27,12 @@ def get_test_data(lines, all_words):
     for line in lines:
         label = line.split('\t')[1]
         utterance = line.split('\t')[2]
-        tokens = nltk.word_tokenize(utterance.lower())
-        train_instance = {word: (word in tokens) for word in all_words}
-        test_data.append(train_instance)
-        test_labels.append(label)
+
+        if label in label_to_id:
+            tokens = nltk.word_tokenize(utterance.lower())
+            train_instance = {word: (word in tokens) for word in all_words}
+            test_data.append(train_instance)
+            test_labels.append(label_to_id[label])
     return test_data, test_labels
 
 words_file = open(ALL_WORDS, "r")
