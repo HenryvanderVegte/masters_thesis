@@ -48,23 +48,6 @@ def test(test_file_in, all_words_file_in, pickle_in, label_to_id):
     classifier = pickle.load(f)
     f.close()
 
-    tuples = []
-
-    for i in range(0,len(test_data)):
-        tuples.append((test_data[i], test_labels[i]))
-
-    pred_perc = classifier.prob_classify(test_data[0])
-
-    for i in pred_perc.samples():
-        print(i + " " + str(pred_perc.prob(i)))
-
-    print(pred_perc.prob('0'))
-    print(pred_perc.prob('1'))
-    print(pred_perc.prob('2'))
-    print(pred_perc.prob('3'))
-    print(pred_perc.prob('4'))
-    print(pred_perc.prob('5'))
-
     pred = classifier.prob_classify_many(test_data)
     print(pred)
     print(test_labels)
@@ -77,4 +60,29 @@ def test(test_file_in, all_words_file_in, pickle_in, label_to_id):
 
     print("Accuracy:" + str(accuracy(test_labels, pred)))
 
-test(EXAMPLE_TEST_FILE, EXAMPLE_ALL_WORDS, EXAMPLE_PICKLE, example_label_to_id)
+def test_get_probability_scores(test_file_in, all_words_file_in, pickle_in, label_to_id):
+    words_file = open(all_words_file_in, "r")
+    word_lines = words_file.readlines()
+    all_words = get_all_words(word_lines)
+
+    test_file = open(test_file_in, "r")
+    test_lines = test_file.readlines()
+    test_data, _ = get_test_data(test_lines, all_words, label_to_id)
+
+    f = open(pickle_in, 'rb')
+    classifier = pickle.load(f)
+    f.close()
+
+    probabilities = []
+    for test_vector in test_data:
+        label_probs = []
+        prob_dist = classifier.prob_classify(test_vector)
+        for label in label_to_id.values():
+            label_probs.append(prob_dist.prob(label))
+        probabilities.append(label_probs)
+    return probabilities
+
+#test(EXAMPLE_TEST_FILE, EXAMPLE_ALL_WORDS, EXAMPLE_PICKLE, example_label_to_id)
+
+test_get_probability_scores(EXAMPLE_TEST_FILE, EXAMPLE_ALL_WORDS, EXAMPLE_PICKLE, example_label_to_id)
+
