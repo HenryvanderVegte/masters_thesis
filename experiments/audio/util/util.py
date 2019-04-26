@@ -30,11 +30,11 @@ def get_and_norm_train_data(data_path, label_to_id, experiment_path):
 
     normed_vectors = (train_vectors - means) / stddevs
 
-    with open(os.path.join(experiment_path, "means.txt"), "w") as f:
+    with open(os.path.join(experiment_path, "means_audio.txt"), "w") as f:
         for mean in means:
             f.write(str(mean) + '\n')
 
-    with open(os.path.join(experiment_path, "stddevs.txt"), "w") as f:
+    with open(os.path.join(experiment_path, "stddevs_audio.txt"), "w") as f:
         for stddev in stddevs:
             f.write(str(stddev) + '\n')
 
@@ -42,14 +42,14 @@ def get_and_norm_train_data(data_path, label_to_id, experiment_path):
 
 def get_and_norm_test_data(data_path, label_to_id, experiment_path):
     means = []
-    means_file = open(os.path.join(experiment_path, "means.txt"), "r")
+    means_file = open(os.path.join(experiment_path, "means_audio.txt"), "r")
     means_file_lines = means_file.readlines()
     for line in means_file_lines:
         means.append(float(line))
     means = np.array(means)
 
     stddevs = []
-    stddevs_file = open(os.path.join(experiment_path, "stddevs.txt"), "r")
+    stddevs_file = open(os.path.join(experiment_path, "stddevs_audio.txt"), "r")
     stddevs_file_lines = stddevs_file.readlines()
     for line in stddevs_file_lines:
         stddevs.append(float(line))
