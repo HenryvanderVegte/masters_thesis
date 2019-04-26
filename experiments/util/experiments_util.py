@@ -29,11 +29,21 @@ def create_experiment(experiments_dir, label_to_id, description):
     return experiment_dir, logger
 
 def get_ids_and_labels(feature_file):
-    ids_and_labels = []
+    ids = []
+    labels = []
     file = open(feature_file, "r")
     lines = file.readlines()
     for line in lines:
         split = line.split('\t')
-        id_and_label = split[0] + "\t" + split[1]
-        ids_and_labels.append(id_and_label)
-    return ids_and_labels
+        ids.append(split[0])
+        labels.append(split[1])
+    return ids, labels
+
+def join_ids_labels_probs(ids, labels, probs1, probs2):
+    if not len(ids) == len(labels) == len(probs1) == len(probs2):
+        print("Expected equal length will return")
+        return
+    out = ""
+    for i in range(0, len(ids)):
+        out += ids[i] + '\t' + labels[i] + '\t' + probs1[i] + '\t' + probs2[i] + '\n'
+    return out

@@ -54,7 +54,7 @@ class Net(nn.Module):
         out = self.fc3(out)
         return out
 
-def train(train_file, label_to_id, experiment_path, logger):
+def train(train_file, experiment_path, label_to_id, logger):
     logger.info("Training DNN classifier")
     train_vectors, train_labels = util.get_and_norm_train_data(train_file, label_to_id, experiment_path)
 
