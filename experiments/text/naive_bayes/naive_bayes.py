@@ -64,7 +64,7 @@ def train(train_file_in, experiment_dir, label_to_id, logger):
     classifier = nltk.NaiveBayesClassifier.train(train_data)
     classifier.show_most_informative_features()
 
-    model_path = os.path.join(experiment_dir, "model.pkl")
+    model_path = os.path.join(experiment_dir, "naive_bayes_text.pkl")
     f = open(model_path, 'wb')
     pickle.dump(classifier, f)
     f.close()
@@ -80,7 +80,7 @@ def test(test_file_in, experiment_dir, label_to_id, logger):
     test_lines = test_file.readlines()
     test_data, test_labels = __get_test_data(test_lines, all_words, label_to_id)
 
-    model_path = os.path.join(experiment_dir, "model.pkl")
+    model_path = os.path.join(experiment_dir, "naive_bayes_text.pkl")
     f = open(model_path, 'rb')
     classifier = pickle.load(f)
     f.close()
@@ -104,7 +104,7 @@ def eval_get_probability_scores(test_file_in, experiment_dir, label_to_id, logge
     test_lines = test_file.readlines()
     test_data, _ = __get_test_data(test_lines, all_words, label_to_id)
 
-    model_path = os.path.join(experiment_dir, "model.pkl")
+    model_path = os.path.join(experiment_dir, "naive_bayes_text.pkl")
     f = open(model_path, 'rb')
     classifier = pickle.load(f)
     f.close()

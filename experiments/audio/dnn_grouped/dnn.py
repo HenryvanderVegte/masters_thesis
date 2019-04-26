@@ -6,7 +6,6 @@ from experiments.audio.util import util
 import torch.utils.data as utils
 from sklearn.metrics import recall_score
 from nltk.metrics import ConfusionMatrix, accuracy
-import onnx
 
 
 TRAIN_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//train.txt"
@@ -103,16 +102,16 @@ def train(train_file, experiment_path, label_to_id, logger):
 
     logger.info("Completed train")
     # export onnx model
-    onnx_model_path = os.path.join(experiment_path, "model.onnx")
+    onnx_model_path = os.path.join(experiment_path, "dnn_audio.onnx")
     dummy_input = torch.randn(batch_size, features_count, device='cuda')
     torch.onnx.export(model, dummy_input, onnx_model_path, verbose=True)
 
     # export pytorch model
-    model_path = os.path.join(experiment_path, "model.pth")
+    model_path = os.path.join(experiment_path, "dnn_audio.pth")
     torch.save(model.state_dict(), model_path)
     logger.info("Saved model to" + onnx_model_path + " and " + model_path)
 
-def test(dev_file, label_to_id, experiment_path, logger):
+def test(dev_file, experiment_path, label_to_id,  logger):
     logger.info("Testing DNN classifier")
 
     test_vectors, test_labels = util.get_and_norm_test_data(dev_file, label_to_id, experiment_path)
@@ -131,7 +130,7 @@ def test(dev_file, label_to_id, experiment_path, logger):
     test_dataset = utils.TensorDataset(tensor_test_x, tensor_test_y)  # create your datset
     test_dataloader = utils.DataLoader(test_dataset, batch_size=32)  # create your dataloader
 
-    model_path = os.path.join(experiment_path, "model.pth")
+    model_path = os.path.join(experiment_path, "dnn_audio.pth")
     model = Net(features_count, labels_count).to(device)
     model.load_state_dict(torch.load(model_path))
     model.eval()
@@ -158,9 +157,9 @@ def test(dev_file, label_to_id, experiment_path, logger):
     logger.info("Accuracy: " + str(accuracy(gold, predictions)))
     logger.info("Unweighted average recall: " + str(recall_score(gold, predictions, average='macro')))
     cm = ConfusionMatrix(gold, predictions)
-    logger.info("Confusion matrix:\n" + cm)
+    logger.info("Confusion matrix:\n" + str(cm))
 
-def eval_get_probabilities(test_file_in, label_to_id, experiment_path, logger):
+def eval_get_probabilities(test_file_in, experiment_path, label_to_id, logger):
     logger.info("Getting DNN probability scores for " + test_file_in)
 
     test_vectors, test_labels = util.get_and_norm_test_data(test_file_in, label_to_id, experiment_path)
@@ -179,7 +178,7 @@ def eval_get_probabilities(test_file_in, label_to_id, experiment_path, logger):
     test_dataset = utils.TensorDataset(tensor_test_x, tensor_test_y)
     test_dataloader = utils.DataLoader(test_dataset, batch_size=32)
 
-    model_path = os.path.join(experiment_path, "model.pth")
+    model_path = os.path.join(experiment_path, "dnn_audio.pth")
     model = Net(features_count, labels_count).to(device)
     model.load_state_dict(torch.load(model_path))
     model.eval()

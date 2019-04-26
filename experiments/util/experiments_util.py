@@ -28,15 +28,18 @@ def create_experiment(experiments_dir, label_to_id, description):
 
     return experiment_dir, logger
 
-def get_ids_and_labels(feature_file):
+def get_ids_and_labels(feature_file, label_to_id):
     ids = []
     labels = []
     file = open(feature_file, "r")
     lines = file.readlines()
     for line in lines:
         split = line.split('\t')
-        ids.append(split[0])
-        labels.append(split[1])
+        id = split[0]
+        label = split[1]
+        if label in label_to_id:
+            ids.append(id)
+            labels.append(label)
     return ids, labels
 
 def join_ids_labels_probs(ids, labels, probs1, probs2):
@@ -45,5 +48,10 @@ def join_ids_labels_probs(ids, labels, probs1, probs2):
         return
     out = ""
     for i in range(0, len(ids)):
-        out += ids[i] + '\t' + labels[i] + '\t' + probs1[i] + '\t' + probs2[i] + '\n'
+        out += ids[i] + '\t' + labels[i]
+        for prob in probs1[i]:
+            out += '\t' + str(prob)
+        for prob in probs2[i]:
+            out += '\t' + str(prob)
+        out += '\n'
     return out

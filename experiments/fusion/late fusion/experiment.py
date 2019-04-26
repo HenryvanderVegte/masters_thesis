@@ -25,16 +25,15 @@ label_to_id = {
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "late fusion experiment")
 
 dnn.train(AUDIO_TRAIN_70, experiment_dir, label_to_id, logger)
-dnn.test(AUDIO_DEV, experiment_dir)
+dnn.test(AUDIO_DEV, experiment_dir, label_to_id, logger)
 
 naive_bayes.train(TEXT_TRAIN_70, experiment_dir, label_to_id, logger)
 naive_bayes.test(TEXT_DEV, experiment_dir, label_to_id, logger)
 
-
 #extract fusion probabilities for train:
 probabilities_text = naive_bayes.eval_get_probability_scores(TEXT_DEV, experiment_dir, label_to_id, logger)
 probabilities_audio = dnn.eval_get_probabilities(AUDIO_DEV, experiment_dir, label_to_id, logger)
-ids, labels = get_ids_and_labels(TEXT_DEV)
+ids, labels = get_ids_and_labels(TEXT_DEV, label_to_id)
 
 joined = join_ids_labels_probs(ids, labels, probabilities_text, probabilities_audio)
 fusion_path = os.path.join(experiment_dir, "train_30_fusion.txt")
@@ -45,7 +44,7 @@ with open(fusion_path, "w") as f:
 #extract fusion probabilities for dev:
 probabilities_text = naive_bayes.eval_get_probability_scores(TEXT_DEV, experiment_dir, label_to_id, logger)
 probabilities_audio = dnn.eval_get_probabilities(AUDIO_DEV, experiment_dir, label_to_id, logger)
-ids, labels = get_ids_and_labels(TEXT_DEV)
+ids, labels = get_ids_and_labels(TEXT_DEV, label_to_id)
 
 joined = join_ids_labels_probs(ids, labels, probabilities_text, probabilities_audio)
 fusion_path = os.path.join(experiment_dir, "dev_fusion.txt")
@@ -56,7 +55,7 @@ with open(fusion_path, "w") as f:
 #extract fusion probabilities for test:
 probabilities_text = naive_bayes.eval_get_probability_scores(TEXT_TEST, experiment_dir, label_to_id, logger)
 probabilities_audio = dnn.eval_get_probabilities(AUDIO_TEST, experiment_dir, label_to_id, logger)
-ids, labels = get_ids_and_labels(TEXT_TEST)
+ids, labels = get_ids_and_labels(TEXT_TEST, label_to_id)
 
 joined = join_ids_labels_probs(ids, labels, probabilities_text, probabilities_audio)
 fusion_path = os.path.join(experiment_dir, "test_fusion.txt")
