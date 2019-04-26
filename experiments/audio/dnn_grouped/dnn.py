@@ -54,20 +54,16 @@ class Net(nn.Module):
         out = self.fc3(out)
         return out
 
-def train(train_file, label_to_id, experiment_path):
-
+def train(train_file, label_to_id, experiment_path, logger):
+    logger.info("Training DNN classifier")
     train_vectors, train_labels = util.get_and_norm_train_data(train_file, label_to_id, experiment_path)
 
     labels_count = len(set(list(label_to_id.values())))
     instances_count = train_vectors.shape[0]
     features_count = train_vectors.shape[1]
 
-    print("number of labels: " + str(labels_count))
-    print("number of instances: " + str(instances_count))
-    print("number of features: " + str(features_count))
-
-    print("train vectors shape: " + str(train_vectors.shape))
-    print("train labels shape: " + str(train_labels.shape))
+    info = "labels: " + str(labels_count) + ", instances: " + str(instances_count) + ", features: " + str(features_count)
+    logger.info("Data info: " + info)
 
     train_labels = np.array(train_labels).reshape(-1,1)
 
@@ -85,7 +81,7 @@ def train(train_file, label_to_id, experiment_path):
 
     # Train the model
     total_step = len(train_dataloader)
-    print("start train")
+    logger.info("Start train")
     for epoch in range(num_epochs):
         for i, (train_vectors, labels) in enumerate(train_dataloader):
             # Move tensors to the configured device
@@ -102,9 +98,10 @@ def train(train_file, label_to_id, experiment_path):
             optimizer.step()
 
             if (i + 1) % 100 == 0:
-                print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
+                logger.info('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                       .format(epoch + 1, num_epochs, i + 1, total_step, loss.item()))
 
+    logger.info("Completed train")
     # export onnx model
     onnx_model_path = os.path.join(experiment_path, "model.onnx")
     dummy_input = torch.randn(batch_size, features_count, device='cuda')
@@ -113,19 +110,18 @@ def train(train_file, label_to_id, experiment_path):
     # export pytorch model
     model_path = os.path.join(experiment_path, "model.pth")
     torch.save(model.state_dict(), model_path)
+    logger.info("Saved model to" + onnx_model_path + " and " + model_path)
 
-def test(dev_file, label_to_id, experiment_path):
-    print("##### Test #####")
+def test(dev_file, label_to_id, experiment_path, logger):
+    logger.info("Testing DNN classifier")
 
     test_vectors, test_labels = util.get_and_norm_test_data(dev_file, label_to_id, experiment_path)
     instances_count = test_vectors.shape[0]
     features_count = test_vectors.shape[1]
     labels_count = len(set(list(label_to_id.values())))
 
-    print("number of instances: " + str(instances_count))
-
-    print("test vectors shape: " + str(test_vectors.shape))
-    print("test labels shape: " + str(test_labels.shape))
+    info = "labels: " + str(labels_count) + ", instances: " + str(instances_count) + ", features: " + str(features_count)
+    logger.info("Data info: " + info)
 
     test_labels = np.array(test_labels).reshape(-1, 1)
 
@@ -139,10 +135,12 @@ def test(dev_file, label_to_id, experiment_path):
     model = Net(features_count, labels_count).to(device)
     model.load_state_dict(torch.load(model_path))
     model.eval()
+    logger.info("Loaded model from" + model_path)
 
     predictions = []
     gold = []
 
+    logger.info("Start test")
     with torch.no_grad():
         for test_vectors, labels in test_dataloader:
             test_vectors = test_vectors.to(device)
@@ -157,21 +155,23 @@ def test(dev_file, label_to_id, experiment_path):
             predictions += predicted.data.tolist()
             gold += labels.data.tolist()
 
-    print("#########################\n")
-    print("UAR: " + str(recall_score(gold, predictions, average='macro')))
-    print("Accuracy:" + str(accuracy(gold, predictions)))
-    print("#########################\n")
-
+    logger.info("Accuracy: " + str(accuracy(gold, predictions)))
+    logger.info("Unweighted average recall: " + str(recall_score(gold, predictions, average='macro')))
     cm = ConfusionMatrix(gold, predictions)
-    print(cm)
+    logger.info("Confusion matrix:\n" + cm)
 
-def eval_get_probabilities(dev_file, label_to_id, experiment_path):
-    test_vectors, test_labels = util.get_and_norm_test_data(dev_file, label_to_id, experiment_path)
+def eval_get_probabilities(test_file_in, label_to_id, experiment_path, logger):
+    logger.info("Getting DNN probability scores for " + test_file_in)
 
+    test_vectors, test_labels = util.get_and_norm_test_data(test_file_in, label_to_id, experiment_path)
+
+    instances_count = test_vectors.shape[0]
     features_count = test_vectors.shape[1]
     labels_count = len(set(list(label_to_id.values())))
-
     test_labels = np.array(test_labels).reshape(-1, 1)
+
+    info = "labels: " + str(labels_count) + ", instances: " + str(instances_count) + ", features: " + str(features_count)
+    logger.info("Data info: " + info)
 
     tensor_test_x = torch.stack([torch.Tensor(i) for i in test_vectors])
     tensor_test_y = torch.stack([torch.Tensor(i) for i in test_labels])
@@ -183,6 +183,7 @@ def eval_get_probabilities(dev_file, label_to_id, experiment_path):
     model = Net(features_count, labels_count).to(device)
     model.load_state_dict(torch.load(model_path))
     model.eval()
+    logger.info("Loaded model from" + model_path)
 
     probabilities = []
     softmax = nn.Softmax()
