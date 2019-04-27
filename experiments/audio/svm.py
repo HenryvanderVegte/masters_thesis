@@ -76,7 +76,7 @@ def train(train_file_in, experiment_dir, label_to_id, logger):
     logger.info("Saved stddevs to " + stddevs_path)
 
 def test(test_file_in, experiment_dir, label_to_id, logger):
-    logger.info("Training SVM classifier on " + str(test_file_in))
+    logger.info("Testing SVM classifier on " + str(test_file_in))
 
     means_path = os.path.join(experiment_dir, 'means.txt')
     stddevs_path = os.path.join(experiment_dir, 'stddevs.txt')
@@ -104,4 +104,4 @@ def test(test_file_in, experiment_dir, label_to_id, logger):
 
     cm = ConfusionMatrix(test_labels, pred)
 
-    logger.info("Confusion Matrix:" + str(cm))
+    logger.info("Confusion Matrix:\n" + str(cm))

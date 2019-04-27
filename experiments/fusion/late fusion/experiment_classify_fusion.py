@@ -16,7 +16,7 @@ label_to_id = {
     "neu":"3",
 }
 
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify fusion experiment")
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify_fusion_features")
 
 svm.train(FUSION_TRAIN, experiment_dir, label_to_id, logger)
 svm.test(FUSION_DEV, experiment_dir, label_to_id, logger)

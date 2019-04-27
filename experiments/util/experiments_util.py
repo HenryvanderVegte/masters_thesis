@@ -4,12 +4,12 @@ import logging
 
 def create_experiment(experiments_dir, label_to_id, description):
     time_as_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')
-    experiment_dir = os.path.join(experiments_dir, time_as_string)
+    experiment_dir = os.path.join(experiments_dir, time_as_string + "_" + description)
 
     os.makedirs(experiment_dir)
     logfile = os.path.join(experiment_dir, 'logfile.log')
 
-    logger = logging.getLogger("experiment_"+ time_as_string)
+    logger = logging.getLogger("experiment_" + description)
     logger.setLevel('DEBUG')
     file_log_handler = logging.FileHandler(logfile)
     logger.addHandler(file_log_handler)
@@ -48,10 +48,10 @@ def join_ids_labels_probs(ids, labels, probs1, probs2):
         return
     out = ""
     for i in range(0, len(ids)):
-        out += ids[i] + '\t' + labels[i]
+        out += ids[i] + '\t' + labels[i] + "\t"
         for prob in probs1[i]:
-            out += '\t' + str(prob)
+            out += str(prob) + ","
         for prob in probs2[i]:
-            out += '\t' + str(prob)
-        out += '\n'
+            out += str(prob) + ","
+        out = out[:-1] + '\n'
     return out
