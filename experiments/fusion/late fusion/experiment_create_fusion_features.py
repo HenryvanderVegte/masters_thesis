@@ -1,5 +1,5 @@
+from experiments.audio import dnn
 from experiments.text.naive_bayes import naive_bayes
-from experiments.audio.dnn_grouped import dnn
 from experiments.util.experiments_util import *
 
 AUDIO_TRAIN_70 = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//audio//train_70.txt"
@@ -62,3 +62,4 @@ fusion_path = os.path.join(experiment_dir, "test_fusion.txt")
 
 with open(fusion_path, "w") as f:
     f.write(joined)
+

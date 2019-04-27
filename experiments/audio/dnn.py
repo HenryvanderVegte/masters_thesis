@@ -24,9 +24,9 @@ label_to_id = {
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-num_epochs = 20
+num_epochs = 50
 hidden_size = 1024
-batch_size = 32
+batch_size = 16
 learning_rate = 0.01
 
 class Net(nn.Module):
@@ -44,11 +44,11 @@ class Net(nn.Module):
     def forward(self, x):
         out = self.fc1(x)
         out = self.relu(out)
-        #out = self.fc1_drop(out)
+        out = self.fc1_drop(out)
 
         out = self.fc2(out)
         out = self.relu2(out)
-        #out = self.fc2_drop(out)
+        out = self.fc2_drop(out)
 
         out = self.fc3(out)
         return out
