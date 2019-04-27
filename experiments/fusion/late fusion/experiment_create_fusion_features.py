@@ -1,5 +1,5 @@
 from experiments.audio import dnn
-from experiments.text.naive_bayes import naive_bayes
+from experiments.text import naive_bayes
 from experiments.util.experiments_util import *
 
 AUDIO_TRAIN_70 = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//audio//train_70.txt"
@@ -22,7 +22,7 @@ label_to_id = {
     "neu":"3",
 }
 
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "extract_late_fusion_features")
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "extract_late_fusion_features", use_timestamp=True)
 
 dnn.train(AUDIO_TRAIN_70, experiment_dir, label_to_id, logger)
 dnn.test(AUDIO_DEV, experiment_dir, label_to_id, logger)

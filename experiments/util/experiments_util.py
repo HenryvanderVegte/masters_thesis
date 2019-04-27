@@ -2,9 +2,9 @@ import os, datetime
 import json
 import logging
 
-def create_experiment(experiments_dir, label_to_id, description):
+def create_experiment(experiments_dir, label_to_id, description, use_timestamp):
     time_as_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')
-    experiment_dir = os.path.join(experiments_dir, time_as_string + "_" + description)
+    experiment_dir = os.path.join(experiments_dir, time_as_string + "_" + description) if use_timestamp else os.path.join(experiments_dir, description)
 
     os.makedirs(experiment_dir)
     logfile = os.path.join(experiment_dir, 'logfile.log')

@@ -1,4 +1,3 @@
-from experiments.text.naive_bayes import naive_bayes
 from experiments.audio import svm
 from experiments.util.experiments_util import *
 
@@ -16,7 +15,7 @@ label_to_id = {
     "neu":"3",
 }
 
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify_fusion_features")
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify_fusion_features", use_timestamp=True)
 
 svm.train(FUSION_TRAIN, experiment_dir, label_to_id, logger)
 svm.test(FUSION_DEV, experiment_dir, label_to_id, logger)

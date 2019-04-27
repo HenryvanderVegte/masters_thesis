@@ -10,8 +10,6 @@ def print_labels(file_lines):
     counter = Counter(labels)
     print(counter)
 
-
-
 text_file = open(EXTRACTED_FILE, "r")
 lines = text_file.readlines()
 
