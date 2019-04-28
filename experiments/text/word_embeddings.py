@@ -3,31 +3,73 @@ import numpy as np
 import gensim
 
 
-def extract_word_embeddings_to_file(file_in, model, file_out, max_token_length):
+def extract_word_embeddings(file_in, model, label_file_out, vector_file_out, max_token_length):
     vector_size = model.vector_size
     file_in = open(file_in, "r")
     file_in_lines = file_in.readlines()
 
-    for line in file_in_lines:
-        split = line.split("\t")
+    features_per_instance = vector_size * max_token_length
+    feature_vectors = np.zeros(shape=(len(file_in_lines), features_per_instance))
+
+    label_file = ""
+
+    for i in range(len(file_in_lines)):
+        print(str(i) + " of " + str(len(file_in_lines)))
+        split = file_in_lines[i].split("\t")
         id = split[0]
         label = split[1]
 
-        print(id)
-
-        utterance = line.split('\t')[2]
+        label_file += id + "\t" + label + "\n"
+        utterance = file_in_lines[i].split('\t')[2]
         tokens = nltk.word_tokenize(utterance.lower())
 
         vector = np.zeros(shape=(vector_size * max_token_length))
-        i = 0
+        j = 0
         for token in tokens[:max_token_length]:
             if token in model.wv:
-                vector[i*vector_size:(i+1)*vector_size] =  np.array(model.wv[token])
-            i += 1
+                vector[j*vector_size:(j+1)*vector_size] =  np.array(model.wv[token])
+            j += 1
 
-        vector_as_string = ""
-        for val in vector:
-            vector_as_string += str(val) + ","
+        feature_vectors[i,:] = vector
 
-        with open(file_out, "a+") as f:
-            f.write(id + "\t" + label + "\t" + vector_as_string[:-1] + '\n')
+    with open(label_file_out, "w") as f:
+        f.write(label_file)
+
+    np.save(vector_file_out, feature_vectors)
+
+
+def extract_word_embeddings(file_in, model, label_file_out, vector_file_out, max_token_length):
+    vector_size = model.vector_size
+    file_in = open(file_in, "r")
+    file_in_lines = file_in.readlines()
+
+    features_per_instance = vector_size * max_token_length
+    feature_vectors = np.zeros(shape=(len(file_in_lines), features_per_instance))
+
+    label_file = ""
+
+    for i in range(len(file_in_lines)):
+        print(str(i) + " of " + str(len(file_in_lines)))
+        split = file_in_lines[i].split("\t")
+        id = split[0]
+        label = split[1]
+
+        label_file += id + "\t" + label + "\n"
+        utterance = file_in_lines[i].split('\t')[2]
+        tokens = nltk.word_tokenize(utterance.lower())
+
+        vector = np.zeros(shape=(vector_size * max_token_length))
+        j = 0
+        for token in tokens[:max_token_length]:
+            if token in model.wv:
+                vector[j*vector_size:(j+1)*vector_size] =  np.array(model.wv[token])
+            j += 1
+
+        feature_vectors[i,:] = vector
+
+    with open(label_file_out, "w") as f:
+        f.write(label_file)
+
+    np.save(vector_file_out, feature_vectors)
+
+

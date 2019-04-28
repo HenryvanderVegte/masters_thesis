@@ -23,6 +23,14 @@ label_to_id = {
 
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "extract_word_embeddings", use_timestamp=True)
 
-train_embeddings_path = os.path.join(experiment_dir, 'train_embeddings.txt')
+train_embeddings_path = os.path.join(experiment_dir, 'train_embeddings.npy')
+train_embeddings_labels_path = os.path.join(experiment_dir, 'train_embeddings.txt')
+extract_word_embeddings(TRAIN_TXT, model, train_embeddings_labels_path, train_embeddings_path, MAX_TOKEN_LENGTH)
 
-extract_word_embeddings_to_file(TRAIN_TXT, model, train_embeddings_path, MAX_TOKEN_LENGTH)
+dev_embeddings_path = os.path.join(experiment_dir, 'dev_embeddings.npy')
+dev_embeddings_labels_path = os.path.join(experiment_dir, 'dev_embeddings.txt')
+extract_word_embeddings(DEV_TXT, model, dev_embeddings_labels_path, dev_embeddings_path, MAX_TOKEN_LENGTH)
+
+test_embeddings_path = os.path.join(experiment_dir, 'test_embeddings.npy')
+test_embeddings_labels_path = os.path.join(experiment_dir, 'test_embeddings.txt')
+extract_word_embeddings(TEST_TXT, model, test_embeddings_labels_path, test_embeddings_path, MAX_TOKEN_LENGTH)

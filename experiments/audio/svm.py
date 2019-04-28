@@ -39,21 +39,35 @@ def __get_labels_and_features(feature_file, label_to_id):
     return labels, feature_vectors
 
 
-def train(train_file_in, experiment_dir, label_to_id, logger):
+def train_from_file(train_file_in, experiment_dir, label_to_id, logger):
     logger.info("Training SVM classifier on " + str(train_file_in))
-
     labels, features = __get_labels_and_features(train_file_in, label_to_id)
 
-    means = features.mean(axis=0)
-    stddevs = features.std(axis=0)
+    train(labels, features, True, experiment_dir, logger)
 
-    # remove 0 values
-    stddevs[stddevs == 0] = 1
+def train(labels, feature_vectors, normalize_features, experiment_dir, logger):
+    if normalize_features:
+        means = feature_vectors.mean(axis=0)
+        stddevs = feature_vectors.std(axis=0)
+        # remove 0 values
+        stddevs[stddevs == 0] = 1
+        feature_vectors = (feature_vectors - means) / stddevs
 
-    normed_features = (features - means) / stddevs
+        means_path = os.path.join(experiment_dir, 'means.txt')
+        with open(means_path, "w") as f:
+            for mean in means:
+                f.write(str(mean) + '\n')
+
+        logger.info("Saved means to " + means_path)
+
+        stddevs_path = os.path.join(experiment_dir, 'stddevs.txt')
+        with open(stddevs_path, "w") as f:
+            for stddev in stddevs:
+                f.write(str(stddev) + '\n')
+        logger.info("Saved stddevs to " + stddevs_path)
 
     classifier = SVC(gamma='scale', decision_function_shape='ovo')
-    classifier.fit(normed_features, labels)
+    classifier.fit(feature_vectors, labels)
 
     model_path = os.path.join(experiment_dir, 'svm_model.pkl')
     f = open(model_path, 'wb')
@@ -62,20 +76,7 @@ def train(train_file_in, experiment_dir, label_to_id, logger):
 
     logger.info("Completed training. Saved model to " + model_path)
 
-    means_path = os.path.join(experiment_dir, 'means.txt')
-    with open(means_path, "w") as f:
-        for mean in means:
-            f.write(str(mean) + '\n')
-
-    logger.info("Saved means to " + means_path)
-
-    stddevs_path = os.path.join(experiment_dir, 'stddevs.txt')
-    with open(stddevs_path, "w") as f:
-        for stddev in stddevs:
-            f.write(str(stddev) + '\n')
-    logger.info("Saved stddevs to " + stddevs_path)
-
-def test(test_file_in, experiment_dir, label_to_id, logger):
+def test_from_file(test_file_in, experiment_dir, label_to_id, logger):
     logger.info("Testing SVM classifier on " + str(test_file_in))
 
     means_path = os.path.join(experiment_dir, 'means.txt')
@@ -99,9 +100,37 @@ def test(test_file_in, experiment_dir, label_to_id, logger):
     test_labels = [str(i) for i in test_labels]
 
     logger.info("Accuracy:" + str(accuracy(test_labels, pred)))
+    logger.info("Unweighted average recall:" + str(recall_score(test_labels, pred, average='macro')))
+
+    cm = ConfusionMatrix(test_labels, pred)
+    logger.info("Confusion Matrix:\n" + str(cm))
+
+
+def test(labels, feature_vectors, normalize_features, experiment_dir, logger):
+    if normalize_features:
+        means_path = os.path.join(experiment_dir, 'means.txt')
+        stddevs_path = os.path.join(experiment_dir, 'stddevs.txt')
+        means, stddevs = __load_means_and_stddevs(means_path, stddevs_path)
+
+        feature_vectors = (feature_vectors - means) / stddevs
+
+    model_path = os.path.join(experiment_dir, 'svm_model.pkl')
+    logger.info("Load model from " + str(model_path))
+    f = open(model_path, 'rb')
+    classifier = pickle.load(f)
+    f.close()
+
+    pred = np.array(classifier.predict(feature_vectors))
+    pred = [str(i) for i in pred]
+
+    test_labels = np.array(labels)
+    test_labels = [str(i) for i in test_labels]
+
+    logger.info("Accuracy:" + str(accuracy(test_labels, pred)))
 
     logger.info("Unweighted average recall:" + str(recall_score(test_labels, pred, average='macro')))
 
     cm = ConfusionMatrix(test_labels, pred)
 
     logger.info("Confusion Matrix:\n" + str(cm))
+

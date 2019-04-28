@@ -17,5 +17,5 @@ label_to_id = {
 
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify_fusion_features", use_timestamp=True)
 
-svm.train(FUSION_TRAIN, experiment_dir, label_to_id, logger)
-svm.test(FUSION_DEV, experiment_dir, label_to_id, logger)
+svm.train_from_file(FUSION_TRAIN, experiment_dir, label_to_id, logger)
+svm.test_from_file(FUSION_DEV, experiment_dir, label_to_id, logger)
