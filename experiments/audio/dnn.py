@@ -12,31 +12,23 @@ TRAIN_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//spli
 DEV_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//dev.txt"
 EXPERIMENT_PATH = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//experiments//dnn"
 
-label_to_id = {
-    "hap":"0",
-    "exc":"0",
-    "sad":"1",
-    "ang":"2",
-    "neu":"3",
-}
-
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-num_epochs = 50
+num_epochs = 20
 hidden_size = 1024
-batch_size = 16
+batch_size = 32
 learning_rate = 0.01
 
 class Net(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(input_dim, hidden_size)
-        self.fc1_drop = nn.Dropout(p=0.5)
+        #self.fc1_drop = nn.Dropout(p=0.5)
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc2_drop = nn.Dropout(p=0.5)
+        #self.fc2_drop = nn.Dropout(p=0.5)
         self.relu2 = nn.ReLU()
         self.fc3 = nn.Linear(hidden_size, output_dim)
 
@@ -44,11 +36,11 @@ class Net(nn.Module):
     def forward(self, x):
         out = self.fc1(x)
         out = self.relu(out)
-        out = self.fc1_drop(out)
+        #out = self.fc1_drop(out)
 
         out = self.fc2(out)
         out = self.relu2(out)
-        out = self.fc2_drop(out)
+        #out = self.fc2_drop(out)
 
         out = self.fc3(out)
         return out
@@ -70,7 +62,7 @@ def train(train_file, experiment_path, label_to_id, logger):
     tensor_train_y = torch.stack([torch.Tensor(i) for i in train_labels])
 
     train_dataset = utils.TensorDataset(tensor_train_x,tensor_train_y) # create your datset
-    train_dataloader = utils.DataLoader(train_dataset, batch_size=32) # create your dataloader
+    train_dataloader = utils.DataLoader(train_dataset, batch_size=batch_size) # create your dataloader
 
     model = Net(features_count, labels_count).to(device)
 
