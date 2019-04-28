@@ -6,7 +6,7 @@ from experiments.audio.util import util
 import torch.utils.data as utils
 from sklearn.metrics import recall_score
 from nltk.metrics import ConfusionMatrix, accuracy
-
+from experiments.util import data_loader
 
 TRAIN_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//train.txt"
 DEV_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//dev.txt"
@@ -62,8 +62,28 @@ class Net(nn.Module):
         out = self.fc4(out)
         return out
 
-def train(labels, features, experiment_path, logger):
+def train(labels, features, normalize_features, experiment_path, logger):
     logger.info("Training DNN classifier")
+    if normalize_features:
+        means = features.mean(axis=0)
+        stddevs = features.std(axis=0)
+        # remove 0 values
+        stddevs[stddevs == 0] = 1
+        features = (features - means) / stddevs
+
+        means_path = os.path.join(experiment_path, 'means.txt')
+        with open(means_path, "w") as f:
+            for mean in means:
+                f.write(str(mean) + '\n')
+
+        logger.info("Saved means to " + means_path)
+
+        stddevs_path = os.path.join(experiment_path, 'stddevs.txt')
+        with open(stddevs_path, "w") as f:
+            for stddev in stddevs:
+                f.write(str(stddev) + '\n')
+        logger.info("Saved stddevs to " + stddevs_path)
+
     labels_count = len(set(list(label_to_id.values())))
     instances_count = features.shape[0]
     features_count = features.shape[1]
@@ -118,8 +138,16 @@ def train(labels, features, experiment_path, logger):
     torch.save(model.state_dict(), model_path)
     logger.info("Saved model to" + onnx_model_path + " and " + model_path)
 
-def test(labels, features, experiment_path, logger):
+def test(labels, features, normalize_features, experiment_path, logger):
     logger.info("Testing DNN classifier")
+
+    if normalize_features:
+        means_path = os.path.join(experiment_path, 'means.txt')
+        stddevs_path = os.path.join(experiment_path, 'stddevs.txt')
+
+        means, stddevs = data_loader.load_means_and_stddevs(means_path, stddevs_path)
+
+        features = (np.array(features) - means) / stddevs
 
     instances_count = features.shape[0]
     features_count = features.shape[1]

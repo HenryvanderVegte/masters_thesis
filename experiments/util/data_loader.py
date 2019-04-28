@@ -29,3 +29,19 @@ def load_from_binary(label_file, feature_vector_bin_file, label_to_id):
     feature_vectors = np.load(feature_vector_bin_file)
 
     return labels, feature_vectors[label_lines,:]
+
+def load_means_and_stddevs(means_path, stddevs_path):
+    means = []
+    means_file = open(means_path, "r")
+    means_file_lines = means_file.readlines()
+    for line in means_file_lines:
+        means.append(float(line))
+    means = np.array(means)
+
+    stddevs = []
+    stddevs_file = open(stddevs_path, "r")
+    stddevs_file_lines = stddevs_file.readlines()
+    for line in stddevs_file_lines:
+        stddevs.append(float(line))
+    stddevs = np.array(stddevs)
+    return means, stddevs
