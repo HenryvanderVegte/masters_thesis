@@ -30,6 +30,24 @@ def load_from_binary(label_file, feature_vector_bin_file, label_to_id):
 
     return labels, feature_vectors[label_lines,:]
 
+def load_dict_from_binary(label_file, feature_vector_bin_file, label_to_id):
+    label_file = open(label_file, "r")
+    label_file_lines = label_file.readlines()
+
+    labels = []
+    label_lines = []
+
+    for i in range(len(label_file_lines)):
+        label = label_file_lines[i].split('\t')[1][:-1]
+        if label in label_to_id:
+            labels.append(int(label_to_id[label]))
+            label_lines.append(i)
+
+    feature_vectors_dict = np.load(feature_vector_bin_file)
+
+    return labels, feature_vectors_dict
+
+
 def load_means_and_stddevs(means_path, stddevs_path):
     means = []
     means_file = open(means_path, "r")

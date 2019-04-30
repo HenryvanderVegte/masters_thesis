@@ -9,16 +9,12 @@ TEST_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//test.
 
 label_to_id = {
     "hap":"0",
-    "exc":"0",
     "sad":"1",
-    "fru":"1",
-    "ang":"1",
-    "fea":"1",
-    "dis":"1",
-    "neu":"2",
+    "ang":"2",
+    "neu":"3",
 }
 
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify_dnn_3_labels", use_timestamp=True)
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify_dnn_4_labels", use_timestamp=True)
 
 dnn.train(TRAIN_TXT, experiment_dir, label_to_id, logger)
 

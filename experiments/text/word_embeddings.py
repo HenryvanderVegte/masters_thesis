@@ -41,14 +41,14 @@ def extract_word_embeddings(file_in, model, label_file_out, vector_file_out, max
 extracts the feature vectors into a matrix with 
 (instance, token, vector)
 '''
-def extract_word_embeddings_with_time(file_in, model, label_file_out, vector_file_out, max_token_length):
+def extract_word_embeddings_with_time(file_in, model, label_file_out, dict_file_out, oov_vector):
     vector_size = model.vector_size
+
     file_in = open(file_in, "r")
     file_in_lines = file_in.readlines()
 
-    feature_vectors = np.zeros(shape=(len(file_in_lines), max_token_length,  vector_size))
-
     label_file = ""
+    instance_dict = {}
 
     for i in range(len(file_in_lines)):
         print(str(i) + " of " + str(len(file_in_lines)))
@@ -60,18 +60,17 @@ def extract_word_embeddings_with_time(file_in, model, label_file_out, vector_fil
         utterance = file_in_lines[i].split('\t')[2]
         tokens = nltk.word_tokenize(utterance.lower())
 
-        instance_matrix = np.zeros(shape=(max_token_length, vector_size))
+        instance_matrix = np.zeros(shape=(len(tokens), vector_size))
         j = 0
-        for token in tokens[:max_token_length]:
-            if token in model.wv:
-                instance_matrix[j,:] = np.array(model.wv[token])
+        for token in tokens:
+            instance_matrix[j,:] = np.array(model.wv[token]) if token in model.wv else oov_vector
             j += 1
 
-        feature_vectors[i,:,:] = instance_matrix
+        instance_dict[id] = instance_matrix
 
     with open(label_file_out, "w") as f:
         f.write(label_file)
 
-    np.save(vector_file_out, feature_vectors)
+    np.save(dict_file_out, instance_dict)
 
 
