@@ -2,6 +2,9 @@ import nltk
 import numpy as np
 import gensim
 
+from nltk.tokenize import RegexpTokenizer
+
+tokenizer = RegexpTokenizer(r'\w+')
 
 def extract_word_embeddings(file_in, model, label_file_out, vector_file_out, max_token_length):
     vector_size = model.vector_size
@@ -21,7 +24,7 @@ def extract_word_embeddings(file_in, model, label_file_out, vector_file_out, max
 
         label_file += id + "\t" + label + "\n"
         utterance = file_in_lines[i].split('\t')[2]
-        tokens = nltk.word_tokenize(utterance.lower())
+        tokens = tokenizer.tokenize(utterance.lower())
 
         vector = np.zeros(shape=(vector_size * max_token_length))
         j = 0
@@ -58,7 +61,10 @@ def extract_word_embeddings_with_time(file_in, model, label_file_out, dict_file_
 
         label_file += id + "\t" + label + "\n"
         utterance = file_in_lines[i].split('\t')[2]
-        tokens = nltk.word_tokenize(utterance.lower())
+        tokens = tokenizer.tokenize(utterance.lower())
+
+        if len(tokens) == 0:
+            continue
 
         instance_matrix = np.zeros(shape=(len(tokens), vector_size))
         j = 0
