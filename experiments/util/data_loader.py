@@ -34,18 +34,25 @@ def load_dict_from_binary(label_file, feature_vector_bin_file, label_to_id):
     label_file = open(label_file, "r")
     label_file_lines = label_file.readlines()
 
-    labels = []
-    label_lines = []
+    label_dict = {}
 
     for i in range(len(label_file_lines)):
-        label = label_file_lines[i].split('\t')[1][:-1]
+        split = label_file_lines[i][:-1].split('\t')
+        id = split[0]
+        label = split[1]
         if label in label_to_id:
-            labels.append(int(label_to_id[label]))
-            label_lines.append(i)
+            label_dict[id] = int(label_to_id[label])
+    feature_vectors_dict = np.load(feature_vector_bin_file).item()
 
-    feature_vectors_dict = np.load(feature_vector_bin_file)
+    # remove feature vectors with a label that is unwanted (not in the label_to_id dict)
+    ids_to_remove = []
+    for id in feature_vectors_dict.keys():
+        if id not in label_dict:
+            ids_to_remove.append(id)
+    for id in ids_to_remove:
+        del feature_vectors_dict[id]
 
-    return labels, feature_vectors_dict
+    return label_dict, feature_vectors_dict
 
 
 def load_means_and_stddevs(means_path, stddevs_path):
