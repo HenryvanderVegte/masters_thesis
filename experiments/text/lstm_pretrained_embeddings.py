@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from experiments.util.data_loader import *
 from nltk.metrics import ConfusionMatrix, accuracy
+from sklearn.metrics import recall_score
 import gensim
 import os
 
@@ -30,7 +31,7 @@ dev_label_dict, dev_feature_dict = load_dict_from_binary(DEV_EMBEDDINGS_LABELS, 
 
 
 
-def prepare_data(feature_dict, label_dict, seq_length = 50):
+def prepare_data(feature_dict, label_dict, seq_length = 30):
     fl = []
     labels = []
     for key in feature_dict.keys():
@@ -60,40 +61,39 @@ class SentimentLSTM(nn.Module):
 
         self.output_size = output_size
         self.n_layers = n_layers
-        self.hidden_dim = hidden_dim
 
-        # embedding and LSTM layers
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers)
+        self.lstm = nn.LSTM(embedding_dim, output_size, n_layers, dropout=0.4)
 
         # dropout layer
         #self.dropout = nn.Dropout(0.3)
 
         # linear and sigmoid layers
-        self.fc = nn.Linear(hidden_dim, output_size)
-        self.sig = nn.Sigmoid()
+        #self.fc = nn.Linear(hidden_dim, output_size)
+        #self.sig = nn.Sigmoid()
 
     def forward(self, x):
         batch_size = x.size(0)
 
-        lstm_out, _ = self.lstm(x)
+        out, _ = self.lstm(x)
 
         # dropout and fully-connected layer
         #out = self.dropout(lstm_out)
-        out = self.fc(lstm_out)
+        #out = self.fc(lstm_out)
 
         out = out[-1]
 
         # sigmoid function
-        sig_out = self.sig(out)
+        #sig_out = self.sig(out)
 
         # return last sigmoid output and hidden state
-        return sig_out
+        return out
 
 embedding_dim = 300
-hidden_dim = 50
+hidden_dim = 150
 n_layers = 2
-batch_size = 1
+batch_size = 4
 clip=5
+epochs= 70
 
 train_dataset = prepare_data(feature_dict, label_dict)
 train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
@@ -105,12 +105,12 @@ net = SentimentLSTM(labels_count, embedding_dim, hidden_dim, n_layers).to(device
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(net.parameters(), lr = 0.1, momentum=0.9)
+optimizer = optim.Adam(net.parameters())
 
 # Train the model
 total_step = len(train_loader)
 
-for e in range(15):
+for e in range(epochs):
     # batch loop
     for i, (inputs, labels) in enumerate(train_loader):
         inputs = inputs.to(device)
@@ -129,25 +129,50 @@ for e in range(15):
 
         optimizer.step()
 
-
         if (i + 1) % 20 == 0:
             print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
                   .format(e + 1, 30, i + 1, total_step, loss.item()))
 
-        predictions = []
-        gold = []
-        with torch.no_grad():
-            for inputs, labels in dev_loader:
-                inputs = inputs.to(device)
-                inputs = torch.transpose(inputs, 0, 1)
-                labels = labels.to(device, dtype=torch.int64).view(-1)
+    predictions = []
+    gold = []
+    with torch.no_grad():
+        for inputs, labels in dev_loader:
+            inputs = inputs.to(device)
+            inputs = torch.transpose(inputs, 0, 1)
+            labels = labels.to(device, dtype=torch.int64).view(-1)
 
-                output = net(inputs)
+            output = net(inputs)
 
-                _, predicted = torch.max(output.data, 1)
-                predictions += predicted.data.tolist()
-                gold += labels.data.tolist()
-        print("Accuracy: " + str(accuracy(gold, predictions)))
-        cm = ConfusionMatrix(gold, predictions)
-        print("Confusion matrix:\n" + str(cm))
+            _, predicted = torch.max(output.data, 1)
+            predictions += predicted.data.tolist()
+            gold += labels.data.tolist()
+    print("Accuracy: " + str(accuracy(gold, predictions)))
+    print("Unweighted average recall: " + str(recall_score(gold, predictions, average='macro')))
+    #cm = ConfusionMatrix(gold, predictions)
+    #print("Confusion matrix:\n" + str(cm))
 
+with torch.no_grad():
+    for inputs, labels in dev_loader:
+        inputs = inputs.to(device)
+        inputs = torch.transpose(inputs, 0, 1)
+        labels = labels.to(device, dtype=torch.int64).view(-1)
+
+        output = net(inputs)
+
+        _, predicted = torch.max(output.data, 1)
+        predictions += predicted.data.tolist()
+        gold += labels.data.tolist()
+print("Accuracy: " + str(accuracy(gold, predictions)))
+print("Unweighted average recall: " + str(recall_score(gold, predictions, average='macro')))
+cm = ConfusionMatrix(gold, predictions)
+print("Confusion matrix:\n" + str(cm))
+
+experiment_path = "C://Users/Henry/Desktop/Masterarbeit//temp"
+
+# export pytorch model
+model_path = os.path.join(experiment_path, "dnn_audio.pth")
+torch.save(net.state_dict(), model_path)
+
+onnx_model_path = os.path.join(experiment_path, "dnn_audio.onnx")
+dummy_input = torch.randn(batch_size, embedding_dim * 20, device='cuda')
+torch.onnx.export(net, dummy_input, onnx_model_path, verbose=True)
