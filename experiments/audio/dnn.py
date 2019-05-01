@@ -140,9 +140,6 @@ def test(dev_file, experiment_path, label_to_id,  logger):
             outputs = model(test_vectors)
             _, predicted = torch.max(outputs.data, 1)
 
-            m = nn.Softmax()
-            s = m(outputs)
-
             predictions += predicted.data.tolist()
             gold += labels.data.tolist()
 

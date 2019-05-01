@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from experiments.util.data_loader import *
+from nltk.metrics import ConfusionMatrix, accuracy
 import gensim
 import os
 
@@ -17,12 +18,17 @@ label_to_id = {
     "ang":"2",
     "neu":"3",
 }
-
-TEST_EMBEDDINGS_LABELS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//test_embeddings.txt"
-TEST_EMBEDDINGS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//test_embeddings.npy"
-label_dict, feature_dict = load_dict_from_binary(TEST_EMBEDDINGS_LABELS, TEST_EMBEDDINGS, label_to_id)
-
 labels_count = len(set(list(label_to_id.values())))
+
+TRAIN_EMBEDDINGS_LABELS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//train_embeddings.txt"
+TRAIN_EMBEDDINGS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//train_embeddings.npy"
+label_dict, feature_dict = load_dict_from_binary(TRAIN_EMBEDDINGS_LABELS, TRAIN_EMBEDDINGS, label_to_id)
+
+DEV_EMBEDDINGS_LABELS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//dev_embeddings.txt"
+DEV_EMBEDDINGS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//dev_embeddings.npy"
+dev_label_dict, dev_feature_dict = load_dict_from_binary(DEV_EMBEDDINGS_LABELS, DEV_EMBEDDINGS, label_to_id)
+
+
 
 def prepare_data(feature_dict, label_dict, seq_length = 50):
     fl = []
@@ -57,8 +63,7 @@ class SentimentLSTM(nn.Module):
         self.hidden_dim = hidden_dim
 
         # embedding and LSTM layers
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers,
-                            dropout=drop_prob, batch_first=True)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers)
 
         # dropout layer
         #self.dropout = nn.Dropout(0.3)
@@ -67,82 +72,82 @@ class SentimentLSTM(nn.Module):
         self.fc = nn.Linear(hidden_dim, output_size)
         self.sig = nn.Sigmoid()
 
-    def forward(self, x, hidden):
+    def forward(self, x):
         batch_size = x.size(0)
 
-        lstm_out, hidden = self.lstm(x, hidden)
+        lstm_out, _ = self.lstm(x)
 
         # dropout and fully-connected layer
         #out = self.dropout(lstm_out)
         out = self.fc(lstm_out)
 
-        out = out[:,-1]
+        out = out[-1]
 
         # sigmoid function
         sig_out = self.sig(out)
 
         # return last sigmoid output and hidden state
-        return sig_out, hidden
-
-    def init_hidden(self, batch_size):
-        weight = next(self.parameters()).data
-        hidden = (weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device),
-                      weight.new(self.n_layers, batch_size, self.hidden_dim).zero_().to(device))
-        return hidden
+        return sig_out
 
 embedding_dim = 300
-hidden_dim = 200
-n_layers = 5
+hidden_dim = 50
+n_layers = 2
 batch_size = 1
 clip=5
-dataset = prepare_data(feature_dict, label_dict)
 
-train_loader = utils.DataLoader(dataset, shuffle=False, batch_size=batch_size)
+train_dataset = prepare_data(feature_dict, label_dict)
+train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
+
+dev_dataset = prepare_data(dev_feature_dict, dev_label_dict)
+dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=batch_size)
 
 net = SentimentLSTM(labels_count, embedding_dim, hidden_dim, n_layers).to(device)
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(net.parameters(), lr = 0.01, momentum=0.9)
+optimizer = torch.optim.SGD(net.parameters(), lr = 0.1, momentum=0.9)
 
 # Train the model
 total_step = len(train_loader)
 
-counter = 0
-
-print_every = 100
-
-for e in range(30):
-    # initialize hidden state
-    h = net.init_hidden(batch_size)
-    total_step = len(train_loader)
+for e in range(15):
     # batch loop
     for i, (inputs, labels) in enumerate(train_loader):
         inputs = inputs.to(device)
 
         #transpose from [batch_size, time_steps, dim] to [time_steps, batch_size, dim]
-        #inputs = torch.transpose(inputs, 0, 1)
+        inputs = torch.transpose(inputs, 0, 1)
 
         labels = labels.to(device, dtype=torch.int64).view(-1)
 
-        # Creating new variables for the hidden state, otherwise
-        # we'd backprop through the entire training history
-        h = tuple([each.data for each in h])
-
-        # zero accumulated gradients
         net.zero_grad()
 
-        # get the output from the model
-        output, h = net(inputs, h)
+        output = net(inputs)
 
-        # calculate the loss and perform backprop
         loss = criterion(output, labels)
         loss.backward()
 
-        # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
-        nn.utils.clip_grad_norm_(net.parameters(), clip)
         optimizer.step()
 
-        if (i + 1) % 100 == 0:
+
+        if (i + 1) % 20 == 0:
             print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
-                        .format(e + 1, 30, i + 1, total_step, loss.item()))
+                  .format(e + 1, 30, i + 1, total_step, loss.item()))
+
+        predictions = []
+        gold = []
+        with torch.no_grad():
+            for inputs, labels in dev_loader:
+                inputs = inputs.to(device)
+                inputs = torch.transpose(inputs, 0, 1)
+                labels = labels.to(device, dtype=torch.int64).view(-1)
+
+                output = net(inputs)
+
+                _, predicted = torch.max(output.data, 1)
+                predictions += predicted.data.tolist()
+                gold += labels.data.tolist()
+        print("Accuracy: " + str(accuracy(gold, predictions)))
+        cm = ConfusionMatrix(gold, predictions)
+        print("Confusion matrix:\n" + str(cm))
+
