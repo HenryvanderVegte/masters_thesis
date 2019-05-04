@@ -1,5 +1,6 @@
-from classification.util.data_loader_pickle import *
+from classification.util.data_loader import *
 from classification.util.experiments_util import *
+from classification.util.global_vars import *
 from classification.text import dnn
 
 TRAIN_EMBEDDINGS_LABELS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//train_embeddings.txt"

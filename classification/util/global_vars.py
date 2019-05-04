@@ -1,0 +1,1 @@
+ROOT_FOLDER = "C://Users//t-javand//Desktop//Masterarbeit"

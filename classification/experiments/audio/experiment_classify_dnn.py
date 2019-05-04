@@ -1,11 +1,11 @@
 from classification.util.experiments_util import *
 from classification.audio import dnn
+from classification.util.global_vars import *
 
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//classification//"
+experiments_folder = os.path.join(ROOT_FOLDER, "IEMOCAP_audio//experiments")
 
-TRAIN_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//train.txt"
-DEV_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//dev.txt"
-TEST_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//test.txt"
+train_txt = os.path.join(ROOT_FOLDER, "features//audio//train.txt")
+dev_txt = os.path.join(ROOT_FOLDER, "features//audio//dev.txt")
 
 label_to_id = {
     "hap":"0",
@@ -14,8 +14,8 @@ label_to_id = {
     "neu":"3",
 }
 
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify_dnn_4_labels", use_timestamp=True)
+experiment_dir, logger = create_experiment(experiments_folder, label_to_id, "classify_dnn_4_labels", use_timestamp=True)
 
-dnn.train(TRAIN_TXT, experiment_dir, label_to_id, logger)
+dnn.train(train_txt, experiment_dir, label_to_id, logger)
 
-dnn.test(DEV_TXT, experiment_dir, label_to_id, logger)
+dnn.test(dev_txt, experiment_dir, label_to_id, logger)

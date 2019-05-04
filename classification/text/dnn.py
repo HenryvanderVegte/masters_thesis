@@ -3,6 +3,7 @@ import os
 import torch.nn as nn
 import numpy as np
 import torch.utils.data as utils
+from classification.util import data_loader_pickle, data_loader_txt
 from sklearn.metrics import recall_score
 from nltk.metrics import ConfusionMatrix, accuracy
 
@@ -143,7 +144,7 @@ def test(labels, features, normalize_features, experiment_path, logger):
         means_path = os.path.join(experiment_path, 'means.txt')
         stddevs_path = os.path.join(experiment_path, 'stddevs.txt')
 
-        means, stddevs = data_loader.load_means_and_stddevs(means_path, stddevs_path)
+        means, stddevs = data_loader_txt.load_means_and_stddevs(means_path, stddevs_path)
 
         features = (np.array(features) - means) / stddevs
 
@@ -194,7 +195,7 @@ def test(labels, features, normalize_features, experiment_path, logger):
 def eval_get_probabilities(test_file_in, experiment_path, label_to_id, logger):
     logger.info("Getting DNN probability scores for " + test_file_in)
 
-    test_vectors, test_labels = util.get_and_norm_test_data(test_file_in, label_to_id, experiment_path)
+    test_vectors, test_labels = data_loader_pickle.get_and_norm_test_data(test_file_in, label_to_id, experiment_path)
 
     instances_count = test_vectors.shape[0]
     features_count = test_vectors.shape[1]
@@ -230,8 +231,3 @@ def eval_get_probabilities(test_file_in, experiment_path, label_to_id, logger):
             probabilities += probability
 
     return probabilities
-
-
-#train(TRAIN_FILE_AUDIO, label_to_id, EXPERIMENT_PATH)
-#test(DEV_FILE_AUDIO, label_to_id, EXPERIMENT_PATH)
-#eval_get_probabilities(DEV_FILE_AUDIO, label_to_id, EXPERIMENT_PATH)

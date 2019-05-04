@@ -1,1 +1,0 @@
-ROOT_FOLDER = "C://Users//Henry//Desktop//Masterarbeit"

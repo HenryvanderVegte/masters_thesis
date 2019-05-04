@@ -1,11 +1,12 @@
 from classification.audio import svm
 from classification.util.experiments_util import *
+from classification.util.global_vars import *
+import os
 
-FUSION_TRAIN = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//fusion//train_30_fusion.txt"
-FUSION_DEV = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//fusion//dev_fusion.txt"
-AUDIO_TEST = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//fusion//test_fusion.txt"
+experiments_folder = os.path.join(ROOT_FOLDER, "IEMOCAP_fusion//experiments")
 
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//classification//"
+fusion_train = os.path.join(ROOT_FOLDER, "features//fusion//fusion_train_30.txt")
+fusion_dev = os.path.join(ROOT_FOLDER, "features//fusion//fusion_dev.txt")
 
 label_to_id = {
     "hap":"0",
@@ -15,7 +16,7 @@ label_to_id = {
     "neu":"3",
 }
 
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify_fusion_features", use_timestamp=True)
+experiment_dir, logger = create_experiment(experiments_folder, label_to_id, "classify_fusion_features", use_timestamp=True)
 
-svm.train_from_file(FUSION_TRAIN, experiment_dir, label_to_id, logger)
-svm.test_from_file(FUSION_DEV, experiment_dir, label_to_id, logger)
+svm.train_from_file(fusion_train, experiment_dir, label_to_id, logger)
+svm.test_from_file(fusion_dev, experiment_dir, label_to_id, logger)

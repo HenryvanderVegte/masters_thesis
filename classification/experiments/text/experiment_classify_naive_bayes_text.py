@@ -1,11 +1,11 @@
 from classification.util.experiments_util import *
+from classification.util.global_vars import *
 from classification.text import naive_bayes
 
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//classification//"
+experiments_folder = os.path.join(ROOT_FOLDER, "IEMOCAP_txt//experiments")
 
-TRAIN_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//split//train.txt"
-DEV_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//split//dev.txt"
-TEST_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//split//test.txt"
+train_txt = os.path.join(ROOT_FOLDER, "features//text//utterances//train.txt")
+dev_txt = os.path.join(ROOT_FOLDER, "features//text//utterances//dev.txt")
 
 label_to_id = {
     "hap":"0",
@@ -18,9 +18,7 @@ label_to_id = {
     "neu":"2",
 }
 
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify_naive_bayes", use_timestamp=True)
+experiment_dir, logger = create_experiment(experiments_folder, label_to_id, "classify_naive_bayes", use_timestamp=True)
 
-
-naive_bayes.train(TRAIN_TXT, experiment_dir, label_to_id, logger)
-
-naive_bayes.test(DEV_TXT, experiment_dir, label_to_id, logger)
+naive_bayes.train(train_txt, experiment_dir, label_to_id, logger)
+naive_bayes.test(dev_txt, experiment_dir, label_to_id, logger)
