@@ -1,5 +1,6 @@
-from classification.audio import dnn, svm
+from classification.audio import dnn, decision_tree, svm
 from classification.text import naive_bayes
+import classification.util.data_loader_txt as data_loader
 from classification.util.experiments_util import *
 from classification.util.global_vars import *
 
@@ -25,13 +26,13 @@ label_to_id = {
 
 
 
-experiment_dir, logger = create_experiment(experiments_folder, label_to_id, "classify_fusion_full_3_labels", use_timestamp=True)
+experiment_dir, logger = create_experiment(experiments_folder, label_to_id, "classify_fusion_full", use_timestamp=True)
 
 dnn.train(audio_train_70, experiment_dir, label_to_id, logger)
 dnn.test(audio_dev, experiment_dir, label_to_id, logger)
 
 naive_bayes.train(text_train_70, experiment_dir, label_to_id, logger)
-naive_bayes.test(text_test, experiment_dir, label_to_id, logger)
+naive_bayes.test(text_dev, experiment_dir, label_to_id, logger)
 
 #extract fusion probabilities for train:
 probabilities_text = naive_bayes.eval_get_probability_scores(text_train_30, experiment_dir, label_to_id, logger)
@@ -66,6 +67,12 @@ fusion_path_test = os.path.join(experiment_dir, "test_fusion.txt")
 with open(fusion_path_test, "w") as f:
     f.write(joined)
 
-svm.train_from_file(fusion_path_train, experiment_dir, label_to_id, logger)
-svm.test_from_file(fusion_path_dev, experiment_dir, label_to_id, logger)
+train_vectors, train_labels = data_loader.get_train_data(fusion_path_train, label_to_id, experiment_dir, False, logger)
 
+dev_vectors, dev_labels = data_loader.get_test_data(fusion_path_dev, label_to_id, experiment_dir, False, logger)
+
+decision_tree.train(train_labels, train_vectors, experiment_dir, logger)
+decision_tree.test(dev_labels, dev_vectors, experiment_dir, logger)
+
+svm.train(train_labels, train_vectors, experiment_dir, logger)
+svm.test(dev_labels, dev_vectors, experiment_dir, logger)

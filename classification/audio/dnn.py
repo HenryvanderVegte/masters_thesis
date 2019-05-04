@@ -16,8 +16,8 @@ EXPERIMENT_PATH = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//class
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-num_epochs = 60
-hidden_size = 512
+num_epochs = 70
+hidden_size = 1024
 batch_size = 32
 learning_rate = 0.01
 
@@ -25,10 +25,10 @@ class Net(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(input_dim, hidden_size)
-        self.fc1_drop = nn.Dropout(p=0.3)
+        self.fc1_drop = nn.Dropout(p=0.5)
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc2_drop = nn.Dropout(p=0.3)
+        self.fc2_drop = nn.Dropout(p=0.5)
         self.relu2 = nn.ReLU()
         self.fc3 = nn.Linear(hidden_size, output_dim)
 
