@@ -1,6 +1,7 @@
-from experiments.util.data_loader import *
-from experiments.util.experiments_util import *
-from experiments.text import dnn
+from classification.util.data_loader import *
+from classification.util.experiments_util import *
+from classification.util.global_vars import *
+from classification.text import dnn
 
 TRAIN_EMBEDDINGS_LABELS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//train_embeddings.txt"
 TRAIN_EMBEDDINGS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//train_embeddings.npy"
@@ -11,7 +12,7 @@ DEV_EMBEDDINGS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddin
 TEST_EMBEDDINGS_LABELS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//test_embeddings.txt"
 TEST_EMBEDDINGS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//test_embeddings.npy"
 
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//experiments//"
+EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//classification//"
 
 label_to_id = {
     "hap":"0",

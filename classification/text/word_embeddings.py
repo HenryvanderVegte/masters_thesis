@@ -1,6 +1,4 @@
-import nltk
 import numpy as np
-import gensim
 
 from nltk.tokenize import RegexpTokenizer
 
@@ -41,8 +39,8 @@ def extract_word_embeddings(file_in, model, label_file_out, vector_file_out, max
     np.save(vector_file_out, feature_vectors)
 
 '''
-extracts the feature vectors into a matrix with 
-(instance, token, vector)
+extracts the feature vectors into a dictionary with 
+dict[id] = (tokens, vectors)
 '''
 def extract_word_embeddings_with_time(file_in, model, label_file_out, dict_file_out, oov_vector):
     vector_size = model.vector_size

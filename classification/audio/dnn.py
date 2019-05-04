@@ -2,7 +2,7 @@ import torch
 import os
 import torch.nn as nn
 import numpy as np
-from experiments.audio.util import util
+from classification.util import data_loader_txt
 import torch.utils.data as utils
 from sklearn.metrics import recall_score
 from nltk.metrics import ConfusionMatrix, accuracy
@@ -10,7 +10,7 @@ from nltk.metrics import ConfusionMatrix, accuracy
 
 TRAIN_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//train.txt"
 DEV_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//dev.txt"
-EXPERIMENT_PATH = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//experiments//dnn"
+EXPERIMENT_PATH = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//classification//dnn"
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -47,7 +47,7 @@ class Net(nn.Module):
 
 def train(train_file, experiment_path, label_to_id, logger):
     logger.info("Training DNN classifier")
-    train_vectors, train_labels = util.get_and_norm_train_data(train_file, label_to_id, experiment_path)
+    train_vectors, train_labels = data_loader_txt.get_and_norm_train_data(train_file, label_to_id, experiment_path)
 
     labels_count = len(set(list(label_to_id.values())))
     instances_count = train_vectors.shape[0]
@@ -106,7 +106,7 @@ def train(train_file, experiment_path, label_to_id, logger):
 def test(dev_file, experiment_path, label_to_id,  logger):
     logger.info("Testing DNN classifier")
 
-    test_vectors, test_labels = util.get_and_norm_test_data(dev_file, label_to_id, experiment_path)
+    test_vectors, test_labels = data_loader_txt.get_and_norm_test_data(dev_file, label_to_id, experiment_path)
     instances_count = test_vectors.shape[0]
     features_count = test_vectors.shape[1]
     labels_count = len(set(list(label_to_id.values())))
@@ -151,7 +151,7 @@ def test(dev_file, experiment_path, label_to_id,  logger):
 def eval_get_probabilities(test_file_in, experiment_path, label_to_id, logger):
     logger.info("Getting DNN probability scores for " + test_file_in)
 
-    test_vectors, test_labels = util.get_and_norm_test_data(test_file_in, label_to_id, experiment_path)
+    test_vectors, test_labels = data_loader_txt.get_and_norm_test_data(test_file_in, label_to_id, experiment_path)
 
     instances_count = test_vectors.shape[0]
     features_count = test_vectors.shape[1]
@@ -187,8 +187,3 @@ def eval_get_probabilities(test_file_in, experiment_path, label_to_id, logger):
             probabilities += probability
 
     return probabilities
-
-
-#train(TRAIN_FILE_AUDIO, label_to_id, EXPERIMENT_PATH)
-#test(DEV_FILE_AUDIO, label_to_id, EXPERIMENT_PATH)
-#eval_get_probabilities(DEV_FILE_AUDIO, label_to_id, EXPERIMENT_PATH)
