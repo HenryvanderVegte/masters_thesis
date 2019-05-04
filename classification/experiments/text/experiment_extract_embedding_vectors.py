@@ -1,11 +1,11 @@
-from experiments.util.experiments_util import *
-from experiments.text.word_embeddings import *
+from classification.util.experiments_util import *
+from classification.text.word_embeddings import *
 import gensim
 import os
 
 
 
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//experiments//"
+EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//classification//"
 TRAIN_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//split//train.txt"
 DEV_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//split//dev.txt"
 TEST_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//split//test.txt"

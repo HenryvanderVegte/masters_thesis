@@ -4,7 +4,7 @@ import torch.utils.data as utils
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from experiments.util.data_loader import *
+from classification.util.data_loader_pickle import *
 from nltk.metrics import ConfusionMatrix, accuracy
 from sklearn.metrics import recall_score
 import gensim

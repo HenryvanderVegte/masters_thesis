@@ -1,11 +1,11 @@
-from experiments.audio import svm
-from experiments.util.experiments_util import *
+from classification.audio import svm
+from classification.util.experiments_util import *
 
 FUSION_TRAIN = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//fusion//train_30_fusion.txt"
 FUSION_DEV = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//fusion//dev_fusion.txt"
 AUDIO_TEST = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//fusion//test_fusion.txt"
 
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//experiments//"
+EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//classification//"
 
 label_to_id = {
     "hap":"0",

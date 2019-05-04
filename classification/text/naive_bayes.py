@@ -119,5 +119,3 @@ def eval_get_probability_scores(test_file_in, experiment_dir, label_to_id, logge
         probabilities.append(label_probs)
 
     return probabilities
-
-#train(EXAMPLE_TRAIN_FILE, EXAMPLE_ALL_WORDS, EXAMPLE_PICKLE, example_label_to_id)

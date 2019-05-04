@@ -1,6 +1,6 @@
-from experiments.audio import dnn
-from experiments.text import naive_bayes
-from experiments.util.experiments_util import *
+from classification.audio import dnn
+from classification.text import naive_bayes
+from classification.util.experiments_util import *
 
 AUDIO_TRAIN_70 = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//audio//train_70.txt"
 AUDIO_TRAIN_30 = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//audio//train_30.txt"
@@ -12,7 +12,7 @@ TEXT_TRAIN_30 = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//featur
 TEXT_DEV = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//text//dev.txt"
 TEXT_TEST = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//features//text//test.txt"
 
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//experiments//"
+EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_fusion//classification//"
 
 label_to_id = {
     "hap":"0",

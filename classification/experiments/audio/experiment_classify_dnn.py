@@ -1,7 +1,7 @@
-from experiments.util.experiments_util import *
-from experiments.audio import dnn
+from classification.util.experiments_util import *
+from classification.audio import dnn
 
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//experiments//"
+EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//classification//"
 
 TRAIN_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//train.txt"
 DEV_TXT = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//dev.txt"
