@@ -16,8 +16,8 @@ EXPERIMENT_PATH = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//class
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-num_epochs = 600
-hidden_size = 1024
+num_epochs = 60
+hidden_size = 512
 batch_size = 32
 learning_rate = 0.01
 
@@ -25,10 +25,10 @@ class Net(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(input_dim, hidden_size)
-        self.fc1_drop = nn.Dropout(p=0.5)
+        self.fc1_drop = nn.Dropout(p=0.3)
         self.relu = nn.ReLU()
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc2_drop = nn.Dropout(p=0.5)
+        self.fc2_drop = nn.Dropout(p=0.3)
         self.relu2 = nn.ReLU()
         self.fc3 = nn.Linear(hidden_size, output_dim)
 
@@ -47,7 +47,7 @@ class Net(nn.Module):
 
 def train(train_file, experiment_path, label_to_id, logger):
     logger.info("Training DNN classifier")
-    train_vectors, train_labels = data_loader_txt.get_and_norm_train_data(train_file, label_to_id, experiment_path)
+    train_vectors, train_labels = data_loader_txt.get_train_data(train_file, label_to_id, experiment_path, True, logger)
 
     labels_count = len(set(list(label_to_id.values())))
     instances_count = train_vectors.shape[0]
@@ -95,7 +95,7 @@ def train(train_file, experiment_path, label_to_id, logger):
     logger.info("Completed train")
     # export onnx model
     onnx_model_path = os.path.join(experiment_path, "dnn_audio.onnx")
-    dummy_input = torch.randn(batch_size, features_count, device='cuda')
+    dummy_input = torch.randn(batch_size, features_count).to(device)
     torch.onnx.export(model, dummy_input, onnx_model_path, verbose=True)
 
     # export pytorch model
@@ -106,7 +106,7 @@ def train(train_file, experiment_path, label_to_id, logger):
 def test(dev_file, experiment_path, label_to_id,  logger):
     logger.info("Testing DNN classifier")
 
-    test_vectors, test_labels = data_loader_txt.get_and_norm_test_data(dev_file, label_to_id, experiment_path)
+    test_vectors, test_labels = data_loader_txt.get_test_data(dev_file, label_to_id, experiment_path, True, logger)
     instances_count = test_vectors.shape[0]
     features_count = test_vectors.shape[1]
     labels_count = len(set(list(label_to_id.values())))
@@ -151,7 +151,7 @@ def test(dev_file, experiment_path, label_to_id,  logger):
 def eval_get_probabilities(test_file_in, experiment_path, label_to_id, logger):
     logger.info("Getting DNN probability scores for " + test_file_in)
 
-    test_vectors, test_labels = data_loader_txt.get_and_norm_test_data(test_file_in, label_to_id, experiment_path)
+    test_vectors, test_labels = data_loader_txt.get_test_data(test_file_in, label_to_id, experiment_path, True, logger)
 
     instances_count = test_vectors.shape[0]
     features_count = test_vectors.shape[1]
@@ -181,7 +181,6 @@ def eval_get_probabilities(test_file_in, experiment_path, label_to_id, logger):
             test_vectors = test_vectors.to(device)
 
             outputs = model(test_vectors)
-            _, predicted = torch.max(outputs.data, 1)
 
             probability = softmax(outputs).data.tolist()
             probabilities += probability

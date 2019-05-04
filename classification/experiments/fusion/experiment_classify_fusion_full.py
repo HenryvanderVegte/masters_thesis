@@ -19,9 +19,11 @@ label_to_id = {
     "hap":"0",
     "exc":"0",
     "sad":"1",
-    "ang":"1",
-    "neu":"2",
+    "ang":"2",
+    "neu":"3",
 }
+
+
 
 experiment_dir, logger = create_experiment(experiments_folder, label_to_id, "classify_fusion_full_3_labels", use_timestamp=True)
 

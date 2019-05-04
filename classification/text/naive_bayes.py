@@ -2,7 +2,7 @@ import nltk
 import pickle
 from sklearn.metrics import recall_score
 from nltk.metrics import ConfusionMatrix, accuracy
-import datetime
+from collections import OrderedDict
 import os
 
 def __get_all_words(lines):
@@ -110,11 +110,13 @@ def eval_get_probability_scores(test_file_in, experiment_dir, label_to_id, logge
     f.close()
     logger.info("Loaded model from " + str(model_path))
 
+    sorted_labels = list(OrderedDict.fromkeys(label_to_id.values()))
+
     probabilities = []
     for test_vector in test_data:
         label_probs = []
         prob_dist = classifier.prob_classify(test_vector)
-        for label in set(list(label_to_id.values())):
+        for label in sorted_labels:
             label_probs.append(prob_dist.prob(label))
         probabilities.append(label_probs)
 
