@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-def get_and_norm_train_data(data_path, label_to_id, experiment_path):
+def get_train_data(data_path, label_to_id, experiment_path, normalize_data):
     train_file = open(data_path, "r")
     train_file_lines = train_file.readlines()
 
@@ -22,39 +22,26 @@ def get_and_norm_train_data(data_path, label_to_id, experiment_path):
     train_vectors = np.array(train_vectors)
     train_labels = np.array(train_labels)
 
-    means = train_vectors.mean(axis=0)
-    stddevs = train_vectors.std(axis=0)
+    if normalize_data:
+        means = train_vectors.mean(axis=0)
+        stddevs = train_vectors.std(axis=0)
 
-    # remove 0 values
-    stddevs[stddevs == 0] = 1
+        # remove 0 values
+        stddevs[stddevs == 0] = 1
 
-    normed_vectors = (train_vectors - means) / stddevs
+        train_vectors = (train_vectors - means) / stddevs
 
-    with open(os.path.join(experiment_path, "means_audio.txt"), "w") as f:
-        for mean in means:
-            f.write(str(mean) + '\n')
+        with open(os.path.join(experiment_path, "means_audio.txt"), "w") as f:
+            for mean in means:
+                f.write(str(mean) + '\n')
 
-    with open(os.path.join(experiment_path, "stddevs_audio.txt"), "w") as f:
-        for stddev in stddevs:
-            f.write(str(stddev) + '\n')
+        with open(os.path.join(experiment_path, "stddevs_audio.txt"), "w") as f:
+            for stddev in stddevs:
+                f.write(str(stddev) + '\n')
 
-    return normed_vectors, train_labels
+    return train_vectors, train_labels
 
-def get_and_norm_test_data(data_path, label_to_id, experiment_path):
-    means = []
-    means_file = open(os.path.join(experiment_path, "means_audio.txt"), "r")
-    means_file_lines = means_file.readlines()
-    for line in means_file_lines:
-        means.append(float(line))
-    means = np.array(means)
-
-    stddevs = []
-    stddevs_file = open(os.path.join(experiment_path, "stddevs_audio.txt"), "r")
-    stddevs_file_lines = stddevs_file.readlines()
-    for line in stddevs_file_lines:
-        stddevs.append(float(line))
-    stddevs = np.array(stddevs)
-
+def get_test_data(data_path, label_to_id, experiment_path, normalize_data):
     test_file = open(data_path, "r")
     test_file_lines = test_file.readlines()
 
@@ -75,6 +62,20 @@ def get_and_norm_test_data(data_path, label_to_id, experiment_path):
     test_vectors = np.array(test_vectors)
     test_labels = np.array(test_labels)
 
-    normed_vectors = (test_vectors - means) / stddevs
+    if normalize_data:
+        means = []
+        means_file = open(os.path.join(experiment_path, "means_audio.txt"), "r")
+        means_file_lines = means_file.readlines()
+        for line in means_file_lines:
+            means.append(float(line))
+        means = np.array(means)
 
-    return normed_vectors, test_labels
+        stddevs = []
+        stddevs_file = open(os.path.join(experiment_path, "stddevs_audio.txt"), "r")
+        stddevs_file_lines = stddevs_file.readlines()
+        for line in stddevs_file_lines:
+            stddevs.append(float(line))
+        stddevs = np.array(stddevs)
+        test_vectors = (test_vectors - means) / stddevs
+
+    return test_vectors, test_labels
