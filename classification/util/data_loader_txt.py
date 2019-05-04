@@ -1,7 +1,9 @@
 import numpy as np
 import os
 
-def get_train_data(data_path, label_to_id, experiment_path, normalize_data):
+def get_train_data(data_path, label_to_id, experiment_path, normalize_data, logger):
+    logger.info("Load train data from " + str(data_path))
+    logger.info("Normalize data: " + str(normalize_data))
     train_file = open(data_path, "r")
     train_file_lines = train_file.readlines()
 
@@ -31,17 +33,23 @@ def get_train_data(data_path, label_to_id, experiment_path, normalize_data):
 
         train_vectors = (train_vectors - means) / stddevs
 
-        with open(os.path.join(experiment_path, "means_audio.txt"), "w") as f:
+        means_path = os.path.join(experiment_path, "means.txt")
+        with open(means_path, "w") as f:
             for mean in means:
                 f.write(str(mean) + '\n')
+        logger.info("Wrote means to: " + str(means_path))
 
-        with open(os.path.join(experiment_path, "stddevs_audio.txt"), "w") as f:
+        stddevs_path = os.path.join(experiment_path, "stddevs.txt")
+        with open(stddevs_path, "w") as f:
             for stddev in stddevs:
                 f.write(str(stddev) + '\n')
+        logger.info("Wrote standard deviations to: " + str(stddevs_path))
 
     return train_vectors, train_labels
 
-def get_test_data(data_path, label_to_id, experiment_path, normalize_data):
+def get_test_data(data_path, label_to_id, experiment_path, normalize_data, logger):
+    logger.info("Load test data from " + str(data_path))
+    logger.info("Normalize data: " + str(normalize_data))
     test_file = open(data_path, "r")
     test_file_lines = test_file.readlines()
 
@@ -64,14 +72,19 @@ def get_test_data(data_path, label_to_id, experiment_path, normalize_data):
 
     if normalize_data:
         means = []
-        means_file = open(os.path.join(experiment_path, "means_audio.txt"), "r")
+        means_path = os.path.join(experiment_path, "means.txt")
+        logger.info("Read means from: " + str(means_path))
+        means_file = open(means_path, "r")
         means_file_lines = means_file.readlines()
         for line in means_file_lines:
             means.append(float(line))
         means = np.array(means)
 
+
         stddevs = []
-        stddevs_file = open(os.path.join(experiment_path, "stddevs_audio.txt"), "r")
+        stddevs_path = os.path.join(experiment_path, "stddevs.txt")
+        logger.info("Read standard deviations from: " + str(stddevs_path))
+        stddevs_file = open(stddevs_path, "r")
         stddevs_file_lines = stddevs_file.readlines()
         for line in stddevs_file_lines:
             stddevs.append(float(line))

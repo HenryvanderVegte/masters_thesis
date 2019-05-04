@@ -19,9 +19,9 @@ label_to_id = {
 
 experiment_dir, logger = create_experiment(experiments_folder, label_to_id, "classify_fusion_svm", use_timestamp=True)
 
-train_vectors, train_labels = data_loader.get_train_data(fusion_train, label_to_id, experiment_dir, False)
+train_vectors, train_labels = data_loader.get_train_data(fusion_train, label_to_id, experiment_dir, False, logger)
 
-dev_vectors, dev_labels = data_loader.get_test_data(fusion_dev, label_to_id, experiment_dir, False)
+dev_vectors, dev_labels = data_loader.get_test_data(fusion_dev, label_to_id, experiment_dir, False, logger)
 
 
 svm.train(train_labels, train_vectors, experiment_dir, logger)
