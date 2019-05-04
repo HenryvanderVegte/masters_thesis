@@ -1,5 +1,6 @@
 import nltk
 import pickle
+from classification.util.experiments_util import log_metrics
 from sklearn.metrics import recall_score
 from nltk.metrics import ConfusionMatrix, accuracy
 from collections import OrderedDict
@@ -47,7 +48,7 @@ def __get_all_words_from_file(all_words_file):
     return all_words
 
 def train(train_file_in, experiment_dir, label_to_id, logger):
-    logger.info("Training naive bayes classifier on " + str(train_file_in))
+    logger.info("############# Training naive bayes classifier on " + str(train_file_in))
 
     train_file = open(train_file_in, "r")
     train_lines = train_file.readlines()
@@ -72,7 +73,7 @@ def train(train_file_in, experiment_dir, label_to_id, logger):
     logger.info("Completed training. Saved model to " + model_path)
 
 def test(test_file_in, experiment_dir, label_to_id, logger):
-    logger.info("Testing naive bayes classifier on " + str(test_file_in))
+    logger.info("############# Testing naive bayes classifier on " + str(test_file_in))
 
     all_words_file = os.path.join(experiment_dir, "allwords.txt")
     all_words = __get_all_words_from_file(all_words_file)
@@ -89,10 +90,7 @@ def test(test_file_in, experiment_dir, label_to_id, logger):
 
     pred = classifier.classify_many(test_data)
 
-    logger.info("Accuracy: " + str(accuracy(test_labels, pred)))
-    logger.info("Unweighted average recall: " + str(recall_score(test_labels, pred, average='macro')))
-    cm = ConfusionMatrix(test_labels, pred)
-    logger.info("Confusion Matrix: \n" + str(cm))
+    log_metrics(test_labels, pred, logger)
 
 def eval_get_probability_scores(test_file_in, experiment_dir, label_to_id, logger):
     logger.info("Getting naive bayes probability scores for " + str(test_file_in))

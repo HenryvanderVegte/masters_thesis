@@ -1,11 +1,10 @@
 import numpy as np
 from sklearn.svm import SVC
 import pickle, os
-from sklearn.metrics import recall_score
-from nltk.metrics import ConfusionMatrix, accuracy
+from classification.util.experiments_util import log_metrics
 
 def train(labels, feature_vectors, experiment_dir, logger):
-    logger.info("Training SVM classifier." )
+    logger.info("############ Training SVM classifier. ########## \n\n" )
     classifier = SVC(gamma='scale', decision_function_shape='ovo')
     classifier.fit(feature_vectors, labels)
 
@@ -17,6 +16,7 @@ def train(labels, feature_vectors, experiment_dir, logger):
     logger.info("Completed training. Saved model to " + model_path)
 
 def test(labels, feature_vectors, experiment_dir, logger):
+    logger.info("############ Testing SVM classifier. ########## \n\n" )
     model_path = os.path.join(experiment_dir, 'svm_model.pkl')
     logger.info("Load model from " + str(model_path))
     f = open(model_path, 'rb')
@@ -26,14 +26,7 @@ def test(labels, feature_vectors, experiment_dir, logger):
     pred = np.array(classifier.predict(feature_vectors))
     pred = [str(i) for i in pred]
 
-    test_labels = np.array(labels)
-    test_labels = [str(i) for i in test_labels]
+    labels = np.array(labels)
+    labels = [str(i) for i in labels]
 
-    logger.info("Accuracy:" + str(accuracy(test_labels, pred)))
-
-    logger.info("Unweighted average recall:" + str(recall_score(test_labels, pred, average='macro')))
-
-    cm = ConfusionMatrix(test_labels, pred)
-
-    logger.info("Confusion Matrix:\n" + str(cm))
-
+    log_metrics(labels, pred, logger)

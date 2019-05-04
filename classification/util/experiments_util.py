@@ -1,6 +1,8 @@
 import os, datetime
 import json
 import logging
+from sklearn.metrics import recall_score, precision_recall_fscore_support
+from nltk.metrics import ConfusionMatrix, accuracy
 
 def create_experiment(experiments_dir, label_to_id, description, use_timestamp):
     time_as_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')
@@ -55,3 +57,28 @@ def join_ids_labels_probs(ids, labels, probs1, probs2):
             out += str(prob) + ","
         out = out[:-1] + '\n'
     return out
+
+def log_metrics(labels, predictions, logger):
+    out = "\n"
+
+    cm = ConfusionMatrix(labels, predictions)
+    out += "Confusion Matrix:\n" + str(cm) + "\n"
+
+    out += "Accuracy:" + str(accuracy(labels, predictions)) + "\n"
+    out += "Unweighted average recall:" + str(recall_score(labels, predictions, average='macro')) + "\n"
+
+    prec, rec, fscore, _ = precision_recall_fscore_support(labels, predictions)
+
+    out += "Precision:\n"
+    for i, val in enumerate(prec):
+        out += str(i) + " : " + str(val * 100) + " % \n"
+
+    out += "\nRecall:\n"
+    for i, val in enumerate(rec):
+        out += str(i) + " : " + str(val * 100) + " % \n"
+
+    out += "\nF-measure:\n"
+    for i, val in enumerate(fscore):
+        out += str(i) + " : " + str(val * 100) + " % \n"
+
+    logger.info(out)

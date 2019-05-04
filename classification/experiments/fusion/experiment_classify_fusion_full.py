@@ -1,4 +1,4 @@
-from classification.audio import dnn, decision_tree, svm
+from classification.audio import dnn, decision_tree, svm, max_prob_classifier
 from classification.text import naive_bayes
 import classification.util.data_loader_txt as data_loader
 from classification.util.experiments_util import *
@@ -40,7 +40,7 @@ probabilities_audio = dnn.eval_get_probabilities(audio_train_30, experiment_dir,
 ids, labels = get_ids_and_labels(text_train_30, label_to_id)
 
 joined = join_ids_labels_probs(ids, labels, probabilities_text, probabilities_audio)
-fusion_path_train = os.path.join(experiment_dir, "train_30_fusion.txt")
+fusion_path_train = os.path.join(experiment_dir, "fusion_train_30.txt")
 
 with open(fusion_path_train, "w") as f:
     f.write(joined)
@@ -51,7 +51,7 @@ probabilities_audio = dnn.eval_get_probabilities(audio_dev, experiment_dir, labe
 ids, labels = get_ids_and_labels(text_dev, label_to_id)
 
 joined = join_ids_labels_probs(ids, labels, probabilities_text, probabilities_audio)
-fusion_path_dev = os.path.join(experiment_dir, "dev_fusion.txt")
+fusion_path_dev = os.path.join(experiment_dir, "fusion_dev.txt")
 
 with open(fusion_path_dev, "w") as f:
     f.write(joined)
@@ -62,7 +62,7 @@ probabilities_audio = dnn.eval_get_probabilities(audio_test, experiment_dir, lab
 ids, labels = get_ids_and_labels(text_test, label_to_id)
 
 joined = join_ids_labels_probs(ids, labels, probabilities_text, probabilities_audio)
-fusion_path_test = os.path.join(experiment_dir, "test_fusion.txt")
+fusion_path_test = os.path.join(experiment_dir, "fusion_test.txt")
 
 with open(fusion_path_test, "w") as f:
     f.write(joined)
@@ -76,3 +76,5 @@ decision_tree.test(dev_labels, dev_vectors, experiment_dir, logger)
 
 svm.train(train_labels, train_vectors, experiment_dir, logger)
 svm.test(dev_labels, dev_vectors, experiment_dir, logger)
+
+max_prob_classifier.test(dev_labels, dev_vectors, logger)

@@ -4,9 +4,7 @@ import torch.nn as nn
 import numpy as np
 from classification.util import data_loader_txt
 import torch.utils.data as utils
-from sklearn.metrics import recall_score
-from nltk.metrics import ConfusionMatrix, accuracy
-
+from classification.util.experiments_util import log_metrics
 
 TRAIN_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//train.txt"
 DEV_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//dev.txt"
@@ -16,7 +14,7 @@ EXPERIMENT_PATH = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//class
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-num_epochs = 70
+num_epochs = 200
 hidden_size = 1024
 batch_size = 32
 learning_rate = 0.01
@@ -46,7 +44,8 @@ class Net(nn.Module):
         return out
 
 def train(train_file, experiment_path, label_to_id, logger):
-    logger.info("Training DNN classifier")
+    logger.info("############ Training DNN classifier. ########## \n\n" )
+
     train_vectors, train_labels = data_loader_txt.get_train_data(train_file, label_to_id, experiment_path, True, logger)
 
     labels_count = len(set(list(label_to_id.values())))
@@ -104,7 +103,7 @@ def train(train_file, experiment_path, label_to_id, logger):
     logger.info("Saved model to" + onnx_model_path + " and " + model_path)
 
 def test(dev_file, experiment_path, label_to_id,  logger):
-    logger.info("Testing DNN classifier")
+    logger.info("############ Testing DNN classifier. ########## \n\n" )
 
     test_vectors, test_labels = data_loader_txt.get_test_data(dev_file, label_to_id, experiment_path, True, logger)
     instances_count = test_vectors.shape[0]
@@ -143,13 +142,10 @@ def test(dev_file, experiment_path, label_to_id,  logger):
             predictions += predicted.data.tolist()
             gold += labels.data.tolist()
 
-    logger.info("Accuracy: " + str(accuracy(gold, predictions)))
-    logger.info("Unweighted average recall: " + str(recall_score(gold, predictions, average='macro')))
-    cm = ConfusionMatrix(gold, predictions)
-    logger.info("Confusion matrix:\n" + str(cm))
+    log_metrics(gold, predictions, logger)
 
 def eval_get_probabilities(test_file_in, experiment_path, label_to_id, logger):
-    logger.info("Getting DNN probability scores for " + test_file_in)
+    logger.info("############ Getting prob scores for DNN classifier. ########## \n\n" )
 
     test_vectors, test_labels = data_loader_txt.get_test_data(test_file_in, label_to_id, experiment_path, True, logger)
 
