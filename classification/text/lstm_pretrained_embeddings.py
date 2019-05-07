@@ -7,6 +7,7 @@ import torch.optim as optim
 from classification.util.data_loader_pickle import *
 from nltk.metrics import ConfusionMatrix, accuracy
 from sklearn.metrics import recall_score
+from classification.util.global_vars import *
 import gensim
 import os
 
@@ -21,15 +22,14 @@ label_to_id = {
 }
 labels_count = len(set(list(label_to_id.values())))
 
-TRAIN_EMBEDDINGS_LABELS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//train_embeddings.txt"
-TRAIN_EMBEDDINGS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//train_embeddings.npy"
+TRAIN_EMBEDDINGS_LABELS = os.path.join(ROOT_FOLDER, "IEMOCAP_txt//embeddings//2-dim//train_embeddings.txt")
+TRAIN_EMBEDDINGS = os.path.join(ROOT_FOLDER, "IEMOCAP_txt//embeddings//2-dim//train_embeddings.npy")
+
 label_dict, feature_dict = load_dict_from_binary(TRAIN_EMBEDDINGS_LABELS, TRAIN_EMBEDDINGS, label_to_id)
 
-DEV_EMBEDDINGS_LABELS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//dev_embeddings.txt"
-DEV_EMBEDDINGS = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_txt//embeddings//2-dim//dev_embeddings.npy"
+DEV_EMBEDDINGS_LABELS = os.path.join(ROOT_FOLDER, "IEMOCAP_txt//embeddings//2-dim//dev_embeddings.txt")
+DEV_EMBEDDINGS = os.path.join(ROOT_FOLDER, "IEMOCAP_txt//embeddings//2-dim//dev_embeddings.npy")
 dev_label_dict, dev_feature_dict = load_dict_from_binary(DEV_EMBEDDINGS_LABELS, DEV_EMBEDDINGS, label_to_id)
-
-
 
 def prepare_data(feature_dict, label_dict, seq_length = 30):
     fl = []
@@ -93,10 +93,10 @@ hidden_dim = 150
 n_layers = 2
 batch_size = 4
 clip=5
-epochs= 70
+epochs= 1
 
 train_dataset = prepare_data(feature_dict, label_dict)
-train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=batch_size)
+train_loader = utils.DataLoader(train_dataset, shuffle=False, batch_size=batch_size)
 
 dev_dataset = prepare_data(dev_feature_dict, dev_label_dict)
 dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=batch_size)
