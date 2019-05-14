@@ -16,7 +16,7 @@ class SentimentRNN(nn.Module):
         self.n_layers = n_layers
         self.rnn = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=n_layers, dropout=drop_prob, batch_first=True)
 
-        self.dropout = nn.Dropout(0.3)
+        self.dropout = nn.Dropout(0.5)
 
         self.fc = nn.Linear(hidden_size, output_size)
         self.relu = nn.ReLU()
@@ -47,6 +47,7 @@ class SentimentRNN(nn.Module):
         return hidden
 
 def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, params):
+
     train_loader = utils.DataLoader(train_dataset, shuffle=False, batch_size=params["batch_size"])
     dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=len(dev_dataset))
 
@@ -60,7 +61,11 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
     print(model)
 
     # Loss and optimizer
-    criterion = nn.CrossEntropyLoss()
+    unique, counts = np.unique(train_dataset.tensors[1], return_counts=True)
+    count_dict = dict(zip(unique, counts))
+    weights = 1 / np.array(list(count_dict.values()))
+    weights = torch.FloatTensor(weights).cuda()
+    criterion = nn.CrossEntropyLoss(weight=weights)
     optimizer = optim.Adam(model.parameters())
 
     for e in range(params["epochs"]):
