@@ -23,6 +23,8 @@ experiment_dir, logger = create_experiment(experiments_folder, label_to_id, "ext
 
 dict = build_one_hot_dict(train_txt, 3000)
 
+np.save(os.path.join(experiment_dir, 'vector_dict.npy'), dict)
+
 train_one_hot_path = os.path.join(experiment_dir, 'train_one_hot.npy')
 train_labels_path = os.path.join(experiment_dir, 'train_one_hot.txt')
 extract_one_hot_vectors_with_time(train_txt, dict, train_labels_path, train_one_hot_path)
