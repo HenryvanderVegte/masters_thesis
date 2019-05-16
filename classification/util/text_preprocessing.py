@@ -29,7 +29,7 @@ def create_sequence_dataset(feature_dict, label_dict, seq_length):
 
     return dataset
 
-def create_sequence_dataset(feature_dict, label_dict, seq_length, pad_vector):
+def create_sequence_dataset_with_pad(feature_dict, label_dict, seq_length, pad_vector):
     """
     TODO: Implement method correctly
     :param feature_dict:
