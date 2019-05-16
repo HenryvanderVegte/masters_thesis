@@ -22,6 +22,7 @@ label_to_id = {
 
 params = {
     "sequence_length":25,
+    "embedding_size":100,
     "batch_size": 16,
     "hidden_size": 15,
     "drop_prob": 0.6,

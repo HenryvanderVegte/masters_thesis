@@ -10,14 +10,14 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 class SentimentRNN(nn.Module):
-    def __init__(self, output_size, embedding_dim, hidden_size, n_layers, drop_prob):
+    def __init__(self, vocab_size, embedding_dim, hidden_size, output_size, n_layers, drop_prob):
         super().__init__()
 
         self.hidden_size = hidden_size
         self.n_layers = n_layers
 
-        self.embedding = nn.Embedding(embedding_dim, hidden_size)
-        self.rnn = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size, num_layers=n_layers, dropout=drop_prob, batch_first=True)
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.rnn = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=n_layers, dropout=drop_prob, batch_first=True)
 
         self.dropout = nn.Dropout(0.5)
 
@@ -54,10 +54,10 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
     dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=len(dev_dataset))
 
     labels_count = len(set(list(label_to_id.values())))
-    embedding_dim = train_loader.dataset[0][0].size()[1]
+    vocab_size = train_loader.dataset[0][0].size()[1]
     n_layers = params["layers"]
 
-    model = SentimentRNN(labels_count, embedding_dim, params["hidden_size"], n_layers, params["drop_prob"]).to(device)
+    model = SentimentRNN(vocab_size, params["embedding_size"],  params["hidden_size"], labels_count, n_layers, params["drop_prob"]).to(device)
 
     print(model)
 
@@ -76,7 +76,7 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
         for i, (inputs, labels) in enumerate(train_loader):
             if inputs.shape[0] != params["batch_size"]:
                 continue
-            inputs = inputs.to(device)
+            inputs = inputs.to(device, dtype=torch.int64)
             labels = labels.to(device, dtype=torch.int64).view(-1)
             h = tuple([each.data for each in h])
 
@@ -91,22 +91,6 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
             nn.utils.clip_grad_norm_(model.parameters(), 5)
 
             optimizer.step()
-
-            '''
-            with torch.no_grad():
-                predictions = []
-                gold = []
-                for inputs, labels in dev_loader:
-                    inputs = inputs.to(device)
-                    inputs = torch.transpose(inputs, 0, 1)
-                    labels = labels.to(device, dtype=torch.int64).view(-1)
-
-                    output = model(inputs)
-                    _, predicted = torch.max(output.data, 1)
-                    predictions += predicted.data.tolist()
-                    gold += labels.data.tolist()
-                log_metrics(gold, predictions, logger)
-            '''
 
         test_loss = 0
         predictions = []
