@@ -29,27 +29,31 @@ def create_sequence_dataset(feature_dict, label_dict, seq_length):
 
     return dataset
 
-def create_sequence_dataset_with_pad(feature_dict, label_dict, seq_length, pad_vector):
+def create_sequence_dataset_with_pad_val(feature_dict, label_dict, seq_length, pad_val):
     """
-    TODO: Implement method correctly
+    Creates a dataset of 1-dim vectors, cuts the vectors to :seq_length: and pads them with the :pad_val:
     :param feature_dict:
     :param label_dict:
     :param seq_length:
     :param pad_vector:
     :return:
     """
-    fl = []
+    features = []
     labels = []
     for key in feature_dict.keys():
-        fl.append(torch.stack([torch.Tensor(i) for i in feature_dict[key][:seq_length,:]]))
+        cut_vec = feature_dict[key][:seq_length]
+        pad_vec = np.full((seq_length), pad_val)
+        pad_vec[:len(cut_vec)] = cut_vec
+
+        print(len(pad_vec))
+        features.append(torch.Tensor(pad_vec))
         labels.append(label_dict[key])
 
     labels = np.array(labels).reshape(-1,1)
-    padded_features = pad_sequence(fl)
 
     labels = torch.stack([torch.Tensor(i) for i in labels])
+    features = torch.stack([torch.Tensor(i) for i in features])
 
-    padded_features = torch.transpose(padded_features, 0, 1)
-    dataset = utils.TensorDataset(padded_features, labels)
+    dataset = utils.TensorDataset(features, labels)
 
     return dataset

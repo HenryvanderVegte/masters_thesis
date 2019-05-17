@@ -54,7 +54,7 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
     dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=len(dev_dataset))
 
     labels_count = len(set(list(label_to_id.values())))
-    vocab_size = train_loader.dataset[0][0].size()[1]
+    vocab_size = params["vocab_size"]
     n_layers = params["layers"]
 
     model = SentimentRNN(vocab_size, params["embedding_size"],  params["hidden_size"], labels_count, n_layers, params["drop_prob"]).to(device)
@@ -98,7 +98,7 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
         h = model.init_hidden(len(dev_dataset))
         with torch.no_grad():
             for inputs, labels in dev_loader:
-                inputs = inputs.to(device)
+                inputs = inputs.to(device, dtype=torch.int64)
                 labels = labels.to(device, dtype=torch.int64).view(-1)
                 h = tuple([each.data for each in h])
 
