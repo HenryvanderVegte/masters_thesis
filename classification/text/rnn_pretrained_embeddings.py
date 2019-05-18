@@ -23,7 +23,7 @@ class SentimentRNN(nn.Module):
         self.n_layers = n_layers
         self.rnn = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=n_layers, dropout=drop_prob, batch_first=True)
 
-        #self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.2)
 
         self.fc = nn.Linear(hidden_size, output_size)
         self.relu = nn.ReLU()
@@ -34,13 +34,16 @@ class SentimentRNN(nn.Module):
 
         x = torch.nn.utils.rnn.pack_padded_sequence(x, lengths, batch_first=True)
 
-        out, hidden = self.rnn(x, hidden)
+        packed, hidden = self.rnn(x, hidden)
 
-        out, _ = torch.nn.utils.rnn.pad_packed_sequence(out, batch_first=True)
+        pad, inp = torch.nn.utils.rnn.pad_packed_sequence(packed, batch_first=True)
 
-        out = out[:, -1, :]
-        #out = self.dropout(out)
+        last_out = torch.empty(batch_size, self.hidden_size, dtype=torch.float, device=device)
 
+        for j, x in enumerate(inp):
+            last_out[j,:] = pad[j,(x-1),:]
+
+        out = self.dropout(last_out)
 
         out = self.fc(out)
         out = self.relu(out)
