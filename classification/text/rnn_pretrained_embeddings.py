@@ -62,6 +62,7 @@ class SentimentRNN(nn.Module):
         return hidden
 
 def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, params):
+    logger.info(str(params))
 
     train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
     dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=len(dev_dataset))

@@ -21,9 +21,9 @@ label_to_id = {
 }
 
 params = {
-    "max_sequence_length": 20,
-    "batch_size": 16,
-    "hidden_size": 20,
+    "max_sequence_length": 50,
+    "batch_size": 8,
+    "hidden_size": 16,
     "drop_prob": 0.2,
     "layers": 2,
     "epochs": 1000,
