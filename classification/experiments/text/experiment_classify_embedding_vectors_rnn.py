@@ -21,8 +21,8 @@ label_to_id = {
 }
 
 params = {
-    "sequence_length":30,
-    "batch_size": 16,
+    "max_sequence_length":40,
+    "batch_size": 8,
     "hidden_size": 30,
     "drop_prob": 0.4,
     "layers": 2,
@@ -31,10 +31,10 @@ params = {
 
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, label_to_id, "classify_word_embeddings_rnn", use_timestamp=True)
 
-train_labels, train_features = data_loader.load_dict_from_binary(TRAIN_EMBEDDINGS_LABELS, TRAIN_EMBEDDINGS, label_to_id)
-train_dataset = create_sequence_dataset(train_features, train_labels, params["sequence_length"])
-
 dev_labels, dev_features = data_loader.load_dict_from_binary(DEV_EMBEDDINGS_LABELS, DEV_EMBEDDINGS, label_to_id)
-dev_dataset = create_sequence_dataset(dev_features, dev_labels, params["sequence_length"])
+dev_dataset = create_sequence_dataset(dev_features, dev_labels, params["max_sequence_length"])
+
+train_labels, train_features = data_loader.load_dict_from_binary(TRAIN_EMBEDDINGS_LABELS, TRAIN_EMBEDDINGS, label_to_id)
+train_dataset = create_sequence_dataset(train_features, train_labels, params["max_sequence_length"])
 
 rnn_pretrained_embeddings.train(train_dataset, dev_dataset, experiment_dir, label_to_id, logger, params)

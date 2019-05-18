@@ -15,17 +15,21 @@ def create_sequence_dataset(feature_dict, label_dict, seq_length):
     """
     fl = []
     labels = []
+    lengths = []
     for key in feature_dict.keys():
         fl.append(torch.stack([torch.Tensor(i) for i in feature_dict[key][:seq_length,:]]))
+        lengths.append(min(feature_dict[key].shape[0], seq_length))
         labels.append(label_dict[key])
 
     labels = np.array(labels).reshape(-1,1)
+    lengths = np.array(lengths).reshape(-1,1)
     padded_features = pad_sequence(fl)
 
     labels = torch.stack([torch.Tensor(i) for i in labels])
+    lengths = torch.stack([torch.Tensor(i) for i in lengths])
 
     padded_features = torch.transpose(padded_features, 0, 1)
-    dataset = utils.TensorDataset(padded_features, labels)
+    dataset = utils.TensorDataset(padded_features, labels, lengths)
 
     return dataset
 
