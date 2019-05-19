@@ -4,7 +4,7 @@ import torch.utils.data as utils
 import torch.nn as nn
 import torch.optim as optim
 import os
-from classification.util.experiments_util import log_metrics, sort_by_length
+from classification.util.experiments_util import get_metrics, sort_by_length
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -126,7 +126,7 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
         # export pytorch model
         if (e+1) % 11 == 0:
             logger.info("Epoch nr " + str(e))
-            log_metrics(gold, predictions, logger)
+            get_metrics(gold, predictions, logger)
             # export pytorch model
             epoch_path = os.path.join(experiment_path, "epoch_" + str(e))
             os.mkdir(epoch_path)
@@ -173,4 +173,4 @@ def test(dev_dataset, experiment_path, label_to_id, logger, params):
             predictions += predicted.data.tolist()
             gold += labels.data.tolist()
 
-    log_metrics(gold, predictions, logger)
+    get_metrics(gold, predictions, logger)

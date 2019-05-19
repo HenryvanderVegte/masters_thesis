@@ -4,7 +4,7 @@ import pickle, os
 from sklearn.externals.six import StringIO
 from sklearn.tree import export_graphviz
 import pydotplus
-from classification.util.experiments_util import log_metrics
+from classification.util.experiments_util import get_metrics
 
 def train(labels, feature_vectors, experiment_dir, logger):
     logger.info("Training Decision Tree classifier.")
@@ -43,4 +43,4 @@ def test(labels, feature_vectors, experiment_dir, logger):
     labels = np.array(labels)
     labels = [str(i) for i in labels]
 
-    log_metrics(labels, pred, logger)
+    logger.info(get_metrics(labels, pred))

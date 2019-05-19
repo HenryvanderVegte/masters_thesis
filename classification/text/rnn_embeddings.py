@@ -4,10 +4,9 @@ import torch.utils.data as utils
 import torch.nn as nn
 import torch.optim as optim
 import os
-from classification.util.experiments_util import log_metrics, sort_by_length
+from classification.util.experiments_util import get_metrics, sort_tensors
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 
 class SentimentRNN(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_size, output_size, n_layers, drop_prob):
@@ -57,13 +56,12 @@ class SentimentRNN(nn.Module):
 
         return hidden
 
-def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, params):
+def train(train_dataset, dev_dataset, id_to_name, experiment_path, labels_count, logger, params):
     logger.info(str(params))
 
     train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
-    dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=len(dev_dataset))
+    dev_loader = utils.DataLoader(dev_dataset, shuffle=True, batch_size=len(dev_dataset))
 
-    labels_count = len(set(list(label_to_id.values())))
     vocab_size = params["vocab_size"]
     n_layers = params["layers"]
 
@@ -79,11 +77,10 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
     optimizer = optim.Adam(model.parameters())
 
     for e in range(params["epochs"]):
-        # batch loop
         h = model.init_hidden(params["batch_size"])
         train_losses = []
-        for i, (inputs, labels, lengths) in enumerate(train_loader):
-            inputs, labels, lengths = sort_by_length(inputs, labels, lengths)
+        for inputs, labels, lengths, _ in train_loader:
+            lengths, inputs, labels = sort_tensors(lengths, inputs, labels)
 
             if inputs.shape[0] != params["batch_size"]:
                 continue
@@ -105,16 +102,18 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
             optimizer.step()
 
         test_loss = 0
-        predictions = []
-        gold = []
+        all_predictions = []
+        all_gold = []
+        all_ids = []
         h = model.init_hidden(len(dev_dataset))
         with torch.no_grad():
-            for inputs, labels, lengths in dev_loader:
-                inputs, labels, lengths = sort_by_length(inputs, labels, lengths)
+            for inputs, labels, lengths, ids in dev_loader:
+                lengths, inputs, labels, ids = sort_tensors(lengths, inputs, labels, ids)
 
                 inputs = inputs.to(device, dtype=torch.int64)
                 labels = labels.to(device, dtype=torch.int64).view(-1)
                 lengths = lengths.to(device, dtype=torch.int64).view(-1)
+                ids = ids.to(device, dtype=torch.int64).view(-1)
                 h = tuple([each.data for each in h])
 
                 output, _ = model(inputs, lengths, h)
@@ -122,32 +121,30 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
                 test_loss = criterion(output, labels)
 
                 _, predicted = torch.max(output.data, 1)
-                predictions += predicted.data.tolist()
-                gold += labels.data.tolist()
+                all_predictions += predicted.data.tolist()
+                all_gold += labels.data.tolist()
+                all_ids += ids.data.tolist()
 
         print('{}; {:.0f} {:.4f}; {:.4f}'.format(e + 1, params["epochs"], np.mean(train_losses), test_loss))
 
         # export pytorch model
-        if (e+1) % 11 == 0:
+        if (e+1) % int(params["log_x_epochs"]) == 0:
             logger.info("Epoch nr " + str(e))
-            log_metrics(gold, predictions, logger)
+            metrics_str = get_metrics(all_gold, all_predictions)
+            logger.info(metrics_str)
             # export pytorch model
             epoch_path = os.path.join(experiment_path, "epoch_" + str(e))
             os.mkdir(epoch_path)
             model_path = os.path.join(epoch_path,  "rnn.pth")
             torch.save(model.state_dict(), model_path)
 
-        #onnx_model_path = os.path.join(epoch_path,  "rnn.onnx")
-        #dummy_input = (torch.randn(1, seq_length, embedding_dim, device='cuda'), torch.randn(params["layers"], 1, params["hidden_size"], device='cuda'))
-        #torch.onnx.export(model, dummy_input, onnx_model_path, verbose=False)
-
-    model_path = os.path.join(experiment_path, "rnn.pth")
-    torch.save(model.state_dict(), model_path)
-
-    #onnx_model_path = os.path.join(experiment_path, "rnn.onnx")
-    #dummy_input = torch.randn(1, seq_length, embedding_dim, device='cuda')
-    #torch.onnx.export(model, dummy_input, onnx_model_path, verbose=True)
-
+            log_results = metrics_str +"\n\n"
+            log_results += "Predicted\tGold\tName\n"
+            for i in range(len(all_predictions)):
+                log_results += str(all_predictions[i]) + "\t" + str(all_gold[i]) + "\t" + id_to_name[all_ids[i]] + "\n"
+            log_results_path = os.path.join(epoch_path, "results.txt")
+            with open(log_results_path, "w") as f:
+                f.write(log_results)
 
 def test(dev_dataset, experiment_path, label_to_id, logger, params):
     dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=params["batch_size"])
@@ -177,4 +174,4 @@ def test(dev_dataset, experiment_path, label_to_id, logger, params):
             predictions += predicted.data.tolist()
             gold += labels.data.tolist()
 
-    log_metrics(gold, predictions, logger)
+    logger.info(get_metrics(gold, predictions))

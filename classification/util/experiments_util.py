@@ -5,20 +5,23 @@ import logging
 from sklearn.metrics import recall_score, precision_recall_fscore_support
 from nltk.metrics import ConfusionMatrix, accuracy
 
-def sort_by_length(inputs, labels, lengths):
+def sort_tensors(sort_by, *args):
     """
-    Inputs three tensors with same size in dim 1, sorts them based on the third tensor
-    :param inputs:
-    :param labels:
-    :param lengths:
+
+    :param sort_by:
+    :param args:
     :return:
     """
-    sorted_inputs = torch.stack([x for _, x in sorted(zip(lengths, inputs), key=lambda pair: pair[0], reverse=True)])
-    sorted_labels = torch.stack([x for _, x in sorted(zip(lengths, labels), key=lambda pair: pair[0], reverse=True)])
-    sorted_lengths = torch.stack(sorted(lengths, reverse=True))
-    return sorted_inputs, sorted_labels, sorted_lengths
+    results = []
+    results.append(torch.stack(sorted(sort_by, reverse=True)))
 
-def create_experiment(experiments_dir, label_to_id, description, use_timestamp):
+    for arg in args:
+        sorted_tensor = torch.stack([x for _, x in sorted(zip(sort_by, arg), key=lambda pair: pair[0], reverse=True)])
+        results.append(sorted_tensor)
+
+    return tuple(results)
+
+def create_experiment(experiments_dir, class_groups, description, use_timestamp):
     time_as_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')
     experiment_dir = os.path.join(experiments_dir, time_as_string + "_" + description) if use_timestamp else os.path.join(experiments_dir, description)
 
@@ -40,7 +43,7 @@ def create_experiment(experiments_dir, label_to_id, description, use_timestamp):
     logger.info("Experiment:\n" +
                 description + "\n\n" +
                 "Labels: \n" +
-                json.dumps(label_to_id) + "\n\n")
+                json.dumps(class_groups) + "\n\n")
 
     return experiment_dir, logger
 
@@ -72,7 +75,7 @@ def join_ids_labels_probs(ids, labels, probs1, probs2):
         out = out[:-1] + '\n'
     return out
 
-def log_metrics(labels, predictions, logger):
+def get_metrics(labels, predictions):
     out = "\n"
 
     cm = ConfusionMatrix(labels, predictions)
@@ -103,4 +106,4 @@ def log_metrics(labels, predictions, logger):
         avg += val
     out += "Unweighted average f-measure:" + str((avg/len(fscore) * 100)) + " % \n"
 
-    logger.info(out)
+    return out
