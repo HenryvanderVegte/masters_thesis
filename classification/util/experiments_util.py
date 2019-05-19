@@ -79,20 +79,28 @@ def log_metrics(labels, predictions, logger):
     out += "Confusion Matrix:\n" + str(cm) + "\n"
 
     out += "Accuracy:" + str(accuracy(labels, predictions)) + "\n"
-    out += "Unweighted average recall:" + str(recall_score(labels, predictions, average='macro')) + "\n"
 
     prec, rec, fscore, _ = precision_recall_fscore_support(labels, predictions)
 
     out += "Precision:\n"
+    avg = 0
     for i, val in enumerate(prec):
         out += str(i) + " : " + str(val * 100) + " % \n"
+        avg += val
+    out += "Unweighted average precision:" + str((avg/len(prec) * 100)) + " % \n"
 
     out += "\nRecall:\n"
+    avg = 0
     for i, val in enumerate(rec):
         out += str(i) + " : " + str(val * 100) + " % \n"
+        avg += val
+    out += "Unweighted average recall:" + str((avg/len(rec) * 100)) + " % \n"
 
     out += "\nF-measure:\n"
+    avg = 0
     for i, val in enumerate(fscore):
         out += str(i) + " : " + str(val * 100) + " % \n"
+        avg += val
+    out += "Unweighted average f-measure:" + str((avg/len(fscore) * 100)) + " % \n"
 
     logger.info(out)

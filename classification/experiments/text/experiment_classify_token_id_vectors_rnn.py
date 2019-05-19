@@ -24,11 +24,11 @@ label_to_id = {
 }
 
 params = {
-    "sequence_length":25,
-    "embedding_size":100,
-    "batch_size": 16,
-    "hidden_size": 15,
-    "drop_prob": 0.6,
+    "max_sequence_length":50,
+    "embedding_size":16,
+    "batch_size": 8,
+    "hidden_size": 8,
+    "drop_prob": 0.4,
     "layers": 2,
     "epochs": 1000,
 }
@@ -37,13 +37,12 @@ experiment_dir, logger = create_experiment(experiments_folder, label_to_id, "cla
 
 token_to_id_dict = np.load(token_id_dict).item()
 
-#this is always the last id in our dict and therefore the size
 params["vocab_size"] = len(token_to_id_dict)
 
 train_labels, train_features = data_loader.load_dict_from_binary(train_labels, train_token_id_vectors, label_to_id)
-train_dataset = create_sequence_dataset_with_pad_val(train_features, train_labels, params["sequence_length"], token_to_id_dict["EOU"])
+train_dataset = create_sequence_dataset_with_pad_val(train_features, train_labels, params["max_sequence_length"], token_to_id_dict["EOU"])
 
 dev_labels, dev_features = data_loader.load_dict_from_binary(dev_labels, dev_token_id_vectors, label_to_id)
-dev_dataset = create_sequence_dataset_with_pad_val(dev_features, dev_labels, params["sequence_length"], token_to_id_dict["EOU"])
+dev_dataset = create_sequence_dataset_with_pad_val(dev_features, dev_labels, params["max_sequence_length"], token_to_id_dict["EOU"])
 
 rnn_embeddings.train(train_dataset, dev_dataset, experiment_dir, label_to_id, logger, params)
