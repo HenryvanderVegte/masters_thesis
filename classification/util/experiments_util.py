@@ -1,8 +1,22 @@
 import os, datetime
+import torch
 import json
 import logging
 from sklearn.metrics import recall_score, precision_recall_fscore_support
 from nltk.metrics import ConfusionMatrix, accuracy
+
+def sort_by_length(inputs, labels, lengths):
+    """
+    Inputs three tensors with same size in dim 1, sorts them based on the third tensor
+    :param inputs:
+    :param labels:
+    :param lengths:
+    :return:
+    """
+    sorted_inputs = torch.stack([x for _, x in sorted(zip(lengths, inputs), key=lambda pair: pair[0], reverse=True)])
+    sorted_labels = torch.stack([x for _, x in sorted(zip(lengths, labels), key=lambda pair: pair[0], reverse=True)])
+    sorted_lengths = torch.stack(sorted(lengths, reverse=True))
+    return sorted_inputs, sorted_labels, sorted_lengths
 
 def create_experiment(experiments_dir, label_to_id, description, use_timestamp):
     time_as_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')

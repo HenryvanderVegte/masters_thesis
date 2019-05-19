@@ -4,16 +4,9 @@ import torch.utils.data as utils
 import torch.nn as nn
 import torch.optim as optim
 import os
-from classification.util.experiments_util import log_metrics
-
+from classification.util.experiments_util import log_metrics, sort_by_length
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-def __sort_by_length(inputs, labels, lengths):
-    sorted_inputs = torch.stack([x for _, x in sorted(zip(lengths, inputs), key=lambda pair: pair[0], reverse=True)])
-    sorted_labels = torch.stack([x for _, x in sorted(zip(lengths, labels), key=lambda pair: pair[0], reverse=True)])
-    sorted_lengths = torch.stack(sorted(lengths, reverse=True))
-    return sorted_inputs, sorted_labels, sorted_lengths
 
 class SentimentRNN(nn.Module):
     def __init__(self, output_size, embedding_dim, hidden_size, n_layers, drop_prob):
@@ -37,7 +30,6 @@ class SentimentRNN(nn.Module):
         packed, hidden = self.rnn(x, hidden)
 
         pad, inp = torch.nn.utils.rnn.pad_packed_sequence(packed, batch_first=True)
-
         last_out = torch.empty(batch_size, self.hidden_size, dtype=torch.float, device=device)
 
         for j, x in enumerate(inp):
@@ -88,7 +80,7 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
         h = model.init_hidden(params["batch_size"])
         train_losses = []
         for i, (inputs, labels, lengths) in enumerate(train_loader):
-            inputs, labels, lengths = __sort_by_length(inputs, labels, lengths)
+            inputs, labels, lengths = sort_by_length(inputs, labels, lengths)
 
             if inputs.shape[0] != params["batch_size"]:
                 continue
@@ -109,29 +101,13 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
 
             optimizer.step()
 
-            '''
-            with torch.no_grad():
-                predictions = []
-                gold = []
-                for inputs, labels in dev_loader:
-                    inputs = inputs.to(device)
-                    inputs = torch.transpose(inputs, 0, 1)
-                    labels = labels.to(device, dtype=torch.int64).view(-1)
-
-                    output = model(inputs)
-                    _, predicted = torch.max(output.data, 1)
-                    predictions += predicted.data.tolist()
-                    gold += labels.data.tolist()
-                log_metrics(gold, predictions, logger)
-            '''
-
         test_loss = 0
         predictions = []
         gold = []
         h = model.init_hidden(len(dev_dataset))
         with torch.no_grad():
-            for i, (inputs, labels, lengths) in enumerate(dev_loader):
-                inputs, labels, lengths = __sort_by_length(inputs, labels, lengths)
+            for inputs, labels, lengths in enumerate(dev_loader):
+                inputs, labels, lengths = sort_by_length(inputs, labels, lengths)
                 inputs = inputs.to(device)
                 labels = labels.to(device, dtype=torch.int64).view(-1)
                 lengths = lengths.to(device, dtype=torch.int64).view(-1)

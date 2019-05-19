@@ -4,7 +4,7 @@ import torch.utils.data as utils
 import torch.nn as nn
 import torch.optim as optim
 import os
-from classification.util.experiments_util import log_metrics
+from classification.util.experiments_util import log_metrics, sort_by_length
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -19,18 +19,27 @@ class SentimentRNN(nn.Module):
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.rnn = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=n_layers, dropout=drop_prob, batch_first=True)
 
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.2)
 
         self.fc = nn.Linear(hidden_size, output_size)
         self.relu = nn.ReLU()
 
-    def forward(self, x, hidden):
+    def forward(self, x, lengths, hidden):
+        batch_size = x.shape[0]
+
         out = self.embedding(x)
+
+        out = torch.nn.utils.rnn.pack_padded_sequence(out, lengths, batch_first=True)
 
         out, hidden = self.rnn(out, hidden)
 
-        out = out[:, -1, :]
-        out = self.dropout(out)
+        pad, inp = torch.nn.utils.rnn.pad_packed_sequence(out, batch_first=True)
+        last_out = torch.empty(batch_size, self.hidden_size, dtype=torch.float, device=device)
+
+        for j, x in enumerate(inp):
+            last_out[j,:] = pad[j,(x-1),:]
+
+        out = self.dropout(last_out)
 
         out = self.fc(out)
         out = self.relu(out)
@@ -49,8 +58,9 @@ class SentimentRNN(nn.Module):
         return hidden
 
 def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, params):
+    logger.info(str(params))
 
-    train_loader = utils.DataLoader(train_dataset, shuffle=False, batch_size=params["batch_size"])
+    train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
     dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=len(dev_dataset))
 
     labels_count = len(set(list(label_to_id.values())))
@@ -58,8 +68,7 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
     n_layers = params["layers"]
 
     model = SentimentRNN(vocab_size, params["embedding_size"],  params["hidden_size"], labels_count, n_layers, params["drop_prob"]).to(device)
-
-    print(model)
+    logger.info(model)
 
     # Loss and optimizer
     unique, counts = np.unique(train_dataset.tensors[1], return_counts=True)
@@ -73,16 +82,19 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
         # batch loop
         h = model.init_hidden(params["batch_size"])
         train_losses = []
-        for i, (inputs, labels) in enumerate(train_loader):
+        for i, (inputs, labels, lengths) in enumerate(train_loader):
+            inputs, labels, lengths = sort_by_length(inputs, labels, lengths)
+
             if inputs.shape[0] != params["batch_size"]:
                 continue
             inputs = inputs.to(device, dtype=torch.int64)
             labels = labels.to(device, dtype=torch.int64).view(-1)
+            lengths = lengths.to(device, dtype=torch.int64).view(-1)
             h = tuple([each.data for each in h])
 
             model.zero_grad()
 
-            output, h = model(inputs, h)
+            output, h = model(inputs, lengths, h)
 
             loss = criterion(output, labels)
             loss.backward()
@@ -97,12 +109,15 @@ def train(train_dataset, dev_dataset, experiment_path, label_to_id, logger, para
         gold = []
         h = model.init_hidden(len(dev_dataset))
         with torch.no_grad():
-            for inputs, labels in dev_loader:
+            for inputs, labels, lengths in dev_loader:
+                inputs, labels, lengths = sort_by_length(inputs, labels, lengths)
+
                 inputs = inputs.to(device, dtype=torch.int64)
                 labels = labels.to(device, dtype=torch.int64).view(-1)
+                lengths = lengths.to(device, dtype=torch.int64).view(-1)
                 h = tuple([each.data for each in h])
 
-                output, _ = model(inputs, h)
+                output, _ = model(inputs, lengths, h)
 
                 test_loss = criterion(output, labels)
 

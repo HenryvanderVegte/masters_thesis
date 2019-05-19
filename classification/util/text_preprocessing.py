@@ -44,20 +44,23 @@ def create_sequence_dataset_with_pad_val(feature_dict, label_dict, seq_length, p
     """
     features = []
     labels = []
+    lengths = []
     for key in feature_dict.keys():
         cut_vec = feature_dict[key][:seq_length]
         pad_vec = np.full((seq_length), pad_val)
         pad_vec[:len(cut_vec)] = cut_vec
 
-        print(len(pad_vec))
+        lengths.append(min(feature_dict[key].shape[0], seq_length))
         features.append(torch.Tensor(pad_vec))
         labels.append(label_dict[key])
 
     labels = np.array(labels).reshape(-1,1)
+    lengths = np.array(lengths).reshape(-1,1)
 
     labels = torch.stack([torch.Tensor(i) for i in labels])
     features = torch.stack([torch.Tensor(i) for i in features])
+    lengths = torch.stack([torch.Tensor(i) for i in lengths])
 
-    dataset = utils.TensorDataset(features, labels)
+    dataset = utils.TensorDataset(features, labels, lengths)
 
     return dataset
