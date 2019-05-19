@@ -1,9 +1,5 @@
-import numpy as np
 import torch
-import torch.utils.data as utils
 import torch.nn as nn
-import torch.optim as optim
-import os
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
