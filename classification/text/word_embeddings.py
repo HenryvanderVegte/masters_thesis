@@ -4,7 +4,7 @@ from collections import Counter
 from string import punctuation
 tokenizer = RegexpTokenizer(r'\w+')
 
-def __extract_tokens_from_utterance(utterance):
+def extract_tokens_from_utterance(utterance):
     utterance = ''.join([c for c in utterance if c not in punctuation])
     tokens = tokenizer.tokenize(utterance.lower())
     return tokens
@@ -109,7 +109,7 @@ def extract_one_hot_vectors_with_time(file_in, one_hot_dict, label_file_out, dic
         label_file += id + "\t" + label + "\n"
 
         utterance = file_in_lines[i].split('\t')[2][:-1]
-        tokens = __extract_tokens_from_utterance(utterance)
+        tokens = extract_tokens_from_utterance(utterance)
 
         if len(tokens) == 0:
             continue
