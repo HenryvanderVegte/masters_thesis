@@ -3,7 +3,7 @@ from classification.util.experiments_util import *
 from classification.util.global_vars import *
 from classification.util.rnn_utils import *
 from classification.text import rnn_pretrained_embeddings
-from classification.util.text_preprocessing import create_sequence_dataset
+from classification.util.text_preprocessing import create_sequence_dataset_from_dicts
 
 TRAIN_EMBEDDINGS_LABELS = os.path.join(ROOT_FOLDER, "IEMOCAP_txt//embeddings//2-dim//train_embeddings.txt")
 TRAIN_EMBEDDINGS = os.path.join(ROOT_FOLDER, "IEMOCAP_txt//embeddings//2-dim//train_embeddings.npy")
@@ -25,22 +25,22 @@ params = {
     "max_sequence_length": 50,
     "batch_size": 8,
     "hidden_size": 16,
-    "drop_prob": 0.6,
+    "drop_prob": 0.3,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 15,
+    "log_x_epochs": 10,
 }
 
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "classify_word_embeddings_rnn", use_timestamp=True)
 params["labels_size"] = len(set(list(class_groups.values())))
 
 dev_labels, dev_features = data_loader.load_dict_from_binary(DEV_EMBEDDINGS_LABELS, DEV_EMBEDDINGS, class_groups)
-dev_dataset, id_to_name = create_sequence_dataset(dev_features, dev_labels, params["max_sequence_length"])
+dev_dataset, id_to_name = create_sequence_dataset_from_dicts(dev_features, dev_labels, params["max_sequence_length"])
 
 params["embedding_dim"] = dev_dataset.tensors[0][0].size()[1]
 
 train_labels, train_features = data_loader.load_dict_from_binary(TRAIN_EMBEDDINGS_LABELS, TRAIN_EMBEDDINGS, class_groups)
-train_dataset, _ = create_sequence_dataset(train_features, train_labels, params["max_sequence_length"])
+train_dataset, _ = create_sequence_dataset_from_dicts(train_features, train_labels, params["max_sequence_length"])
 
 model = rnn_pretrained_embeddings.PretrainedEmbeddingsLSTM(params)
 

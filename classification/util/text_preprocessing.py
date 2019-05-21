@@ -3,14 +3,14 @@ import torch.utils.data as utils
 from torch.nn.utils.rnn import pad_sequence
 import numpy as np
 
-def create_sequence_dataset(feature_dict, label_dict, seq_length):
+def create_sequence_dataset_from_dicts(feature_dict, label_dict, max_seq_length = None):
     """
     Loads sequence data into a TensorDataset,
-    sequences longer than seq_length will be cut,
-    sequences shorter than seq_length will be zero-padded
+    if max_seq_length is set, sequences longer than seq_length will be cut.
+    sequences shorter than max_seq_length will be zero-padded
     :param feature_dict:
     :param label_dict:
-    :param seq_length:
+    :param max_seq_length:
     :return:
     """
     fl = []
@@ -19,8 +19,13 @@ def create_sequence_dataset(feature_dict, label_dict, seq_length):
     ids = []
     id_to_label = {}
     for i, key in enumerate(feature_dict.keys()):
-        fl.append(torch.stack([torch.Tensor(i) for i in feature_dict[key][:seq_length,:]]))
-        lengths.append(min(feature_dict[key].shape[0], seq_length))
+        if max_seq_length is None:
+            fl.append(torch.stack([torch.Tensor(i) for i in feature_dict[key]]))
+        else:
+            fl.append(torch.stack([torch.Tensor(i) for i in feature_dict[key][:max_seq_length, :]]))
+
+        length = feature_dict[key].shape[0] if max_seq_length is None else min(feature_dict[key].shape[0], max_seq_length)
+        lengths.append(length)
         labels.append(label_dict[key])
         ids.append(i)
         id_to_label[i] = key

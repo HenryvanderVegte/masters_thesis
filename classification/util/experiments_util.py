@@ -5,6 +5,20 @@ import logging
 from sklearn.metrics import recall_score, precision_recall_fscore_support
 from nltk.metrics import ConfusionMatrix, accuracy
 
+def read_csv_dataset(dataset):
+    """
+    Reads given .csv dataset file and returns list of dictionaries
+    :param dataset:
+    :return: list of dictionaries, each representing one row
+    """
+    d = open(dataset).read().splitlines()
+    headers = d[0].split("\t")
+    ret = []
+    for row in d[1:]:
+        row = row.split("\t")
+        ret.append({headers[i]: row[i] for i in range(len(row))})
+    return ret
+
 def sort_tensors(sort_by, *args):
     """
 

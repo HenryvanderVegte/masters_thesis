@@ -141,7 +141,7 @@ def build_one_hot_dict(file_in, vocab_size):
     all_tokens = []
     for line in file_in_lines:
         utterance = line.split("\t")[2][:-1]
-        tokens = __extract_tokens_from_utterance(utterance)
+        tokens = extract_tokens_from_utterance(utterance)
         all_tokens += tokens
     counter = Counter(all_tokens)
 
@@ -184,7 +184,7 @@ def extract_token_to_id_vectors_with_time(file_in, token_dict, label_file_out, d
         label_file += id + "\t" + label + "\n"
 
         utterance = file_in_lines[i].split('\t')[2][:-1]
-        tokens = __extract_tokens_from_utterance(utterance)
+        tokens = extract_tokens_from_utterance(utterance)
 
         if len(tokens) == 0:
             continue
@@ -216,7 +216,7 @@ def build_token_to_id_dict(file_in, vocab_size):
     all_tokens = []
     for line in file_in_lines:
         utterance = line.split("\t")[2][:-1]
-        tokens = __extract_tokens_from_utterance(utterance)
+        tokens = extract_tokens_from_utterance(utterance)
         all_tokens += tokens
     counter = Counter(all_tokens)
 
