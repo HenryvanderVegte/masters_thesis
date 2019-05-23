@@ -11,11 +11,11 @@ class PretrainedEmbeddingsLSTM(nn.Module):
         self.n_layers = params["layers"]
         self.rnn = nn.LSTM(input_size=params["embedding_dim"], hidden_size=params["hidden_size"], num_layers=params["layers"], dropout=params["drop_prob"], batch_first=True)
 
-        for name, param in self.rnn.named_parameters_():
+        for name, param in self.rnn.named_parameters():
             if 'bias' in name:
                 nn.init.constant_(param, 0.0)
             elif 'weight' in name:
-                nn.init.xavier_normal(param)
+                nn.init.xavier_normal_(param)
 
         self.dropout = nn.Dropout(params["fully_connected_drop_prob"])
 
