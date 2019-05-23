@@ -73,7 +73,7 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
                 all_gold += labels.data.tolist()
                 all_ids += ids.data.tolist()
 
-        print('{}; {:.0f} {:.4f}; {:.4f}'.format(e + 1, params["epochs"], np.mean(train_losses), test_loss))
+        logger.info('{}; {:.0f} {:.4f}; {:.4f}'.format(e + 1, params["epochs"], np.mean(train_losses), test_loss))
 
 
         if (e+1) % int(params["log_x_epochs"]) == 0:
