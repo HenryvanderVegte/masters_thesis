@@ -21,10 +21,10 @@ EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//ex
 wavs_path = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//features//audio//wavs"
 metadata = read_csv_dataset("C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//labels.csv")
 
-n_fft = 2048
-hop_length = int(n_fft * 0.5)
+n_fft = 4000
+hop_length = int(n_fft * 0.75)
 
-n_mfccs = 60
+n_mfccs = 30
 
 
 def create_sequence_dataset_from_metadata(metadata, class_groups, set, max_seq_length = None):
@@ -106,11 +106,12 @@ for m in metadata:
 params = {
     "max_sequence_length": 50,
     "batch_size": 16,
-    "hidden_size": 30,
-    "drop_prob": 0.6,
+    "hidden_size": 8,
+    "drop_prob": 0.4,
+    "fully_connected_drop_prob": 0.4,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 3,
+    "log_x_epochs": 5,
 }
 
 params["labels_size"] = len(set(list(class_groups.values())))

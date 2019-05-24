@@ -23,12 +23,13 @@ class_groups = {
 
 params = {
     "max_sequence_length": 50,
-    "batch_size": 8,
+    "batch_size": 16,
     "hidden_size": 16,
-    "drop_prob": 0.3,
+    "drop_prob": 0.4,
+    "fully_connected_drop_prob": 0.6,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 10,
+    "log_x_epochs": 8,
 }
 
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "classify_word_embeddings_rnn", use_timestamp=True)
