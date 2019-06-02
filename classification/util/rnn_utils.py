@@ -27,11 +27,12 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
     for e in range(params["epochs"]):
         h = model.init_hidden(params["batch_size"])
         train_losses = []
-        for inputs, labels, lengths, _ in train_loader:
-            lengths, inputs, labels = sort_tensors(lengths, inputs, labels)
+        for inputs, labels, lengths, idx in train_loader:
+            lengths, inputs, labels, idx = sort_tensors(lengths, inputs, labels, idx)
 
             if inputs.shape[0] != params["batch_size"]:
                 continue
+
             inputs = inputs.to(device)
             labels = labels.to(device, dtype=torch.int64).view(-1)
             lengths = lengths.to(device, dtype=torch.int64).view(-1)

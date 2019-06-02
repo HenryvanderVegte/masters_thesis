@@ -4,7 +4,7 @@ import pickle
 from classification.util.rnn_utils import *
 import torch.utils.data as utils
 from torch.nn.utils.rnn import pad_sequence
-from classification.text import rnn_pretrained_embeddings
+from classification.audio import CNNBLSTM
 from classification.util.experiments_util import *
 
 class_groups = {
@@ -21,11 +21,9 @@ EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//ex
 wavs_path = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//features//audio//wavs"
 metadata = read_csv_dataset("C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//labels.csv")
 
-n_fft = 4000
-hop_length = int(n_fft * 0.75)
-
-n_mfccs = 30
-
+n_fft_ms = 25
+hop_length_ms = 10
+n_mels = 40
 
 def create_sequence_dataset_from_metadata(metadata, class_groups, set, max_seq_length = None):
     """
@@ -49,11 +47,13 @@ def create_sequence_dataset_from_metadata(metadata, class_groups, set, max_seq_l
         audio_path = os.path.join(wavs_path, instance["Audio"])
 
         y, sr = librosa.load(audio_path)
-        #stft = librosa.stft(y, n_fft=n_fft, hop_length=hop_length).T
-        #features = np.abs(stft)
 
-        features = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=n_mfccs, n_fft=n_fft,
-                                     hop_length=hop_length).T
+        n_fft = int(sr / (1000 / n_fft_ms))
+        hop_length = int(sr / (1000 / hop_length_ms))
+
+        features = librosa.feature.melspectrogram(y=y, sr=sr, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels).T
+
+        features = librosa.power_to_db(features**2, ref=np.max)
 
         if max_seq_length is None:
             fl.append(torch.stack([torch.Tensor(i) for i in features]))
@@ -81,6 +81,7 @@ def create_sequence_dataset_from_metadata(metadata, class_groups, set, max_seq_l
 
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "classify_audio_lstm", use_timestamp=True)
 
+'''
 train_dataset = create_sequence_dataset_from_metadata(metadata, class_groups, "train")
 dev_dataset = create_sequence_dataset_from_metadata(metadata, class_groups, "dev")
 
@@ -97,7 +98,7 @@ with open("E://masters_thesis//dev.dataset", 'rb') as dev_dataset_path:
 
 with open("E://masters_thesis//train.dataset", 'rb') as train_dataset_path:
     train_dataset = pickle.load(train_dataset_path)
-'''
+
 
 id_to_name = {}
 for m in metadata:
@@ -105,18 +106,18 @@ for m in metadata:
 
 params = {
     "max_sequence_length": 50,
-    "batch_size": 16,
+    "batch_size": 4,
     "hidden_size": 8,
-    "drop_prob": 0.4,
+    "drop_prob": 0.2,
     "fully_connected_drop_prob": 0.4,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 5,
+    "log_x_epochs": 1,
 }
 
 params["labels_size"] = len(set(list(class_groups.values())))
 params["embedding_dim"] = dev_dataset.tensors[0][0].size()[1]
 
-model = rnn_pretrained_embeddings.PretrainedEmbeddingsLSTM(params)
+model = CNNBLSTM.CNNBLSTM(params)
 
 train(train_dataset, dev_dataset, id_to_name, experiment_dir, model, logger, params)

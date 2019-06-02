@@ -36,7 +36,7 @@ def sort_tensors(sort_by, *args):
     return tuple(results)
 
 def create_experiment(experiments_dir, class_groups, description, use_timestamp):
-    time_as_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')
+    time_as_string = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     experiment_dir = os.path.join(experiments_dir, time_as_string + "_" + description) if use_timestamp else os.path.join(experiments_dir, description)
 
     os.makedirs(experiment_dir)
