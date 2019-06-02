@@ -29,7 +29,6 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
         train_losses = []
         for inputs, labels, lengths, idx in train_loader:
             lengths, inputs, labels, idx = sort_tensors(lengths, inputs, labels, idx)
-
             if inputs.shape[0] != params["batch_size"]:
                 continue
 

@@ -8,6 +8,7 @@ class CNNBLSTM(nn.Module):
         super().__init__()
 
         self.time_stride = 5
+        self.time_kernel_size = 10
         self.conv_layer_first = nn.Sequential(
             nn.Conv2d(1, 80, kernel_size=(1, 10)),
             nn.BatchNorm2d(80),
@@ -18,7 +19,7 @@ class CNNBLSTM(nn.Module):
             nn.Conv2d(80, 80, kernel_size=(10, 1)),
             nn.BatchNorm2d(80),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=(10, 1), stride=(self.time_stride, 1)))
+            nn.MaxPool2d(kernel_size=(self.time_kernel_size, 1), stride=(self.time_stride, 1)))
 
 
         self.hidden_size = params["hidden_size"]
@@ -39,7 +40,7 @@ class CNNBLSTM(nn.Module):
 
     def forward(self, x, lengths, hidden):
 
-        lengths = (lengths / self.time_stride) -1
+        lengths = ((lengths - self.time_kernel_size) / self.time_stride) - 1
         x0 = x.unsqueeze(1)
         x1 = self.conv_layer_first(x0)
 
