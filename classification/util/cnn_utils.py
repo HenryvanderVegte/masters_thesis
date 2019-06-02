@@ -25,7 +25,6 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
     optimizer = optim.Adam(model.parameters())
 
     for e in range(params["epochs"]):
-        h = model.init_hidden(params["batch_size"])
         train_losses = []
         for inputs, labels, lengths, idx in train_loader:
             if inputs.shape[0] != params["batch_size"]:
@@ -36,11 +35,10 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
             inputs = inputs.to(device)
             labels = labels.to(device, dtype=torch.int64).view(-1)
             lengths = lengths.to(device, dtype=torch.int64).view(-1)
-            h = tuple([each.data for each in h])
 
             model.zero_grad()
 
-            output, h = model(inputs, lengths, h)
+            output = model(inputs)
 
             loss = criterion(output, labels)
             loss.backward()
@@ -54,7 +52,6 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
         all_predictions = []
         all_gold = []
         all_ids = []
-        h = model.init_hidden(params["batch_size"])
         with torch.no_grad():
             for inputs, labels, lengths, ids in dev_loader:
                 if inputs.shape[0] != params["batch_size"]:
@@ -65,9 +62,8 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
                 labels = labels.to(device, dtype=torch.int64).view(-1)
                 lengths = lengths.to(device, dtype=torch.int64).view(-1)
                 ids = ids.to(device, dtype=torch.int64).view(-1)
-                h = tuple([each.data for each in h])
 
-                output, _ = model(inputs, lengths, h)
+                output = model(inputs)
 
                 test_loss = criterion(output, labels)
 

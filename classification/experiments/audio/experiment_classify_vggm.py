@@ -1,10 +1,10 @@
 import librosa, librosa.display
 from tqdm import tqdm
 import pickle
-from classification.util.rnn_utils import *
+from classification.util.cnn_utils import *
 import torch.utils.data as utils
 from torch.nn.utils.rnn import pad_sequence
-from classification.audio import CNNBLSTM
+from classification.audio import VGG_M
 from classification.util.experiments_util import *
 
 class_groups = {
@@ -106,7 +106,7 @@ for m in metadata:
 
 params = {
     "max_sequence_length": 50,
-    "batch_size": 8,
+    "batch_size": 1,
     "hidden_size": 8,
     "drop_prob": 0.2,
     "fully_connected_drop_prob": 0.4,
@@ -118,6 +118,6 @@ params = {
 params["labels_size"] = len(set(list(class_groups.values())))
 params["embedding_dim"] = dev_dataset.tensors[0][0].size()[1]
 
-model = CNNBLSTM.CNNBLSTM(params)
+model = VGG_M.VGGM(num_classes=4)
 
 train(train_dataset, dev_dataset, id_to_name, experiment_dir, model, logger, params)

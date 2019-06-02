@@ -10,20 +10,22 @@ class CNNBLSTM(nn.Module):
         self.time_stride = 5
         self.time_kernel_size = 10
         self.conv_layer_first = nn.Sequential(
-            nn.Conv2d(1, 80, kernel_size=(1, 10)),
-            nn.BatchNorm2d(80),
+            nn.Conv2d(1, 50, kernel_size=(1, 10)),
+            nn.BatchNorm2d(50),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(1, 2), stride=(1, 1)))
 
         self.conv_layer_second = nn.Sequential(
-            nn.Conv2d(80, 80, kernel_size=(10, 1)),
-            nn.BatchNorm2d(80),
+            nn.Conv2d(50, 50, kernel_size=(10, 1)),
+            nn.BatchNorm2d(50),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(self.time_kernel_size, 1), stride=(self.time_stride, 1)))
 
 
         self.hidden_size = params["hidden_size"]
         self.n_layers = params["layers"]
+
+        '''
         self.rnn = nn.LSTM(input_size=2400, hidden_size=params["hidden_size"], num_layers=params["layers"], dropout=params["drop_prob"], batch_first=True)
 
         for name, param in self.rnn.named_parameters():
@@ -31,27 +33,31 @@ class CNNBLSTM(nn.Module):
                 nn.init.constant_(param, 0.0)
             elif 'weight' in name:
                 nn.init.xavier_normal_(param)
+        '''
+
+        self.adaptiveavgpool = nn.AdaptiveAvgPool2d((80, 20))
 
         self.dropout = nn.Dropout(params["fully_connected_drop_prob"])
 
-        self.fc = nn.Linear(params["hidden_size"], params["labels_size"])
+        self.fc = nn.Linear(80*50*20, params["labels_size"])
         torch.nn.init.xavier_uniform_(self.fc.weight)
         self.relu = nn.ReLU()
 
     def forward(self, x, lengths, hidden):
-
         lengths = ((lengths - self.time_kernel_size) / self.time_stride) - 1
         x0 = x.unsqueeze(1)
         x1 = self.conv_layer_first(x0)
 
         x2 = self.conv_layer_second(x1)
 
-        batch_size, channels, seq_length, spectograms = x2.size()
+        x3 = self.adaptiveavgpool(x2)
 
-        x3 = x2.view(batch_size, seq_length, channels * spectograms)
+        batch_size, channels, seq_length, spectograms = x3.size()
 
+        x4 = x3.view(batch_size, seq_length * channels * spectograms)
+
+        '''
         x = torch.nn.utils.rnn.pack_padded_sequence(x3, lengths, batch_first=True)
-
         packed, hidden = self.rnn(x, hidden)
 
         pad, inp = torch.nn.utils.rnn.pad_packed_sequence(packed, batch_first=True)
@@ -59,9 +65,9 @@ class CNNBLSTM(nn.Module):
 
         for j, x in enumerate(inp):
             last_out[j,:] = pad[j,(x-1),:]
+        '''
 
-        out = self.dropout(last_out)
-
+        out = self.dropout(x4)
         out = self.fc(out)
         out = self.relu(out)
         return out, hidden
