@@ -82,8 +82,8 @@ def create_sequence_dataset_from_metadata(metadata, class_groups, set, max_seq_l
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "classify_audio_lstm", use_timestamp=True)
 
 '''
-train_dataset = create_sequence_dataset_from_metadata(metadata, class_groups, "train")
-dev_dataset = create_sequence_dataset_from_metadata(metadata, class_groups, "dev")
+train_dataset = create_sequence_dataset_from_metadata(metadata, class_groups, "train", max_seq_length=600)
+dev_dataset = create_sequence_dataset_from_metadata(metadata, class_groups, "dev", max_seq_length=600)
 
 
 with open("E://masters_thesis//dev.dataset", 'wb') as dev_dataset_path:
@@ -106,13 +106,13 @@ for m in metadata:
 
 params = {
     "max_sequence_length": 50,
-    "batch_size": 1,
+    "batch_size": 32,
     "hidden_size": 8,
     "drop_prob": 0.2,
     "fully_connected_drop_prob": 0.4,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 1,
+    "log_x_epochs": 10,
 }
 
 params["labels_size"] = len(set(list(class_groups.values())))

@@ -44,8 +44,6 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
             loss.backward()
 
             train_losses.append(loss.item())
-            #nn.utils.clip_grad_norm_(model.parameters(), 5)
-
             optimizer.step()
 
         test_loss = 0
