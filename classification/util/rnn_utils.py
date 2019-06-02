@@ -14,7 +14,7 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
     logger.info(model)
 
     train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
-    dev_loader = utils.DataLoader(dev_dataset, shuffle=True, batch_size=len(dev_dataset))
+    dev_loader = utils.DataLoader(dev_dataset, shuffle=True, batch_size=params["batch_size"])
 
     # Loss and optimizer
     unique, counts = np.unique(train_dataset.tensors[1], return_counts=True)
@@ -28,9 +28,10 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
         h = model.init_hidden(params["batch_size"])
         train_losses = []
         for inputs, labels, lengths, idx in train_loader:
-            lengths, inputs, labels, idx = sort_tensors(lengths, inputs, labels, idx)
             if inputs.shape[0] != params["batch_size"]:
                 continue
+            lengths, inputs, labels, idx = sort_tensors(lengths, inputs, labels, idx)
+
 
             inputs = inputs.to(device)
             labels = labels.to(device, dtype=torch.int64).view(-1)
@@ -53,9 +54,11 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
         all_predictions = []
         all_gold = []
         all_ids = []
-        h = model.init_hidden(len(dev_dataset))
+        h = model.init_hidden(params["batch_size"])
         with torch.no_grad():
             for inputs, labels, lengths, ids in dev_loader:
+                if inputs.shape[0] != params["batch_size"]:
+                    continue
                 lengths, inputs, labels, ids = sort_tensors(lengths, inputs, labels, ids)
 
                 inputs = inputs.to(device)
