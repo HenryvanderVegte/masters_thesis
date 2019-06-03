@@ -112,7 +112,7 @@ params = {
     "fully_connected_drop_prob": 0.4,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 10,
+    "log_x_epochs": 4,
 }
 
 params["labels_size"] = len(set(list(class_groups.values())))

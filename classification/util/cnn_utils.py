@@ -14,7 +14,7 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
     logger.info(model)
 
     train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
-    dev_loader = utils.DataLoader(dev_dataset, shuffle=True, batch_size=params["batch_size"])
+    dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=params["batch_size"])
 
     # Loss and optimizer
     unique, counts = np.unique(train_dataset.tensors[1], return_counts=True)

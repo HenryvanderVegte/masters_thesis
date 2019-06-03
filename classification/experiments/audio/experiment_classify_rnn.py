@@ -106,13 +106,13 @@ for m in metadata:
 
 params = {
     "max_sequence_length": 50,
-    "batch_size": 8,
-    "hidden_size": 8,
+    "batch_size": 4,
+    "hidden_size": 256,
     "drop_prob": 0.2,
     "fully_connected_drop_prob": 0.4,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 1,
+    "log_x_epochs": 5,
 }
 
 params["labels_size"] = len(set(list(class_groups.values())))
