@@ -1,11 +1,11 @@
 import os
 from classification.util.global_vars import *
 
-wav_folder = os.path.join(ROOT_FOLDER, "IEMOCAP_wav")
-train_txt = os.path.join(ROOT_FOLDER, "IEMOCAP//features//text//utterances//train.txt")
-test_txt = os.path.join(ROOT_FOLDER, "IEMOCAP//features//text//utterances//test.txt")
-dev_txt = os.path.join(ROOT_FOLDER, "IEMOCAP//features//text//utterances//dev.txt")
-out_csv = os.path.join(ROOT_FOLDER, "IEMOCAP//features//labels.csv")
+wav_folder = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//wavs")
+train_txt = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//features//text//utterances//train.txt")
+test_txt = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//features//text//utterances//test.txt")
+dev_txt = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//features//text//utterances//dev.txt")
+out_csv = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//labels.tsv")
 
 audio_name_to_path = {}
 for r, d, f in os.walk(wav_folder):

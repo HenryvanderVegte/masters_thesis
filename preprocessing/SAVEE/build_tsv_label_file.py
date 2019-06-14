@@ -11,23 +11,20 @@ for r, d, f in os.walk(wav_folder):
             base_path = os.path.basename(os.path.normpath(r))
             audio_path_to_name[os.path.join(base_path, file)] = file[:-4]
 
-
-
-
 def filename_to_label(filename):
-    if filename.startswith('a'):
+    if filename.startswith('a', 3):
         return 'ang'
-    elif filename.startswith('d'):
+    elif filename.startswith('d', 3):
         return 'dis'
-    elif filename.startswith('f'):
+    elif filename.startswith('f', 3):
         return 'fea'
-    elif filename.startswith('h'):
+    elif filename.startswith('h', 3):
         return 'hap'
-    elif filename.startswith('n'):
+    elif filename.startswith('n', 3):
         return 'neu'
-    elif filename.startswith('sa'):
+    elif filename.startswith('sa', 3):
         return 'sad'
-    elif filename.startswith('su'):
+    elif filename.startswith('su', 3):
         return 'sur'
     else:
         print("not found" + filename)
