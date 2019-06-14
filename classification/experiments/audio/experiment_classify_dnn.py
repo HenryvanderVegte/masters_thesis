@@ -17,10 +17,10 @@ class_groups = {
 }
 
 params = {
-    "batch_size": 32,
-    "epochs": 1000,
-    "log_x_epochs": 100,
-    "train_datasets": ['RAVDESS','SAVEE']
+    "batch_size": 1,
+    "epochs": 100,
+    "log_x_epochs": 1,
+    "train_datasets": ['IEMOCAP', 'SAVEE', 'RAVDESS']
 }
 
 experiment_dir, logger = create_experiment(experiments_folder, class_groups, "classify_dnn_4_labels", use_timestamp=True)

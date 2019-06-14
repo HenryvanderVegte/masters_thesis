@@ -77,15 +77,15 @@ def train(train_dataset, dev_dataset, experiment_path, model, logger, params):
 
         logger.info('{}; {:.0f} {:.4f}; {:.4f}'.format(e + 1, params["epochs"], np.mean(train_losses), np.mean(test_losses)))
 
-        epoch_metrics = str(e)
+        epoch_metrics = str(e) + ';'
 
         acc, uap, uar, uaf = get_metrics(train_golds, train_preds)
-        epoch_metrics += '{};{};{};{}'.format(np.mean(train_losses), acc, uap, uar, uaf)
+        epoch_metrics += '{};{};{};{};{};'.format(np.mean(train_losses), acc, uap, uar, uaf)
 
         acc, uap, uar, uaf = get_metrics(test_golds, test_preds)
-        epoch_metrics += '{};{};{};{}'.format(np.mean(test_losses), acc, uap, uar, uaf)
+        epoch_metrics += '{};{};{};{};{}'.format(np.mean(test_losses), acc, uap, uar, uaf)
 
-        with open(log_epochs, "w") as f:
+        with open(log_epochs, "a") as f:
             f.write(epoch_metrics + '\n')
 
         if (e+1) % int(params["log_x_epochs"]) == 0:
