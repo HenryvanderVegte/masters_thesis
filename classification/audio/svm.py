@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.svm import SVC
 import pickle, os
-from classification.util.experiments_util import get_metrics
+from classification.util.experiments_util import get_metrics_str
 
 def train(labels, feature_vectors, experiment_dir, logger):
     logger.info("############ Training SVM classifier. ########## \n\n" )
@@ -29,4 +29,4 @@ def test(labels, feature_vectors, experiment_dir, logger):
     labels = np.array(labels)
     labels = [str(i) for i in labels]
 
-    logger.info(get_metrics(labels, pred))
+    logger.info(get_metrics_str(labels, pred))

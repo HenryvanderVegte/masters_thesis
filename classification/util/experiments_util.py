@@ -2,6 +2,7 @@ import os, datetime
 import torch
 import json
 import logging
+import numpy as np
 from sklearn.metrics import recall_score, precision_recall_fscore_support
 from nltk.metrics import ConfusionMatrix, accuracy
 
@@ -89,7 +90,7 @@ def join_ids_labels_probs(ids, labels, probs1, probs2):
         out = out[:-1] + '\n'
     return out
 
-def get_metrics(labels, predictions):
+def get_metrics_str(labels, predictions):
     out = "\n"
 
     cm = ConfusionMatrix(labels, predictions)
@@ -121,3 +122,12 @@ def get_metrics(labels, predictions):
     out += "Unweighted average f-measure:" + str((avg/len(fscore) * 100)) + " % \n"
 
     return out
+
+def get_metrics(labels, predictions):
+    acc = accuracy(labels, predictions)
+
+    prec, rec, fscore, _ = precision_recall_fscore_support(labels, predictions)
+    UAP = np.sum(prec) / len(prec)
+    UAR = np.sum(rec) / len(rec)
+    UAF = np.sum(fscore) / len(fscore)
+    return acc, UAP, UAR, UAF

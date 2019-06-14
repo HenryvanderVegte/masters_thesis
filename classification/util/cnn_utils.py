@@ -4,7 +4,7 @@ import torch.utils.data as utils
 import torch.nn as nn
 import torch.optim as optim
 import os
-from classification.util.experiments_util import get_metrics, sort_tensors
+from classification.util.experiments_util import get_metrics_str, sort_tensors
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -75,7 +75,7 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
 
         if (e+1) % int(params["log_x_epochs"]) == 0:
             logger.info("Epoch nr " + str(e))
-            metrics_str = get_metrics(all_gold, all_predictions)
+            metrics_str = get_metrics_str(all_gold, all_predictions)
             logger.info(metrics_str)
             epoch_path = os.path.join(experiment_path, "epoch_" + str(e))
             os.mkdir(epoch_path)
@@ -108,4 +108,4 @@ def test(dev_dataset, model, label_to_id, logger, params):
             predictions += predicted.data.tolist()
             gold += labels.data.tolist()
 
-    logger.info(get_metrics(gold, predictions))
+    logger.info(get_metrics_str(gold, predictions))

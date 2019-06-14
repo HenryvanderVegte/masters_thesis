@@ -1,6 +1,6 @@
 import nltk
 import pickle
-from classification.util.experiments_util import get_metrics
+from classification.util.experiments_util import get_metrics_str
 from sklearn.metrics import recall_score
 from nltk.metrics import ConfusionMatrix, accuracy
 from collections import OrderedDict
@@ -90,7 +90,7 @@ def test(test_file_in, experiment_dir, label_to_id, logger):
 
     pred = classifier.classify_many(test_data)
 
-    logger.info(get_metrics(test_labels, pred))
+    logger.info(get_metrics_str(test_labels, pred))
 
 def eval_get_probability_scores(test_file_in, experiment_dir, label_to_id, logger):
     logger.info("Getting naive bayes probability scores for " + str(test_file_in))

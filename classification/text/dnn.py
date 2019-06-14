@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 import torch.utils.data as utils
 from classification.util import data_loader_pickle, data_loader_txt
-from classification.util.experiments_util import get_metrics
+from classification.util.experiments_util import get_metrics_str
 
 TRAIN_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//train.txt"
 DEV_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//dev.txt"
@@ -186,7 +186,7 @@ def test(labels, features, normalize_features, experiment_path, logger):
             predictions += predicted.data.tolist()
             gold += labels.data.tolist()
 
-    logger.info(get_metrics(gold, predictions))
+    logger.info(get_metrics_str(gold, predictions))
 
 def eval_get_probabilities(test_file_in, experiment_path, label_to_id, logger):
     logger.info("############ Getting prob scores for DNN classifier. ########## \n\n" )

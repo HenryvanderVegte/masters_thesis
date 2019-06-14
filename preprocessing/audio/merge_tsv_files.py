@@ -13,15 +13,15 @@ out_full = "Id\tName\tLabel\tSet\tDataset\tAudio\n"
 id = 0
 
 for instance in iemocap_meta:
-    out_full += str(id) + "\t" + 'IEMOCAP_' + instance['Name'] + "\t" + instance['Label']  + "\t" + instance['Set']  + "\t" + 'IEMOCAP' + "\t" + 'IEMOCAP\\' + instance['Audio'] +"\n"
+    out_full += str(id) + "\t" + instance['Name'] + "\t" + instance['Label']  + "\t" + instance['Set']  + "\t" + 'IEMOCAP' + "\t" + 'IEMOCAP\\' + instance['Audio'] +"\n"
     id += 1
 
 for instance in ravdess_meta:
-    out_full += str(id) + "\t" + 'RAVDESS_' +  instance['Name'] + "\t" + instance['Label']  + "\t" + instance['Set']  + "\t" + 'RAVDESS' + "\t" + 'RAVDESS\\' + instance['Audio'] +"\n"
+    out_full += str(id) + "\t" +  instance['Name'] + "\t" + instance['Label']  + "\t" + instance['Set']  + "\t" + 'RAVDESS' + "\t" + 'RAVDESS\\' + instance['Audio'] +"\n"
     id += 1
 
 for instance in savee_meta:
-    out_full += str(id) + "\t" + 'SAVEE_' +  instance['Name'] + "\t" + instance['Label']  + "\t" + instance['Set']  + "\t" + 'SAVEE' + "\t" + 'SAVEE\\' + instance['Audio'] +"\n"
+    out_full += str(id) + "\t" +  instance['Name'] + "\t" + instance['Label']  + "\t" + instance['Set']  + "\t" + 'SAVEE' + "\t" + 'SAVEE\\' + instance['Audio'] +"\n"
     id += 1
 
 with open(out_tsv, "w") as f:
