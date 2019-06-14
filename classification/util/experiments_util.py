@@ -5,7 +5,7 @@ import logging
 from sklearn.metrics import recall_score, precision_recall_fscore_support
 from nltk.metrics import ConfusionMatrix, accuracy
 
-def read_csv_dataset(dataset):
+def read_tsv_dataset(dataset):
     """
     Reads given .csv dataset file and returns list of dictionaries
     :param dataset:

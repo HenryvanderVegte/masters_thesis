@@ -1,31 +1,30 @@
 import os
+from classification.util.global_vars import *
 
-OPENSMILE_PATH = "C://Users//Henry//Desktop//opensmile-2.3.0//opensmile-2.3.0//bin//Win32//SMILExtract_Release.exe"
-CONFIG_PATH = "C://Users//Henry//Desktop//opensmile-2.3.0//opensmile-2.3.0//config//emobase.conf"
-WAV_FOLDER = "C://Users//Henry//Desktop//IEMOCAP_wav"
-OUTPUT_FOLDER = "C://Users//Henry//Desktop//IEMOCAP_audio"
-FEATURE_FILE = "C://Users//Henry//Desktop//IEMOCAP_audio//emobase_features.txt"
+OPENSMILE_PATH = os.path.join(ROOT_FOLDER, "opensmile-2.3.0//bin//Win32//SMILExtract_Release.exe")
+CONFIG_PATH = os.path.join(ROOT_FOLDER, "opensmile-2.3.0//config//emobase.conf")
+WAV_FOLDER = os.path.join(ROOT_FOLDER, "datasets//SAVEE")
+OUTPUT_FOLDER = os.path.join(ROOT_FOLDER, "datasets//SAVEE//features//audio//emobase")
 
-filepaths = []
-filenames = []
+audio_path_to_name = {}
 for r, d, f in os.walk(WAV_FOLDER):
     for file in f:
         if '.wav' in file:
-            filepaths.append(os.path.join(r, file))
-            filenames.append(file)
-print(filenames)
+            base_path = os.path.basename(os.path.normpath(r))
+            audio_path_to_name[os.path.join(base_path, file)] = file[:-4]
+
 
 cmdline_base = OPENSMILE_PATH + " -configfile " + CONFIG_PATH
 
-features = []
+for path in audio_path_to_name:
+    cmdline = cmdline_base + " -inputfile " + os.path.join(WAV_FOLDER, path)
 
-for i in range(len(filepaths)):
-    cmdline = cmdline_base + " -inputfile " + filepaths[i]
-    output_file = os.path.join(OUTPUT_FOLDER, filenames[i]) + ".arff"
-    cmdline += " -arffout " + output_file
+    output_file = os.path.join(OUTPUT_FOLDER, audio_path_to_name[path])
+    output_file_arff = output_file + ".arff"
+    cmdline += " -arffout " + output_file_arff
     os.system(cmdline)
 
-    with open(output_file, "rb") as f:
+    with open(output_file_arff, "rb") as f:
         # only read last line (https://stackoverflow.com/questions/3346430)
         f.seek(-2, os.SEEK_END)
         while f.read(1) != b"\n":
@@ -34,10 +33,10 @@ for i in range(len(filepaths)):
         #remove everything before and after the last comma to only get the features
         cleaned_last_line = last.split(',', 1)[1]
         cleaned_last_line = cleaned_last_line.rsplit(',', 1)[0]
-        features.append(filenames[i].split('.')[0] + '\t' + cleaned_last_line)
 
-    os.remove(output_file)
+        cleaned_last_line = cleaned_last_line.replace(',','\n')
 
-with open(FEATURE_FILE, "w") as f:
-    for line in features:
-        f.write(line + '\n')
+        output_file_emobase = output_file + ".emobase"
+        with open(output_file_emobase, "w") as f:
+            f.write(cleaned_last_line)
+    os.remove(output_file_arff)
