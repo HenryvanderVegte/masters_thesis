@@ -5,9 +5,9 @@ from classification.util.rnn_utils import *
 from classification.text import rnn_pretrained_embeddings
 from classification.util.text_preprocessing import create_sequence_dataset_from_metadata
 
-embeddings = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//embeddings//2d//embeddings.npy')
+embeddings = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_dataset//dataset.npy')
 metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//experiments//text//"
+EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//experiments//audio//"
 
 class_groups = {
     "hap":0,
@@ -20,12 +20,12 @@ class_groups = {
 params = {
     "max_sequence_length": 50,
     "batch_size": 16,
-    "hidden_size": 16,
-    "drop_prob": 0.5,
-    "fully_connected_drop_prob": 0.6,
+    "hidden_size": 512,
+    "drop_prob": 0.1,
+    "fully_connected_drop_prob": 0.1,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 3,
+    "log_x_epochs": 10,
 }
 
 params["labels_size"] = len(set(list(class_groups.values())))

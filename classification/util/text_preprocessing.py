@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.utils.data as utils
 from torch.nn.utils.rnn import pad_sequence
@@ -82,3 +83,52 @@ def create_sequence_dataset_with_pad_val(feature_dict, name_to_label_dict, seq_l
     dataset = utils.TensorDataset(features, labels, lengths, ids)
 
     return dataset, id_to_name
+
+def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups, set, max_seq_length = None):
+    """
+    Loads sequence data into a TensorDataset,
+    if max_seq_length is set, sequences longer than seq_length will be cut.
+    sequences shorter than max_seq_length will be zero-padded
+    :param feature_dict:
+    :param label_dict:
+    :param max_seq_length:
+    :return:
+    """
+    fl = []
+    labels = []
+    lengths = []
+    ids = []
+    for instance in metadata:
+        if instance["Label"] not in class_groups or instance["Set"] != set:
+            continue
+
+        label = class_groups[instance["Label"]]
+        features = features_dict[instance['Name']]
+
+        if features is None or len(features) == 0:
+            print('No features for:' + instance['Name'])
+            continue
+
+        if max_seq_length is None:
+            fl.append(torch.stack([torch.Tensor(i) for i in features]))
+        else:
+            fl.append(torch.stack([torch.Tensor(i) for i in features[:max_seq_length, :]]))
+
+        length = features.shape[0] if max_seq_length is None else min(features.shape[0], max_seq_length)
+        lengths.append(length)
+        labels.append(label)
+        ids.append(int(instance["Id"]))
+
+    labels = np.array(labels).reshape(-1,1)
+    lengths = np.array(lengths).reshape(-1,1)
+    ids = np.array(ids).reshape(-1,1)
+    padded_features = pad_sequence(fl)
+
+    labels = torch.stack([torch.Tensor(i) for i in labels])
+    lengths = torch.stack([torch.Tensor(i) for i in lengths])
+    ids = torch.stack([torch.Tensor(i) for i in ids])
+
+    padded_features = torch.transpose(padded_features, 0, 1)
+    dataset = utils.TensorDataset(padded_features, labels, lengths, ids)
+
+    return dataset

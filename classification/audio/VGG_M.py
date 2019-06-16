@@ -51,30 +51,30 @@ class VGGM(nn.Module):
         super(VGGM, self).__init__()
         self.num_classes = num_classes
         self.features = nn.Sequential(
-            nn.Conv2d(1,96,(7, 7),(2, 2)),
+            nn.Conv2d(1,32,(7, 7),(2, 2)),
             nn.ReLU(),
             SpatialCrossMapLRN(5, 0.0005, 0.75, 2),
             nn.MaxPool2d((3, 3),(2, 2),(0, 0),ceil_mode=True),
-            nn.Conv2d(96,128,(5, 5),(2, 2),(1, 1)),
+            nn.Conv2d(32,64,(5, 5),(2, 2),(1, 1)),
             nn.ReLU(),
             SpatialCrossMapLRN(5, 0.0005, 0.75, 2),
             nn.MaxPool2d((3, 3),(2, 2),(0, 0),ceil_mode=True),
-            nn.Conv2d(128,256,(3, 3),(1, 1),(1, 1)),
+            nn.Conv2d(64,128,(3, 3),(1, 1),(1, 1)),
             nn.ReLU(),
-            nn.Conv2d(256,256,(3, 3),(1, 1),(1, 1)),
+            nn.Conv2d(128,128,(3, 3),(1, 1),(1, 1)),
             nn.ReLU(),
-            nn.Conv2d(256,256,(3, 3),(1, 1),(1, 1)),
+            nn.Conv2d(128,128,(3, 3),(1, 1),(1, 1)),
             nn.ReLU(),
             nn.MaxPool2d((3, 3),(2, 2),(0, 0),ceil_mode=True)
         )
         self.classif = nn.Sequential(
-            nn.Linear(4608,4096),
+            nn.Linear(1920,128),
             nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(4096,4096),
+            nn.Dropout(0.8),
+            nn.Linear(128,32),
             nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(4096,num_classes)
+            nn.Dropout(0.8),
+            nn.Linear(32,num_classes)
         )
 
     def forward(self, x):

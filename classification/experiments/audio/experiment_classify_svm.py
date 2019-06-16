@@ -16,12 +16,14 @@ class_groups = {
 }
 
 params = {
-    "train_datasets": ['IEMOCAP']
+    "train_datasets": ['SAVEE', 'RAVDESS']
 }
 
 experiment_dir, logger = create_experiment(experiments_folder, class_groups, "classify_svm_4_labels", use_timestamp=True)
 
 train_dataset = create_emobase_dataset_from_metadata(metadata, class_groups, 'train', dataset_path, Normalization.CREATE_NORM, experiment_dir, params['train_datasets'])
 dev_dataset = create_emobase_dataset_from_metadata(metadata, class_groups, 'dev', dataset_path, Normalization.USE_NORM, experiment_dir)
+
+logger.info(params)
 
 svm.train(train_dataset, dev_dataset, experiment_dir, logger)

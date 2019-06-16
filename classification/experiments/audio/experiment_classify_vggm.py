@@ -19,7 +19,7 @@ class_groups = {
 example_path = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//features//audio//wavs//Ses01F_impro01//Ses01F_impro01_F005.wav"
 EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//experiments//"
 wavs_path = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//features//audio//wavs"
-metadata = read_csv_dataset("C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//labels.csv")
+metadata = read_tsv_dataset("C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//labels.csv")
 
 n_fft_ms = 25
 hop_length_ms = 10
@@ -39,6 +39,7 @@ def create_sequence_dataset_from_metadata(metadata, class_groups, set, max_seq_l
     labels = []
     lengths = []
     ids = []
+    m = nn.AdaptiveAvgPool2d((500,40))
     for instance in tqdm(metadata):
         if instance["Label"] not in class_groups or instance["Set"] != set:
             continue
@@ -55,10 +56,11 @@ def create_sequence_dataset_from_metadata(metadata, class_groups, set, max_seq_l
 
         features = librosa.power_to_db(features**2, ref=np.max)
 
-        if max_seq_length is None:
-            fl.append(torch.stack([torch.Tensor(i) for i in features]))
-        else:
-            fl.append(torch.stack([torch.Tensor(i) for i in features[:max_seq_length, :]]))
+        features = torch.Tensor(features)
+        features = features.unsqueeze(0)
+        features = m(features)
+        features = features.squeeze(0)
+        fl.append(features)
 
         length = features.shape[0] if max_seq_length is None else min(features.shape[0], max_seq_length)
         lengths.append(length)
@@ -85,12 +87,12 @@ experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "cl
 train_dataset = create_sequence_dataset_from_metadata(metadata, class_groups, "train", max_seq_length=600)
 dev_dataset = create_sequence_dataset_from_metadata(metadata, class_groups, "dev", max_seq_length=600)
 
-
 with open("E://masters_thesis//dev.dataset", 'wb') as dev_dataset_path:
     pickle.dump(dev_dataset, dev_dataset_path)
 
 with open("E://masters_thesis//train.dataset", 'wb') as train_dataset_path:
     pickle.dump(train_dataset, train_dataset_path)
+
 '''
 
 with open("E://masters_thesis//dev.dataset", 'rb') as dev_dataset_path:
@@ -106,11 +108,7 @@ for m in metadata:
 
 params = {
     "max_sequence_length": 50,
-    "batch_size": 32,
-    "hidden_size": 8,
-    "drop_prob": 0.2,
-    "fully_connected_drop_prob": 0.4,
-    "layers": 2,
+    "batch_size": 16,
     "epochs": 1000,
     "log_x_epochs": 4,
 }

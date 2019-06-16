@@ -3,15 +3,15 @@ from classification.util.global_vars import *
 
 OPENSMILE_PATH = os.path.join(ROOT_FOLDER, "opensmile-2.3.0//bin//Win32//SMILExtract_Release.exe")
 CONFIG_PATH = os.path.join(ROOT_FOLDER, "opensmile-2.3.0//config//emobase.conf")
-WAV_FOLDER = os.path.join(ROOT_FOLDER, "datasets//SAVEE")
-OUTPUT_FOLDER = os.path.join(ROOT_FOLDER, "datasets//SAVEE//features//audio//emobase")
+WAV_FOLDER = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//wavs_word_level")
+OUTPUT_FOLDER = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//features//audio//emobase_word_level")
 
 audio_path_to_name = {}
 for r, d, f in os.walk(WAV_FOLDER):
     for file in f:
         if '.wav' in file:
             base_path = os.path.basename(os.path.normpath(r))
-            audio_path_to_name[os.path.join(base_path, file)] = file[:-4]
+            audio_path_to_name[os.path.join(base_path, file)] = (base_path, file[:-4])
 
 
 cmdline_base = OPENSMILE_PATH + " -configfile " + CONFIG_PATH
@@ -19,7 +19,14 @@ cmdline_base = OPENSMILE_PATH + " -configfile " + CONFIG_PATH
 for path in audio_path_to_name:
     cmdline = cmdline_base + " -inputfile " + os.path.join(WAV_FOLDER, path)
 
-    output_file = os.path.join(OUTPUT_FOLDER, audio_path_to_name[path])
+    base_dir, file_name = audio_path_to_name[path]
+
+    base_dir = os.path.join(OUTPUT_FOLDER, base_dir)
+
+    if not os.path.isdir(base_dir):
+        os.mkdir(base_dir)
+
+    output_file = os.path.join(base_dir, file_name)
     output_file_arff = output_file + ".arff"
     cmdline += " -arffout " + output_file_arff
     os.system(cmdline)

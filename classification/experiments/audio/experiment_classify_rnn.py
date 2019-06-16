@@ -19,7 +19,7 @@ class_groups = {
 example_path = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//features//audio//wavs//Ses01F_impro01//Ses01F_impro01_F005.wav"
 EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//experiments//"
 wavs_path = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//features//audio//wavs"
-metadata = read_csv_dataset("C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//labels.csv")
+metadata = read_tsv_dataset("C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//labels.tsv")
 
 n_fft_ms = 25
 hop_length_ms = 10

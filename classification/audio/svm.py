@@ -4,7 +4,6 @@ import pickle, os
 from classification.util.experiments_util import get_metrics_str
 
 def train(train_dataset, dev_dataset, experiment_dir, logger):
-
     features = np.array(train_dataset.tensors[0])
     labels = np.ravel(np.array(train_dataset.tensors[1]))
     classifier = SVC(gamma='scale', decision_function_shape='ovo')
