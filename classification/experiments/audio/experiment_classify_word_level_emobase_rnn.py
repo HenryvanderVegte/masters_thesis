@@ -20,7 +20,7 @@ class_groups = {
 params = {
     "max_sequence_length": 50,
     "batch_size": 16,
-    "hidden_size": 512,
+    "hidden_size": 32,
     "drop_prob": 0.1,
     "fully_connected_drop_prob": 0.1,
     "layers": 2,

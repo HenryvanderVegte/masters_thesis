@@ -26,7 +26,7 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
     weights = 1 / np.array(list(count_dict.values()))
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
-    optimizer = optim.Adam(model.parameters(), lr=0.1)
+    optimizer = optim.Adam(model.parameters())
 
     for e in range(params["epochs"]):
         h = model.init_hidden(params["batch_size"])
