@@ -20,6 +20,8 @@ def load_emobase_features(path):
     return fl
 
 instance_dict = {}
+
+fl = []
 for r, d, f in os.walk(utterances_with_words):
     for file in f:
         file_path = os.path.join(r, file)
@@ -34,9 +36,19 @@ for r, d, f in os.walk(utterances_with_words):
             for line in f_lines:
                 local_path = line.split('\t')[0][:-4] + '.emobase'
 
-                emobase_features = load_emobase_features(os.path.join(emobase_word_level, local_path))
-                instance_matrix[i, :] = np.array(emobase_features)
+                emobase_features = np.array(load_emobase_features(os.path.join(emobase_word_level, local_path)))
+                instance_matrix[i, :] = emobase_features
+                fl.append(emobase_features)
                 i += 1
         instance_dict[name] = instance_matrix
+
+#normalization
+fl = np.array(fl)
+means = fl.mean(axis=0)
+stddevs = fl.std(axis=0)
+stddevs[stddevs == 0] = 1
+
+for key in instance_dict.keys():
+    instance_dict[key] = (instance_dict[key] - means) / stddevs
 
 np.save(embeddings_out, instance_dict)
