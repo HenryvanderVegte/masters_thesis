@@ -18,13 +18,13 @@ class_groups = {
 }
 
 params = {
-    "batch_size": 16,
-    "hidden_size": 32,
-    "drop_prob": 0.5,
-    "fully_connected_drop_prob": 0.7,
+    "batch_size": 32,
+    "hidden_size": 16,
+    "drop_prob": 0.1,
+    "fully_connected_drop_prob": 0.4,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 2,
+    "log_x_epochs": 1,
 }
 
 params["labels_size"] = len(set(list(class_groups.values())))

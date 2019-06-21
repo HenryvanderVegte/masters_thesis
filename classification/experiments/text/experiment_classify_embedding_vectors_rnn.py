@@ -1,4 +1,3 @@
-import classification.util.data_loader_pickle as data_loader
 from classification.util.experiments_util import *
 from classification.util.global_vars import *
 from classification.util.rnn_utils import *
@@ -18,14 +17,13 @@ class_groups = {
 }
 
 params = {
-    "max_sequence_length": 50,
-    "batch_size": 16,
+    "batch_size": 32,
     "hidden_size": 16,
-    "drop_prob": 0.5,
-    "fully_connected_drop_prob": 0.6,
+    "drop_prob": 0.1,
+    "fully_connected_drop_prob": 0.4,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 3,
+    "log_x_epochs": 2,
 }
 
 params["labels_size"] = len(set(list(class_groups.values())))

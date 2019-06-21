@@ -18,9 +18,9 @@ class_groups = {
 }
 
 params = {
-    "batch_size": 16,
-    "hidden_size": 64,
-    "drop_prob": 0.5,
+    "batch_size": 32,
+    "hidden_size": 32,
+    "drop_prob": 0.1,
     "fully_connected_drop_prob": 0.8,
     "layers": 2,
     "epochs": 1000,
