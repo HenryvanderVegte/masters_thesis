@@ -1,0 +1,15 @@
+[ 15.06.2019 - 23:13:59 ]
+    (MSG) [2] in SMILExtract : openSMILE starting!
+[ 15.06.2019 - 23:13:59 ]
+    (MSG) [2] in SMILExtract : config file is: C://Users//Henry//Desktop//Masterarbeit\opensmile-2.3.0//config//emobase.conf
+[ 15.06.2019 - 23:13:59 ]
+    (MSG) [2] in cComponentManager : successfully registered 95 component types.
+[ 15.06.2019 - 23:13:59 ]
+    (MSG) [2] in instance 'arffsink' : writing ARFF header (988 features)...
+[ 15.06.2019 - 23:13:59 ]
+    (MSG) [2] in cComponentManager : successfully finished createInstances
+                                 (23 component instances were finalised, 1 data memories were finalised)
+[ 15.06.2019 - 23:13:59 ]
+    (MSG) [2] in cComponentManager : starting single thread processing loop
+[ 15.06.2019 - 23:13:59 ]
+    (MSG) [2] in cComponentManager : Processing finished! System ran for 32 ticks.
