@@ -8,7 +8,7 @@ from nltk.metrics import ConfusionMatrix, accuracy
 
 def read_tsv_dataset(dataset):
     """
-    Reads given .csv dataset file and returns list of dictionaries
+    Reads given .tsv dataset file and returns list of dictionaries
     :param dataset:
     :return: list of dictionaries, each representing one row
     """
@@ -131,3 +131,20 @@ def get_metrics(labels, predictions):
     UAR = np.sum(rec) / len(rec)
     UAF = np.sum(fscore) / len(fscore)
     return acc, UAP, UAR, UAF
+
+def normalize_features(feature_dict):
+    full_fl = []
+
+    for fl in feature_dict.values():
+        for arr in fl:
+            full_fl.append(arr)
+
+    fl = np.array(full_fl)
+    means = fl.mean(axis=0)
+    stddevs = fl.std(axis=0)
+    stddevs[stddevs == 0] = 1
+
+    for key in feature_dict.keys():
+        feature_dict[key] = (feature_dict[key] - means) / stddevs
+
+    return feature_dict

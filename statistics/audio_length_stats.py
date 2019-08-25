@@ -1,4 +1,5 @@
 import os
+from pydub import AudioSegment
 from classification.util.global_vars import *
 import wave
 import contextlib
@@ -12,6 +13,9 @@ lengths_script = []
 for r, d, f in os.walk(wav_folder):
     for file in f:
         file_path = os.path.join(r, file)
+
+        audio = AudioSegment.from_file(file_path)
+
         with contextlib.closing(wave.open(file_path,'r')) as f:
             frames = f.getnframes()
             rate = f.getframerate()

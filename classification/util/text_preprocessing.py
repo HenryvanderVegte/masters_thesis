@@ -103,9 +103,14 @@ def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups,
             continue
 
         label = class_groups[instance["Label"]]
+
+        if instance['Name'] not in features_dict:
+            print('No features for:' + instance['Name'])
+            continue
+
         features = features_dict[instance['Name']]
 
-        if features is None or len(features) == 0:
+        if len(features) == 0:
             print('No features for:' + instance['Name'])
             continue
 

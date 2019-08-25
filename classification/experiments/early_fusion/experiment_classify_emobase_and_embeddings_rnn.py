@@ -5,9 +5,9 @@ from classification.util.rnn_utils import *
 from classification.text import rnn_pretrained_embeddings
 from classification.util.text_preprocessing import create_sequence_dataset_from_metadata
 
-embeddings = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//fusion//emobase_and_embeddings.npy')
+embeddings = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_50ms_buffer.npy')
 metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//experiments//fusion//"
+EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//fusion')
 
 class_groups = {
     "hap":0,
@@ -18,10 +18,10 @@ class_groups = {
 }
 
 params = {
-    "batch_size": 32,
+    "batch_size": 16,
     "hidden_size": 32,
     "drop_prob": 0.1,
-    "fully_connected_drop_prob": 0.8,
+    "fully_connected_drop_prob": 0.4,
     "layers": 2,
     "epochs": 1000,
     "log_x_epochs": 2,
@@ -29,8 +29,10 @@ params = {
 
 params["labels_size"] = len(set(list(class_groups.values())))
 
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "classify_word_embeddings_rnn", use_timestamp=True)
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "classify_word_embeddings_normalization", use_timestamp=True)
 embeddings = np.load(embeddings).item()
+embeddings = normalize_features(embeddings)
+
 
 train_dataset = create_sequence_dataset_from_metadata(metadata,embeddings, class_groups, 'train')
 dev_dataset = create_sequence_dataset_from_metadata(metadata,embeddings, class_groups, 'dev')
