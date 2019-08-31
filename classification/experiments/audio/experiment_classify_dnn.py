@@ -1,6 +1,6 @@
 from classification.util.experiments_util import *
 from classification.util.dataset_utils import create_emobase_dataset_from_metadata, Normalization
-from classification.util.dnn_utils import *
+from utils.dnn_utils import *
 from models import DNN
 from classification.util.global_vars import *
 

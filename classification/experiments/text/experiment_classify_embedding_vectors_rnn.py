@@ -1,6 +1,6 @@
 from classification.util.experiments_util import *
 from classification.util.global_vars import *
-from classification.util.rnn_utils import *
+from utils.rnn_utils import *
 from models import LSTM
 from classification.util.text_preprocessing import create_sequence_dataset_from_metadata
 

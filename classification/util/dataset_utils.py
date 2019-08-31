@@ -9,6 +9,7 @@ def create_sequence_dataset_from_dicts(feature_dict, label_dict, max_seq_length 
     Loads sequence data into a TensorDataset,
     if max_seq_length is set, sequences longer than seq_length will be cut.
     sequences shorter than max_seq_length will be zero-padded
+    Returns a TensorDataset which contains features, labels, sequence lengths, and ids
     :param feature_dict:
     :param label_dict:
     :param max_seq_length:
@@ -48,6 +49,7 @@ def create_sequence_dataset_from_dicts(feature_dict, label_dict, max_seq_length 
 def create_sequence_dataset_with_pad_val(feature_dict, name_to_label_dict, seq_length, pad_val):
     """
     Creates a dataset of 1-dim vectors, cuts the vectors to :seq_length: and pads them with the :pad_val:
+    Returns a TensorDataset which contains features, labels, sequence lengths, and ids
     :param feature_dict:
     :param name_to_label_dict:
     :param seq_length:
@@ -89,6 +91,7 @@ def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups,
     Loads sequence data into a TensorDataset,
     if max_seq_length is set, sequences longer than seq_length will be cut.
     sequences shorter than max_seq_length will be zero-padded
+    Returns a TensorDataset which contains features, labels, sequence lengths, and ids
     :param feature_dict:
     :param label_dict:
     :param max_seq_length:
@@ -136,4 +139,44 @@ def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups,
     padded_features = torch.transpose(padded_features, 0, 1)
     dataset = utils.TensorDataset(padded_features, labels, lengths, ids)
 
+    return dataset
+
+def create_dataset_from_metadata(metadata, features_dict, class_groups, set):
+    """
+    Loads data into a TensorDataset,
+    Returns a TensorDataset which contains features, labels, and ids
+    :param feature_dict:
+    :param label_dict:
+    :param max_seq_length:
+    :return:
+    """
+    feature_list = []
+    labels = []
+    ids = []
+    for instance in metadata:
+        if instance["Label"] not in class_groups or instance["Set"] != set:
+            continue
+
+        label = class_groups[instance["Label"]]
+
+        if instance['Name'] not in features_dict:
+            print('No features for:' + instance['Name'])
+            continue
+
+        features = features_dict[instance['Name']]
+
+        if len(features) == 0:
+            print('No features for:' + instance['Name'])
+            continue
+
+        feature_list.append(features)
+        labels.append(label)
+        ids.append(int(instance["Id"]))
+
+    labels = np.array(labels).reshape(-1,1)
+    labels = torch.stack([torch.Tensor(i) for i in labels])
+    ids = np.array(ids).reshape(-1,1)
+    ids = torch.stack([torch.Tensor(i) for i in ids])
+    feature_list = torch.stack([torch.Tensor(i) for i in feature_list])
+    dataset = utils.TensorDataset(feature_list, labels, ids)
     return dataset

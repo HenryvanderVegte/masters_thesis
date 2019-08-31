@@ -26,8 +26,7 @@ def train(train_dataset, dev_dataset, experiment_path, model, logger, params):
     weights = 1 / np.array(list(count_dict.values()))
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
-    optimizer = optim.Adam(model.parameters())
-
+    optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
     for e in range(params["epochs"]):
         train_losses = []
         train_preds = []

@@ -148,3 +148,19 @@ def normalize_sequence_features(feature_dict):
         feature_dict[key] = (feature_dict[key] - means) / stddevs
 
     return feature_dict
+
+def normalize_features(feature_dict):
+    full_fl = []
+
+    for fl in feature_dict.values():
+        full_fl.append(fl)
+
+    fl = np.array(full_fl)
+    means = fl.mean(axis=0)
+    stddevs = fl.std(axis=0)
+    stddevs[stddevs == 0] = 1
+
+    for key in feature_dict.keys():
+        feature_dict[key] = (feature_dict[key] - means) / stddevs
+
+    return feature_dict

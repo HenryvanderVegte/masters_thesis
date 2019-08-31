@@ -1,6 +1,6 @@
 import classification.util.data_loader_pickle as data_loader
 from classification.util.experiments_util import *
-from classification.util.rnn_utils import *
+from utils.rnn_utils import *
 from classification.util.global_vars import *
 from classification.text import rnn_embeddings
 from classification.util.text_preprocessing import create_sequence_dataset_with_pad_val
