@@ -1,5 +1,5 @@
 from classification.util.global_vars import *
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 from classification.text.word_embeddings import *
 import os
 
@@ -10,7 +10,7 @@ This script uses the recognized words, takes the emobase features on a word leve
 utterances_with_words = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//forced_alignment//utterances')
 emobase_word_level = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level')
 embeddings_out = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_20ms_buffer.npy')
-metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
+metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 
 def load_emobase_features(path):
     fl = []

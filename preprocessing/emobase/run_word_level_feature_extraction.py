@@ -1,8 +1,8 @@
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 from preprocessing.emobase.emobase_feature_extractor import *
 from multiprocessing.pool import ThreadPool
 
-metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
+metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 features_out = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_50ms_buffer.npy')
 
 target_labels = ['hap', 'exc', 'sad', 'ang', 'neu']

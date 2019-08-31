@@ -1,8 +1,6 @@
 import nltk
 import pickle
-from classification.util.experiments_util import get_metrics_str
-from sklearn.metrics import recall_score
-from nltk.metrics import ConfusionMatrix, accuracy
+from utils.experiments_util import get_metrics_str
 from collections import OrderedDict
 import os
 

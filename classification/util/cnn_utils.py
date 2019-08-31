@@ -4,7 +4,7 @@ import torch.utils.data as utils
 import torch.nn as nn
 import torch.optim as optim
 import os
-from classification.util.experiments_util import get_metrics_str, sort_tensors
+from utils.experiments_util import get_metrics_str, sort_tensors
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 import torch.utils.data as utils
 from classification.util import data_loader_pickle, data_loader_txt
-from classification.util.experiments_util import get_metrics_str
+from utils.experiments_util import get_metrics_str
 
 TRAIN_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//train.txt"
 DEV_FILE_AUDIO = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//split//dev.txt"

@@ -5,7 +5,7 @@ from utils.rnn_utils import *
 import torch.utils.data as utils
 from torch.nn.utils.rnn import pad_sequence
 from models import CNNBLSTM
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 
 class_groups = {
     "hap":0,
@@ -19,7 +19,7 @@ class_groups = {
 example_path = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//features//audio//wavs//Ses01F_impro01//Ses01F_impro01_F005.wav"
 EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP_audio//experiments//"
 wavs_path = "C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//features//audio//wavs"
-metadata = read_tsv_dataset("C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//labels.tsv")
+metadata = read_tsv_metadata("C://Users//Henry//Desktop//Masterarbeit//IEMOCAP//labels.tsv")
 
 n_fft_ms = 25
 hop_length_ms = 10

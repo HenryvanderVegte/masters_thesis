@@ -1,4 +1,4 @@
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 from classification.util.global_vars import *
 from classification.text import naive_bayes
 

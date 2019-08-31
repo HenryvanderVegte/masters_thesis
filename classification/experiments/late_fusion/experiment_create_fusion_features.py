@@ -1,6 +1,6 @@
 from models import DNN
 from classification.text import naive_bayes
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 from classification.util.global_vars import *
 
 experiments_folder = os.path.join(ROOT_FOLDER, "IEMOCAP_fusion//experiments")

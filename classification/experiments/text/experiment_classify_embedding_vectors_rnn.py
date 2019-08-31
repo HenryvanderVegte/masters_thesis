@@ -1,11 +1,11 @@
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 from classification.util.global_vars import *
 from utils.rnn_utils import *
 from models import LSTM
 from classification.util.text_preprocessing import create_sequence_dataset_from_metadata
 
 embeddings = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//embeddings//2d//embeddings.npy')
-metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
+metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//experiments//text//"
 
 class_groups = {

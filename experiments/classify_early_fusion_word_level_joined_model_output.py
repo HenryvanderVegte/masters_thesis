@@ -1,10 +1,10 @@
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 from classification.util.global_vars import *
 from models import LSTM
-from classification.util.dataset_utils import create_sequence_dataset_from_metadata
-from classification.util.two_modality_utils import *
+from utils.dataset_utils import create_sequence_dataset_from_metadata
+from utils.two_modality_utils import *
 
-metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
+metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 id_to_name = {}
 for m in metadata:
     id_to_name[int(m["Id"])] = m["Name"]

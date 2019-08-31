@@ -1,5 +1,5 @@
 import numpy as np
-from classification.util.experiments_util import get_metrics_str
+from utils.experiments_util import get_metrics_str
 
 def test(labels, feature_vectors, logger):
     logger.info("############ Testing max. probability classifier. ########## \n\n" )

@@ -1,14 +1,13 @@
 import re
 from classification.util.global_vars import *
-from classification.text.word_embeddings import *
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 import gensim
 import os
 
 '''
 This script uses the recognized words with an existing word level audio and extracts pretrained words embeddings for it.
 '''
-metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
+metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 utterances_with_words = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//forced_alignment//utterances')
 emobase_word_level = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level')
 fusion_out = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//late_fusion//emobase_and_embeddings_no_normalization.npy')

@@ -1,5 +1,5 @@
-from classification.util.experiments_util import *
-from classification.util.dataset_utils import create_emobase_dataset_from_metadata, Normalization
+from utils.experiments_util import *
+from utils.dataset_utils import create_emobase_dataset_from_metadata, Normalization
 from utils.dnn_utils import *
 from models import DNN
 from classification.util.global_vars import *
@@ -7,7 +7,7 @@ from classification.util.global_vars import *
 experiments_folder = os.path.join(ROOT_FOLDER, "experiments//audio")
 dataset_path = os.path.join(ROOT_FOLDER, "datasets")
 
-metadata = read_tsv_dataset( os.path.join(ROOT_FOLDER, "datasets//labels.tsv"))
+metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, "datasets//labels.tsv"))
 
 class_groups = {
     "hap":0,

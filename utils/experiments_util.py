@@ -6,11 +6,11 @@ import numpy as np
 from sklearn.metrics import recall_score, precision_recall_fscore_support
 from nltk.metrics import ConfusionMatrix, accuracy
 
-def read_tsv_dataset(dataset):
+def read_tsv_metadata(dataset):
     """
-    Reads given .tsv dataset file and returns list of dictionaries
+    Reads given .tsv metadata file and returns every instance in a list of dictionaries
     :param dataset:
-    :return: list of dictionaries, each representing one row
+    :return: list of dictionaries, each representing one instance
     """
     d = open(dataset).read().splitlines()
     headers = d[0].split("\t")
@@ -22,7 +22,6 @@ def read_tsv_dataset(dataset):
 
 def sort_tensors(sort_by, *args):
     """
-
     :param sort_by:
     :param args:
     :return:

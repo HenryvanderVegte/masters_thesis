@@ -1,5 +1,5 @@
 from classification.audio import svm
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 import classification.util.data_loader_txt as data_loader
 from classification.util.global_vars import *
 import os

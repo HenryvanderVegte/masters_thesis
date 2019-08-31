@@ -2,7 +2,7 @@ from classification.audio import decision_tree, svm, max_prob_classifier
 from models import DNN
 from classification.text import naive_bayes
 import classification.util.data_loader_txt as data_loader
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 from classification.util.global_vars import *
 
 experiments_folder = os.path.join(ROOT_FOLDER, "IEMOCAP_fusion//experiments")

@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.svm import SVC
 import pickle, os
-from classification.util.experiments_util import get_metrics_str
+from utils.experiments_util import get_metrics_str
 
 def train(train_dataset, dev_dataset, experiment_dir, logger):
     features = np.array(train_dataset.tensors[0])

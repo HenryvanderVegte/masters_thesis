@@ -4,7 +4,7 @@ import torch.utils.data as utils
 import torch.nn as nn
 import torch.optim as optim
 import os
-from classification.util.experiments_util import get_metrics_str, sort_tensors, get_metrics
+from utils.experiments_util import get_metrics_str, sort_tensors, get_metrics
 
 """
 This class is used everytime two pretrained models are combined (early or late) to get an output.

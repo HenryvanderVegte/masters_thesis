@@ -1,11 +1,11 @@
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 from classification.util.global_vars import *
 from utils.rnn_utils import *
 from models import LSTM
-from classification.util.dataset_utils import create_sequence_dataset_from_metadata
+from utils.dataset_utils import create_sequence_dataset_from_metadata
 
 emobase_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_50ms_buffer.npy')
-metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
+metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//audio')
 
 class_groups = {

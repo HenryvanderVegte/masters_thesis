@@ -1,4 +1,4 @@
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 from preprocessing.emobase.emobase_feature_extractor import *
 
 def print_m_f_statistics(gender_info_file):

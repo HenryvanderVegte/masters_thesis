@@ -1,5 +1,5 @@
 import classification.util.data_loader_pickle as data_loader
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 from classification.util.global_vars import *
 from classification.text import rnn_embeddings
 from classification.text.word_embeddings import *

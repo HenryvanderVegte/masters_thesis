@@ -1,10 +1,9 @@
-import os
 from classification.util.global_vars import *
-from classification.util.experiments_util import *
+from utils.experiments_util import *
 
-iemocap_meta = read_tsv_dataset(os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//labels.tsv"))
-ravdess_meta = read_tsv_dataset(os.path.join(ROOT_FOLDER, "datasets//RAVDESS//labels.tsv"))
-savee_meta = read_tsv_dataset(os.path.join(ROOT_FOLDER, "datasets//SAVEE//labels.tsv"))
+iemocap_meta = read_tsv_metadata(os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//labels.tsv"))
+ravdess_meta = read_tsv_metadata(os.path.join(ROOT_FOLDER, "datasets//RAVDESS//labels.tsv"))
+savee_meta = read_tsv_metadata(os.path.join(ROOT_FOLDER, "datasets//SAVEE//labels.tsv"))
 out_tsv = os.path.join(ROOT_FOLDER, "datasets//labels.tsv")
 
 
