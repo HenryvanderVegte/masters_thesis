@@ -132,7 +132,7 @@ def get_metrics(labels, predictions):
     UAF = np.sum(fscore) / len(fscore)
     return acc, UAP, UAR, UAF
 
-def normalize_features(feature_dict):
+def normalize_sequence_features(feature_dict):
     full_fl = []
 
     for fl in feature_dict.values():

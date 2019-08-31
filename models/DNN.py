@@ -1,13 +1,13 @@
 import torch.nn as nn
 
 class DNN(nn.Module):
-    def __init__(self, input_dim, num_classes):
+    def __init__(self, params):
         super(DNN, self).__init__()
         self.classif = nn.Sequential(
-            nn.Linear(input_dim,32),
+            nn.Linear(params["input_dim"],params["hidden_size"]),
             nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(32,num_classes))
+            nn.Dropout(params["drop_prob"]),
+            nn.Linear(params["hidden_size"],params["label_dim"]))
 
     def forward(self, x):
         x = self.classif(x)

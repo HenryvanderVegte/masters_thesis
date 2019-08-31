@@ -3,7 +3,7 @@ from preprocessing.emobase.emobase_feature_extractor import *
 from multiprocessing.pool import ThreadPool
 
 metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
-features_out = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_buffer//emobase.npy')
+features_out = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_utterance_level.npy')
 
 target_labels = ['hap', 'exc', 'sad', 'ang', 'neu']
 names = []
@@ -12,7 +12,7 @@ for instance in metadata:
         names.append(instance['Name'])
 
 pool = ThreadPool(8)
-results = pool.map(extract_word_level_emobase_features, names)
+results = pool.map(extract_utterance_level_emobase_features, names)
 pool.close()
 pool.join()
 

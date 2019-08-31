@@ -93,3 +93,10 @@ def extract_word_level_emobase_features(utterance_name):
 
     print('completed ' + utterance_name)
     return all_emobase_features
+
+def extract_utterance_level_emobase_features(utterance_name):
+    wav_file = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//wavs", utterance_name + ".wav")
+    emobase_features = opensmile.get_emobase_features(wav_file)
+
+    print('completed ' + utterance_name)
+    return emobase_features

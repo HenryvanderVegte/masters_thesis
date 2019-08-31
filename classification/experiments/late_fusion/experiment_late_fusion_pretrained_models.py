@@ -23,7 +23,7 @@ experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "cl
 # Set up pretrained text model (word embeddings)
 word_embeddings_dataset_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//word_embeddings.npy')
 word_embeddings_dataset = np.load(word_embeddings_dataset_path).item()
-word_embeddings_dataset = normalize_features(word_embeddings_dataset)
+word_embeddings_dataset = normalize_sequence_features(word_embeddings_dataset)
 word_embedding_dataset_train = create_sequence_dataset_from_metadata(metadata,word_embeddings_dataset, class_groups, 'train')
 word_embedding_dataset_test = create_sequence_dataset_from_metadata(metadata,word_embeddings_dataset, class_groups, 'test')
 
@@ -50,7 +50,7 @@ word_embedding_resources['dev_dataset'] = word_embedding_dataset_test
 # Set up pretrained audio model (emobase features on word level)
 emobase_dataset_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_50ms_buffer.npy')
 emobase_dataset = np.load(emobase_dataset_path).item()
-emobase_dataset = normalize_features(emobase_dataset)
+emobase_dataset = normalize_sequence_features(emobase_dataset)
 emobase_dataset_train = create_sequence_dataset_from_metadata(metadata,emobase_dataset, class_groups, 'train')
 emobase_dataset_test = create_sequence_dataset_from_metadata(metadata,emobase_dataset, class_groups, 'test')
 

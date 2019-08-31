@@ -4,9 +4,9 @@ from classification.util.rnn_utils import *
 from models import LSTM
 from classification.util.dataset_utils import create_sequence_dataset_from_metadata
 
-embeddings = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_dataset//dataset.npy')
+embeddings = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings.npy')
 metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
-EXPERIMENTS_FOLDER = "C://Users//Henry//Desktop//Masterarbeit//experiments//audio//"
+EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//audio')
 
 class_groups = {
     "hap":0,
@@ -17,19 +17,20 @@ class_groups = {
 }
 
 params = {
-    "batch_size": 32,
-    "hidden_size": 16,
+    "batch_size": 16,
+    "hidden_size": 32,
     "drop_prob": 0.1,
-    "fully_connected_drop_prob": 0.4,
+    "fully_connected_drop_prob": 0.2,
     "layers": 2,
     "epochs": 1000,
-    "log_x_epochs": 1,
+    "log_x_epochs": 2,
 }
 
-params["labels_size"] = len(set(list(class_groups.values())))
+params["label_dim"] = len(set(list(class_groups.values())))
 
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "classify_word_embeddings_rnn", use_timestamp=True)
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "classify_word_embeddings", use_timestamp=True)
 embeddings = np.load(embeddings).item()
+embeddings = normalize_sequence_features(embeddings)
 
 train_dataset = create_sequence_dataset_from_metadata(metadata,embeddings, class_groups, 'train')
 dev_dataset = create_sequence_dataset_from_metadata(metadata,embeddings, class_groups, 'dev')

@@ -1,7 +1,7 @@
 from classification.util.experiments_util import *
 from classification.util.dataset_utils import create_emobase_dataset_from_metadata, Normalization
 from classification.util.dnn_utils import *
-from classification.audio import dnn
+from models import DNN
 from classification.util.global_vars import *
 
 experiments_folder = os.path.join(ROOT_FOLDER, "experiments//audio")
@@ -29,6 +29,6 @@ train_dataset = create_emobase_dataset_from_metadata(metadata, class_groups, 'tr
 dev_dataset = create_emobase_dataset_from_metadata(metadata, class_groups, 'dev', dataset_path, Normalization.USE_NORM, experiment_dir)
 input_size = dev_dataset.tensors[0].size()[1]
 
-model = dnn.DNN(input_size, 4)
+model = DNN.DNN(input_size, 4)
 
 train(train_dataset, dev_dataset, experiment_dir, model, logger, params)

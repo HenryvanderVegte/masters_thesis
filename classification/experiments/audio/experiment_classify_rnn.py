@@ -4,7 +4,7 @@ import pickle
 from classification.util.rnn_utils import *
 import torch.utils.data as utils
 from torch.nn.utils.rnn import pad_sequence
-from classification.audio import CNNBLSTM
+from models import CNNBLSTM
 from classification.util.experiments_util import *
 
 class_groups = {

@@ -23,7 +23,7 @@ class LSTM(nn.Module):
 
         self.dropout = nn.Dropout(params["fully_connected_drop_prob"])
 
-        self.fc = nn.Linear(params["hidden_size"], params["labels_size"])
+        self.fc = nn.Linear(params["hidden_size"], params["label_dim"])
         torch.nn.init.xavier_uniform_(self.fc.weight)
         self.relu = nn.ReLU()
 
