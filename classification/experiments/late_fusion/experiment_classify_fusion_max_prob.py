@@ -6,8 +6,8 @@ import os
 
 experiments_folder = os.path.join(ROOT_FOLDER, "IEMOCAP_fusion//experiments")
 
-fusion_train = os.path.join(ROOT_FOLDER, "features//fusion//fusion_train_30.txt")
-fusion_dev = os.path.join(ROOT_FOLDER, "features//fusion//fusion_dev.txt")
+fusion_train = os.path.join(ROOT_FOLDER, "features//late_fusion//fusion_train_30.txt")
+fusion_dev = os.path.join(ROOT_FOLDER, "features//late_fusion//fusion_dev.txt")
 
 label_to_id = {
     "hap":"0",

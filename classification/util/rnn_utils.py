@@ -41,15 +41,13 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
                 continue
             lengths, inputs, labels, ids = sort_tensors(lengths, inputs, labels, ids)
 
-
             inputs = inputs.to(device)
             labels = labels.to(device, dtype=torch.int64).view(-1)
             lengths = lengths.to(device, dtype=torch.int64).view(-1)
             h = tuple([each.data for each in h])
 
             model.zero_grad()
-
-            output, h = model(inputs, lengths, h)
+            output, h, _ = model(inputs, lengths, h)
 
             loss = criterion(output, labels)
             loss.backward()
@@ -81,7 +79,7 @@ def train(train_dataset, dev_dataset, id_to_name, experiment_path, model, logger
                 ids = ids.to(device, dtype=torch.int64).view(-1)
                 h = tuple([each.data for each in h])
 
-                output, _ = model(inputs, lengths, h)
+                output, _, _ = model(inputs, lengths, h)
 
                 test_losses.append(criterion(output, labels).item())
 
@@ -132,7 +130,7 @@ def test(dev_dataset, model, label_to_id, logger, params):
             #inputs = torch.transpose(inputs, 0, 1)
             labels = labels.to(device, dtype=torch.int64).view(-1)
 
-            output = model(inputs)
+            output, _, _ = model(inputs)
 
             _, predicted = torch.max(output.data, 1)
             predictions += predicted.data.tolist()

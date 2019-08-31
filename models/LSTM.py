@@ -1,15 +1,19 @@
 import torch
 import torch.nn as nn
 
+"""
+LSTM model, creates an n-layer LSTM with a final fully connected layer
+"""
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-class PretrainedEmbeddingsLSTM(nn.Module):
+class LSTM(nn.Module):
     def __init__(self, params):
         super().__init__()
 
         self.hidden_size = params["hidden_size"]
         self.n_layers = params["layers"]
-        self.rnn = nn.LSTM(input_size=params["embedding_dim"], hidden_size=params["hidden_size"], num_layers=params["layers"], dropout=params["drop_prob"], batch_first=True)
+        self.rnn = nn.LSTM(input_size=params["input_dim"], hidden_size=params["hidden_size"], num_layers=params["layers"], dropout=params["drop_prob"], batch_first=True)
 
         for name, param in self.rnn.named_parameters():
             if 'bias' in name:
@@ -30,17 +34,17 @@ class PretrainedEmbeddingsLSTM(nn.Module):
 
         packed, hidden = self.rnn(x, hidden)
 
-        pad, inp = torch.nn.utils.rnn.pad_packed_sequence(packed, batch_first=True)
+        padded_seq, inp = torch.nn.utils.rnn.pad_packed_sequence(packed, batch_first=True)
         last_out = torch.empty(batch_size, self.hidden_size, dtype=torch.float, device=device)
 
         for j, x in enumerate(inp):
-            last_out[j,:] = pad[j,(x-1),:]
+            last_out[j,:] = padded_seq[j,(x-1),:]
 
         out = self.dropout(last_out)
 
         out = self.fc(out)
         out = self.relu(out)
-        return out, hidden
+        return out, hidden, padded_seq
 
     def init_hidden(self, batch_size):
         weight = next(self.parameters()).data

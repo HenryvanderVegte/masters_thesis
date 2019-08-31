@@ -11,7 +11,7 @@ This script uses the recognized words with an existing word level audio and extr
 metadata = read_tsv_dataset(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 utterances_with_words = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//forced_alignment//utterances')
 emobase_word_level = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level')
-fusion_out = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//fusion//emobase_and_embeddings_no_normalization.npy')
+fusion_out = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//late_fusion//emobase_and_embeddings_no_normalization.npy')
 model = gensim.models.KeyedVectors.load_word2vec_format('file://C://Users//Henry.000//Desktop//Masterarbeit//pretrained_embeddings//GoogleNews-vectors-negative300.bin', binary=True)
 
 oov_vector = np.random.normal(0, 0.1, model.vector_size)

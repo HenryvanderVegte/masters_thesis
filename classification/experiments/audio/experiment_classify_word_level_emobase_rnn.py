@@ -1,8 +1,7 @@
-import classification.util.data_loader_pickle as data_loader
 from classification.util.experiments_util import *
 from classification.util.global_vars import *
 from classification.util.rnn_utils import *
-from classification.text import rnn_pretrained_embeddings
+from models import LSTM
 from classification.util.text_preprocessing import create_sequence_dataset_from_metadata
 
 embeddings = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_dataset//dataset.npy')
@@ -37,7 +36,7 @@ dev_dataset = create_sequence_dataset_from_metadata(metadata,embeddings, class_g
 
 params["embedding_dim"] = dev_dataset.tensors[0][0].size()[1]
 
-model = rnn_pretrained_embeddings.PretrainedEmbeddingsLSTM(params)
+model = LSTM.LSTM(params)
 
 id_to_name = {}
 for m in metadata:

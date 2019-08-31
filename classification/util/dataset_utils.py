@@ -1,80 +1,139 @@
 import os
-import torch.utils.data as utils
 import torch
+import torch.utils.data as utils
+from torch.nn.utils.rnn import pad_sequence
 import numpy as np
-from enum import Enum
 
-class Normalization(Enum):
-    NO_NORM = 0,
-    CREATE_NORM = 1,
-    USE_NORM = 2
-
-def create_emobase_dataset_from_metadata(metadata, class_groups, set, datasets_path, normalization, experiments_dir, datasets = None):
+def create_sequence_dataset_from_dicts(feature_dict, label_dict, max_seq_length = None):
+    """
+    Loads sequence data into a TensorDataset,
+    if max_seq_length is set, sequences longer than seq_length will be cut.
+    sequences shorter than max_seq_length will be zero-padded
+    :param feature_dict:
+    :param label_dict:
+    :param max_seq_length:
+    :return:
+    """
     fl = []
     labels = []
+    lengths = []
     ids = []
+    id_to_label = {}
+    for i, key in enumerate(feature_dict.keys()):
+        if max_seq_length is None:
+            fl.append(torch.stack([torch.Tensor(i) for i in feature_dict[key]]))
+        else:
+            fl.append(torch.stack([torch.Tensor(i) for i in feature_dict[key][:max_seq_length, :]]))
 
+        length = feature_dict[key].shape[0] if max_seq_length is None else min(feature_dict[key].shape[0], max_seq_length)
+        lengths.append(length)
+        labels.append(label_dict[key])
+        ids.append(i)
+        id_to_label[i] = key
+
+    labels = np.array(labels).reshape(-1,1)
+    lengths = np.array(lengths).reshape(-1,1)
+    ids = np.array(ids).reshape(-1,1)
+    padded_features = pad_sequence(fl)
+
+    labels = torch.stack([torch.Tensor(i) for i in labels])
+    lengths = torch.stack([torch.Tensor(i) for i in lengths])
+    ids = torch.stack([torch.Tensor(i) for i in ids])
+
+    padded_features = torch.transpose(padded_features, 0, 1)
+    dataset = utils.TensorDataset(padded_features, labels, lengths, ids)
+
+    return dataset, id_to_label
+
+def create_sequence_dataset_with_pad_val(feature_dict, name_to_label_dict, seq_length, pad_val):
+    """
+    Creates a dataset of 1-dim vectors, cuts the vectors to :seq_length: and pads them with the :pad_val:
+    :param feature_dict:
+    :param name_to_label_dict:
+    :param seq_length:
+    :param pad_vector:
+    :return: 1.) TensorDataset with features, labels, sequence lengths, and ids
+            2.) Mapping for ids to names (i.e. 212: "Ses01F_impro01_F000")
+    """
+    features = []
+    labels = []
+    lengths = []
+    ids = []
+    id_to_name = {}
+    for i, key in enumerate(feature_dict.keys()):
+        cut_vec = feature_dict[key][:seq_length]
+        pad_vec = np.full((seq_length), pad_val)
+        pad_vec[:len(cut_vec)] = cut_vec
+
+        lengths.append(min(feature_dict[key].shape[0], seq_length))
+        features.append(torch.Tensor(pad_vec))
+        labels.append(name_to_label_dict[key])
+        ids.append(i)
+        id_to_name[i] = key
+
+    labels = np.array(labels).reshape(-1,1)
+    lengths = np.array(lengths).reshape(-1,1)
+    ids = np.array(ids).reshape(-1,1)
+
+    labels = torch.stack([torch.Tensor(i) for i in labels])
+    features = torch.stack([torch.Tensor(i) for i in features])
+    lengths = torch.stack([torch.Tensor(i) for i in lengths])
+    ids = torch.stack([torch.Tensor(i) for i in ids])
+
+    dataset = utils.TensorDataset(features, labels, lengths, ids)
+
+    return dataset, id_to_name
+
+def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups, set, max_seq_length = None):
+    """
+    Loads sequence data into a TensorDataset,
+    if max_seq_length is set, sequences longer than seq_length will be cut.
+    sequences shorter than max_seq_length will be zero-padded
+    :param feature_dict:
+    :param label_dict:
+    :param max_seq_length:
+    :return:
+    """
+    fl = []
+    labels = []
+    lengths = []
+    ids = []
     for instance in metadata:
         if instance["Label"] not in class_groups or instance["Set"] != set:
             continue
 
-        if datasets is not None and instance["Dataset"] not in datasets:
+        label = class_groups[instance["Label"]]
+
+        if instance['Name'] not in features_dict:
+            print('No features for:' + instance['Name'])
             continue
 
-        label = class_groups[instance["Label"]]
-        emobase_path = os.path.join(datasets_path, instance["Dataset"], "features//audio//emobase", instance['Name'] + '.emobase')
+        features = features_dict[instance['Name']]
 
-        with open(emobase_path, "r") as f:
-            lines = f.readlines()
-            emobase_features = [float(i) for i in lines]
+        if len(features) == 0:
+            print('No features for:' + instance['Name'])
+            continue
 
-        fl.append(emobase_features)
+        if max_seq_length is None:
+            fl.append(torch.stack([torch.Tensor(i) for i in features]))
+        else:
+            fl.append(torch.stack([torch.Tensor(i) for i in features[:max_seq_length, :]]))
 
+        length = features.shape[0] if max_seq_length is None else min(features.shape[0], max_seq_length)
+        lengths.append(length)
         labels.append(label)
         ids.append(int(instance["Id"]))
 
-    fl = np.array(fl)
-
-    if normalization != Normalization.NO_NORM:
-        if normalization == Normalization.CREATE_NORM:
-            means = fl.mean(axis=0)
-            stddevs = fl.std(axis=0)
-            stddevs[stddevs == 0] = 1
-
-            means_path = os.path.join(experiments_dir, "means.txt")
-            with open(means_path, "w") as f:
-                for mean in means:
-                    f.write(str(mean) + '\n')
-            stddevs_path = os.path.join(experiments_dir, "stddevs.txt")
-            with open(stddevs_path, "w") as f:
-                for stddev in stddevs:
-                    f.write(str(stddev) + '\n')
-        elif normalization == Normalization.USE_NORM:
-            means = []
-            means_path = os.path.join(experiments_dir, "means.txt")
-            with open(means_path, "r") as f:
-                means_file_lines = f.readlines()
-                for line in means_file_lines:
-                    means.append(float(line))
-            means = np.array(means)
-
-            stddevs = []
-            stddevs_path = os.path.join(experiments_dir, "stddevs.txt")
-            with open(stddevs_path, "r") as f:
-                stddevs_file_lines = f.readlines()
-                for line in stddevs_file_lines:
-                    stddevs.append(float(line))
-                stddevs = np.array(stddevs)
-
-        fl = (fl - means) / stddevs
-
     labels = np.array(labels).reshape(-1,1)
+    lengths = np.array(lengths).reshape(-1,1)
     ids = np.array(ids).reshape(-1,1)
+    padded_features = pad_sequence(fl)
 
-    fl = torch.stack([torch.Tensor(i) for i in fl])
     labels = torch.stack([torch.Tensor(i) for i in labels])
+    lengths = torch.stack([torch.Tensor(i) for i in lengths])
     ids = torch.stack([torch.Tensor(i) for i in ids])
 
-    dataset = utils.TensorDataset(fl, labels, ids)
+    padded_features = torch.transpose(padded_features, 0, 1)
+    dataset = utils.TensorDataset(padded_features, labels, lengths, ids)
 
     return dataset
