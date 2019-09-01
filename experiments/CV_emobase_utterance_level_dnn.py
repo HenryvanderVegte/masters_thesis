@@ -18,8 +18,8 @@ class_groups = {
 
 params = {
     "batch_size": 32,
-    "hidden_size": 1024,
-    "drop_prob": 0.5,
+    "hidden_size": 32,
+    "drop_prob": 0.4,
     "epochs": 1000,
 }
 

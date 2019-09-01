@@ -18,7 +18,7 @@ class_groups = {
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_early_fusion_word_level_joined_model_output", use_timestamp=True)
 
 word_embedding_params = {
-    "hidden_size": 64,
+    "hidden_size": 16,
     "drop_prob": 0.1,
     "fully_connected_drop_prob": 0.2,
     "layers": 2,
@@ -30,7 +30,7 @@ word_embeddings_dataset = np.load(word_embeddings_dataset_path).item()
 word_embeddings_dataset = normalize_sequence_features(word_embeddings_dataset)
 
 emobase_params = {
-    "hidden_size": 64,
+    "hidden_size": 16,
     "drop_prob": 0.1,
     "fully_connected_drop_prob": 0.2,
     "layers": 2,
@@ -42,9 +42,9 @@ emobase_dataset = normalize_sequence_features(emobase_dataset)
 
 joined_model_params = {
     "batch_size": 16,
-    "hidden_size": 64,
+    "hidden_size": 16,
     "drop_prob": 0.1,
-    "fully_connected_drop_prob": 0.6,
+    "fully_connected_drop_prob": 0.2,
     "layers": 2,
     "epochs": 1000,
     "log_x_epochs": 1,
@@ -56,12 +56,18 @@ nr_of_folds = 10
 all_golds = []
 all_preds = []
 for i in range(1, nr_of_folds):
-    logger.info('Testing on fold ' + str(i))
-    validation_fold = [0]
-    test_fold = [i]
+    test_fold_nr = i
+    validation_fold_nr = (i + 1) % nr_of_folds
 
-    train_folds = list(range(1, nr_of_folds))
+    logger.info('Testing on fold ' + str(test_fold_nr))
+    logger.info('Validating on fold ' + str(validation_fold_nr))
+
+    validation_fold = [validation_fold_nr]
+    test_fold = [test_fold_nr]
+
+    train_folds = list(range(0, nr_of_folds))
     train_folds.remove(i)
+    train_folds.remove(validation_fold_nr)
 
     word_embedding_resources = {}
     word_embedding_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, train_folds)
@@ -69,7 +75,7 @@ for i in range(1, nr_of_folds):
     word_embedding_resources['test_dataset']  = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, test_fold)
     word_embedding_params["input_dim"] = word_embedding_resources['train_dataset'].tensors[0][0].size()[1]
     word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
-    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//2019-09-01_06-49-36_CV_classify_word_embeddings//' + str(i) + '//model.pth')
+    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//1//2019-09-01_14-57-28_CV_classify_word_embeddings//' + str(i) + '//model.pth')
     word_embedding_model = LSTM.LSTM(word_embedding_params)
     word_embedding_model.load_state_dict(torch.load(word_embedding_model_path))
     word_embedding_model.eval()
@@ -79,7 +85,7 @@ for i in range(1, nr_of_folds):
     emobase_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, train_folds)
     emobase_resources['validation_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, validation_fold)
     emobase_resources['test_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, test_fold)
-    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//2019-09-01_06-06-32_CV_classify_emobase_50ms_buffer//' + str(i) + '//model.pth')
+    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//1//2019-09-01_14-33-43_CV_classify_emobase_50ms_buffer//' + str(i) + '//model.pth')
     emobase_params["input_dim"] = emobase_resources['train_dataset'].tensors[0][0].size()[1]
     emobase_params["label_dim"] = len(set(list(class_groups.values())))
     emobase_model = LSTM.LSTM(emobase_params)
@@ -91,10 +97,9 @@ for i in range(1, nr_of_folds):
         "batch_size": 16,
         "hidden_size": 64,
         "drop_prob": 0.1,
-        "fully_connected_drop_prob": 0.6,
+        "fully_connected_drop_prob": 0.1,
         "layers": 2,
         "epochs": 1000,
-        "log_x_epochs": 1,
     }
 
     joined_model_params["input_dim"] = emobase_params["hidden_size"] + word_embedding_params["hidden_size"]

@@ -259,7 +259,7 @@ def train_two_modality_max_prob_classifier(resources_modality_1, resources_modal
 
     logger.info(get_metrics_str(test_golds, test_preds))
 
-def train_two_modality_final_output_svm(resources_modality_1, resources_modality_2, experiment_path, logger, params):
+def train_two_modality_final_output_svm(resources_modality_1, resources_modality_2, id_to_name, experiment_path, logger, params):
     """
     Trains a Support Vector Machine based on the outputs of the two models and tests it
     :param resources_modality_1:
@@ -327,6 +327,7 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
 
     test_vectors = np.empty((0,8))
     test_labels = np.empty((0))
+    test_ids = []
     with torch.no_grad():
         dev2_iter = iter(test_loader2)
         for inputs1, labels1, lengths1, ids1 in test_loader1:
@@ -339,10 +340,10 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
                 break
 
             lengths1, inputs1, labels1, ids1 = sort_tensors(lengths1, inputs1, labels1, ids1)
-            lengths2, inputs2, labels2, ids2 = sort_tensors(lengths2, inputs2, labels2, ids2)
+            lengths2, inputs2, labels2 = sort_tensors(lengths2, inputs2, labels2)
 
             labels1 = labels1.to(device, dtype=torch.int64).view(-1)
-            ids1 = ids1.to(device, dtype=torch.int64).view(-1)
+            ids = ids1.to(device, dtype=torch.int64).view(-1)
             lengths1 = lengths1.to(device, dtype=torch.int64).view(-1)
             lengths2 = lengths2.to(device, dtype=torch.int64).view(-1)
 
@@ -358,6 +359,7 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
 
             test_vectors = np.concatenate((test_vectors, added_outputs), axis=0)
             test_labels = np.concatenate((test_labels, labels1.cpu().numpy()), axis=0)
+            test_ids += ids.data.tolist()
 
     test_predictions = np.array(classifier.predict(test_vectors))
     test_predictions = [str(int(i)) for i in test_predictions]
@@ -366,10 +368,10 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
     metrics_str = get_metrics_str(test_golds, test_predictions)
     logger.info(metrics_str)
 
-
-
-    model_path = os.path.join(experiment_path, "model.pth")
-    torch.save(best_model.state_dict(), model_path)
+    model_path = os.path.join(experiment_path, 'svm_model.pkl')
+    f = open(model_path, 'wb')
+    pickle.dump(classifier, f)
+    f.close()
 
     log_results = metrics_str + "\n\n"
     log_results += "Predicted\tGold\tName\n"
@@ -381,8 +383,3 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
         f.write(log_results)
 
     return test_golds, test_predictions
-
-
-
-
-    logger.info(get_metrics_str(dev_labels, pred))
