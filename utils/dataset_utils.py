@@ -86,7 +86,7 @@ def create_sequence_dataset_with_pad_val(feature_dict, name_to_label_dict, seq_l
 
     return dataset, id_to_name
 
-def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups, set, max_seq_length = None):
+def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups, folds, max_seq_length = None):
     """
     Loads sequence data into a TensorDataset,
     if max_seq_length is set, sequences longer than seq_length will be cut.
@@ -102,7 +102,7 @@ def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups,
     lengths = []
     ids = []
     for instance in metadata:
-        if instance["Label"] not in class_groups or instance["Set"] != set:
+        if instance["Label"] not in class_groups or int(instance["Fold"]) not in folds:
             continue
 
         label = class_groups[instance["Label"]]
@@ -141,7 +141,7 @@ def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups,
 
     return dataset
 
-def create_dataset_from_metadata(metadata, features_dict, class_groups, set):
+def create_dataset_from_metadata(metadata, features_dict, class_groups, folds):
     """
     Loads data into a TensorDataset,
     Returns a TensorDataset which contains features, labels, and ids
@@ -154,7 +154,7 @@ def create_dataset_from_metadata(metadata, features_dict, class_groups, set):
     labels = []
     ids = []
     for instance in metadata:
-        if instance["Label"] not in class_groups or instance["Set"] != set:
+        if instance["Label"] not in class_groups or int(instance["Fold"]) not in folds:
             continue
 
         label = class_groups[instance["Label"]]

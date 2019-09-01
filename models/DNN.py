@@ -6,6 +6,8 @@ class DNN(nn.Module):
         self.classif = nn.Sequential(
             nn.Linear(params["input_dim"],params["hidden_size"]),
             nn.ReLU(),
+            nn.Linear(params["hidden_size"], params["hidden_size"]),
+            nn.ReLU(),
             nn.Dropout(params["drop_prob"]),
             nn.Linear(params["hidden_size"],params["label_dim"]))
 

@@ -94,6 +94,6 @@ joined_model_params["input_dim"] = emobase_params["hidden_size"] + word_embeddin
 joined_model_params["label_dim"] = len(set(list(class_groups.values())))
 joined_model = LSTM.LSTM(joined_model_params)
 
-train_two_modality_max_prob_classifier(word_embedding_resources, emobase_resources, logger, joined_model_params)
+#train_two_modality_max_prob_classifier(word_embedding_resources, emobase_resources, logger, joined_model_params)
 
 train_two_modality_rnn(word_embedding_resources, emobase_resources, id_to_name, experiment_dir, joined_model, logger, joined_model_params)

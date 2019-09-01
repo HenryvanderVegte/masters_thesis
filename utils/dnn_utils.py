@@ -4,21 +4,19 @@ import torch.utils.data as utils
 import torch.nn as nn
 import torch.optim as optim
 import os
+from pytorchtools import EarlyStopping
 from utils.experiments_util import get_metrics_str, get_metrics
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def train(train_dataset, dev_dataset, experiment_path, model, logger, params):
-    log_epochs = os.path.join(experiment_path, "log_epochs.txt")
-    with open(log_epochs, "w") as f:
-        f.write('epochs;train_loss;train_acc;train_UAP;train_UAR;train_UAF;dev_loss;dev_acc;dev_UAP;dev_UAR;dev_UAF\n')
-
+def train(train_dataset, validation_dataset, test_dataset, id_to_name, experiment_path, model, logger, params):
     model = model.to(device)
     logger.info(str(params))
     logger.info(model)
 
     train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
-    dev_loader = utils.DataLoader(dev_dataset, shuffle=True, batch_size=params["batch_size"])
+    validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=params["batch_size"])
+    test_loader = utils.DataLoader(test_dataset, shuffle=True, batch_size=params["batch_size"])
 
     # Loss and optimizer
     unique, counts = np.unique(train_dataset.tensors[1], return_counts=True)
@@ -27,13 +25,12 @@ def train(train_dataset, dev_dataset, experiment_path, model, logger, params):
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
     optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
+
+    early_stopping = EarlyStopping(verbose=True)
     for e in range(params["epochs"]):
         train_losses = []
-        train_preds = []
-        train_golds = []
-        train_ids = []
 
-        for inputs, labels, ids in train_loader:
+        for inputs, labels, _ in train_loader:
             if inputs.shape[0] != params["batch_size"]:
                 continue
             inputs = inputs.to(device)
@@ -47,63 +44,73 @@ def train(train_dataset, dev_dataset, experiment_path, model, logger, params):
             train_losses.append(loss.item())
             optimizer.step()
 
-            _, predicted = torch.max(output.data, 1)
-            train_preds += predicted.data.tolist()
-            train_golds += labels.data.tolist()
-            train_ids += ids.data.tolist()
-
-        test_losses = []
-        test_preds = []
-        test_golds = []
-        test_ids = []
+        validation_losses = []
+        validation_predictions = []
+        validation_golds = []
 
         with torch.no_grad():
-            for inputs, labels, ids in dev_loader:
+            for inputs, labels, _ in validation_loader:
                 if inputs.shape[0] != params["batch_size"]:
                     continue
                 inputs = inputs.to(device)
                 labels = labels.to(device, dtype=torch.int64).view(-1)
-                ids = ids.to(device, dtype=torch.int64).view(-1)
 
                 output = model(inputs)
 
-                test_losses.append(criterion(output, labels).item())
+                validation_losses.append(criterion(output, labels).item())
 
                 _, predicted = torch.max(output.data, 1)
-                test_preds += predicted.data.tolist()
-                test_golds += labels.data.tolist()
-                test_ids += ids.data.tolist()
+                validation_predictions += predicted.data.tolist()
+                validation_golds += labels.data.tolist()
 
-        logger.info('{}; {:.0f} {:.4f}; {:.4f}'.format(e + 1, params["epochs"], np.mean(train_losses), np.mean(test_losses)))
+        acc, _, _, _ = get_metrics(validation_golds, validation_predictions)
+        logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e + 1, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
 
-        epoch_metrics = str(e) + ';'
+        early_stopping(np.mean(validation_losses), model)
+        if early_stopping.early_stop:
+            print("Stopping training!")
+            break
 
-        acc, uap, uar, uaf = get_metrics(train_golds, train_preds)
-        epoch_metrics += '{};{};{};{};{};'.format(np.mean(train_losses), acc, uap, uar, uaf)
+    best_model = early_stopping.best_model
 
-        acc, uap, uar, uaf = get_metrics(test_golds, test_preds)
-        epoch_metrics += '{};{};{};{};{}'.format(np.mean(test_losses), acc, uap, uar, uaf)
+    test_losses = []
+    test_predictions = []
+    test_golds = []
+    test_ids = []
+    with torch.no_grad():
+        for inputs, labels, ids in test_loader:
+            if inputs.shape[0] != params["batch_size"]:
+                continue
 
-        with open(log_epochs, "a") as f:
-            f.write(epoch_metrics + '\n')
+            inputs = inputs.to(device)
+            labels = labels.to(device, dtype=torch.int64).view(-1)
+            ids = ids.to(device, dtype=torch.int64).view(-1)
 
-        if (e+1) % int(params["log_x_epochs"]) == 0:
-            logger.info("Epoch nr " + str(e))
-            metrics_str = get_metrics_str(test_golds, test_preds)
-            logger.info(metrics_str)
-            epoch_path = os.path.join(experiment_path, "epoch_" + str(e))
-            os.mkdir(epoch_path)
-            model_path = os.path.join(epoch_path,  "rnn.pth")
-            torch.save(model.state_dict(), model_path)
+            output = best_model(inputs)
 
-            log_results = metrics_str +"\n\n"
-            log_results += "Predicted\tGold\tName\n"
-            for i in range(len(test_preds)):
-                log_results += str(test_preds[i]) + "\t" + str(test_golds[i]) + "\t" + str(test_ids[i]) + "\n"
-            log_results_path = os.path.join(epoch_path, "results.txt")
-            with open(log_results_path, "w") as f:
-                f.write(log_results)
+            test_losses.append(criterion(output, labels).item())
 
+            _, predicted = torch.max(output.data, 1)
+            test_predictions += predicted.data.tolist()
+            test_golds += labels.data.tolist()
+            test_ids += ids.data.tolist()
+
+    metrics_str = get_metrics_str(test_golds, test_predictions)
+    logger.info(metrics_str)
+
+    model_path = os.path.join(experiment_path, "model.pth")
+    torch.save(best_model.state_dict(), model_path)
+
+    log_results = metrics_str + "\n\n"
+    log_results += "Predicted\tGold\tName\n"
+
+    for i in range(len(test_predictions)):
+        log_results += str(test_predictions[i]) + "\t" + str(test_golds[i]) + "\t" + id_to_name[test_ids[i]] + "\n"
+    log_results_path = os.path.join(experiment_path, "results.txt")
+    with open(log_results_path, "w") as f:
+        f.write(log_results)
+
+    return test_golds, test_predictions
 
 def test(dev_dataset, model, logger, params):
     dev_loader = utils.DataLoader(dev_dataset, shuffle=False, batch_size=params["batch_size"])

@@ -5,6 +5,7 @@ from sklearn.svm import SVC
 import torch.nn as nn
 import torch.optim as optim
 import pickle, os
+from pytorchtools import EarlyStopping
 from utils.experiments_util import get_metrics_str, sort_tensors, get_metrics
 
 """
@@ -26,10 +27,6 @@ def train_two_modality_rnn(resources_modality_1, resources_modality_2, id_to_nam
     :param params:
     :return:
     """
-    log_epochs = os.path.join(experiment_path, "log_epochs.txt")
-    with open(log_epochs, "w") as f:
-        f.write('epochs;train_loss;train_acc;train_UAP;train_UAR;train_UAF;dev_loss;dev_acc;dev_UAP;dev_UAR;dev_UAF\n')
-
     joined_model = joined_model.to(device)
     logger.info(str(params))
     logger.info('Joined model: ' + str(joined_model))
@@ -40,10 +37,11 @@ def train_two_modality_rnn(resources_modality_1, resources_modality_2, id_to_nam
     train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=False, batch_size=params["batch_size"])
     train_loader2 = utils.DataLoader(resources_modality_2['train_dataset'], shuffle=False, batch_size=params["batch_size"])
 
-    dev_loader1 = utils.DataLoader(resources_modality_1['dev_dataset'], shuffle=False, batch_size=params["batch_size"])
-    dev_loader2 = utils.DataLoader(resources_modality_2['dev_dataset'], shuffle=False, batch_size=params["batch_size"])
+    validation_loader1 = utils.DataLoader(resources_modality_1['validation_dataset'], shuffle=False, batch_size=params["batch_size"])
+    validation_loader2 = utils.DataLoader(resources_modality_2['validation_dataset'], shuffle=False, batch_size=params["batch_size"])
 
-    max_dev_acc = 0
+    test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=params["batch_size"])
+    test_loader2 = utils.DataLoader(resources_modality_2['test_dataset'], shuffle=False, batch_size=params["batch_size"])
 
     # Loss and optimizer
     unique, counts = np.unique(resources_modality_1['train_dataset'].tensors[1], return_counts=True)
@@ -53,11 +51,10 @@ def train_two_modality_rnn(resources_modality_1, resources_modality_2, id_to_nam
     criterion = nn.CrossEntropyLoss(weight=weights)
     optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
 
+    early_stopping = EarlyStopping(verbose=True)
+
     for e in range(params["epochs"]):
         train_losses = []
-        train_preds = []
-        train_golds = []
-        train_ids = []
 
         h = joined_model.init_hidden(params["batch_size"])
         h1 = model1.init_hidden(params["batch_size"])
@@ -94,87 +91,112 @@ def train_two_modality_rnn(resources_modality_1, resources_modality_2, id_to_nam
 
             train_losses.append(loss.item())
             #nn.utils.clip_grad_norm_(model.parameters(), 5)
-
             optimizer.step()
 
-            _, predicted = torch.max(output.data, 1)
-            train_preds += predicted.data.tolist()
-            train_golds += labels1.data.tolist()
-            train_ids += ids1.data.tolist()
-
-        test_losses = []
-        test_preds = []
-        test_golds = []
-        test_ids = []
         h = joined_model.init_hidden(params["batch_size"])
         h1 = model1.init_hidden(params["batch_size"])
         h2 = model2.init_hidden(params["batch_size"])
+
+        validation_losses = []
+        validation_predictions = []
+        validation_golds = []
         with torch.no_grad():
-            dev2_iter = iter(dev_loader2)
-            for inputs1, labels1, lengths1, ids1 in dev_loader1:
+            validation2_iter = iter(validation_loader2)
+            for inputs1, labels1, lengths1, ids1 in validation_loader1:
                 if inputs1.shape[0] != params["batch_size"]:
                     continue
 
-                inputs2, labels2, lengths2, ids2 = next(dev2_iter)
+                inputs2, labels2, lengths2, ids2 = next(validation2_iter)
                 if not torch.all(torch.eq(ids1, ids2)):
                     print('Expected the same instances for both modalities. Break')
                     break
 
-                lengths1, inputs1, labels1, ids1 = sort_tensors(lengths1, inputs1, labels1, ids1)
-                lengths2, inputs2, labels2, ids2 = sort_tensors(lengths2, inputs2, labels2, ids2)
+                lengths1, inputs1, labels1 = sort_tensors(lengths1, inputs1, labels1)
+                lengths2, inputs2, labels2 = sort_tensors(lengths2, inputs2, labels2)
 
-                labels1 = labels1.to(device, dtype=torch.int64).view(-1)
-                ids1 = ids1.to(device, dtype=torch.int64).view(-1)
-                lengths1 = lengths1.to(device, dtype=torch.int64).view(-1)
-                lengths2 = lengths2.to(device, dtype=torch.int64).view(-1)
+                labels = labels1.to(device, dtype=torch.int64).view(-1)
+                lengths = lengths1.to(device, dtype=torch.int64).view(-1)
 
                 h1 = tuple([each.data for each in h1])
-                _, _, weights1 = model1(inputs1.to(device), lengths1, h1)
+                _, _, weights1 = model1(inputs1.to(device), lengths, h1)
 
                 h2 = tuple([each.data for each in h2])
-                _, _, weights2 = model2(inputs2.to(device), lengths2, h2)
+                _, _, weights2 = model2(inputs2.to(device), lengths, h2)
 
                 joined_inputs = torch.cat((weights1, weights2), 2)
                 h = tuple([each.data for each in h])
-                output, _, _ = joined_model(joined_inputs, lengths1, h)
-                test_losses.append(criterion(output, labels1).item())
+                output, _, _ = joined_model(joined_inputs, lengths, h)
+                validation_losses.append(criterion(output, labels).item())
                 _, predicted = torch.max(output.data, 1)
-                test_preds += predicted.data.tolist()
-                test_golds += labels1.data.tolist()
-                test_ids += ids1.data.tolist()
+                validation_predictions += predicted.data.tolist()
+                validation_golds += labels.data.tolist()
 
-        logger.info('{}; {:.0f} {:.4f}; {:.4f}'.format(e + 1, params["epochs"], np.mean(train_losses), np.mean(test_losses)))
+        acc, _, _, _ = get_metrics(validation_golds, validation_predictions)
+        logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e + 1, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
 
-        epoch_metrics = str(e) + ';'
+        early_stopping(np.mean(validation_losses), joined_model)
+        if early_stopping.early_stop:
+            print("Stopping training!")
+            break
 
-        acc, uap, uar, uaf = get_metrics(train_golds, train_preds)
-        epoch_metrics += '{};{};{};{};{};'.format(np.mean(train_losses), acc, uap, uar, uaf)
+    best_model = early_stopping.best_model
 
-        acc, uap, uar, uaf = get_metrics(test_golds, test_preds)
-        epoch_metrics += '{};{};{};{};{}'.format(np.mean(test_losses), acc, uap, uar, uaf)
-        if acc > max_dev_acc:
-            max_dev_acc = acc
-        print('MAX ACC:' + str(max_dev_acc))
+    test_losses = []
+    test_predictions = []
+    test_golds = []
+    test_ids = []
+    with torch.no_grad():
+        test2_iter = iter(test_loader2)
+        for inputs1, labels1, lengths1, ids1 in test_loader1:
+            if inputs1.shape[0] != params["batch_size"]:
+                continue
 
-        with open(log_epochs, "a") as f:
-            f.write(epoch_metrics + '\n')
+            inputs2, labels2, lengths2, ids2 = next(test2_iter)
+            if not torch.all(torch.eq(ids1, ids2)):
+                print('Expected the same instances for both modalities. Break')
+                break
 
-        if (e+1) % int(params["log_x_epochs"]) == 0:
-            logger.info("Epoch nr " + str(e))
-            metrics_str = get_metrics_str(test_golds, test_preds)
-            logger.info(metrics_str)
-            epoch_path = os.path.join(experiment_path, "epoch_" + str(e))
-            os.mkdir(epoch_path)
-            model_path = os.path.join(epoch_path,  "rnn.pth")
-            torch.save(joined_model.state_dict(), model_path)
+            lengths, inputs1, labels, ids = sort_tensors(lengths1, inputs1, labels1, ids1)
+            _, inputs2 = sort_tensors(lengths2, inputs2)
 
-            log_results = metrics_str +"\n\n"
-            log_results += "Predicted\tGold\tName\n"
-            for i in range(len(test_preds)):
-                log_results += str(test_preds[i]) + "\t" + str(test_golds[i]) + "\t" + id_to_name[test_ids[i]] + "\n"
-            log_results_path = os.path.join(epoch_path, "results.txt")
-            with open(log_results_path, "w") as f:
-                f.write(log_results)
+            labels = labels.to(device, dtype=torch.int64).view(-1)
+            ids = ids.to(device, dtype=torch.int64).view(-1)
+            lengths = lengths.to(device, dtype=torch.int64).view(-1)
+
+            h1 = tuple([each.data for each in h1])
+            _, _, weights1 = model1(inputs1.to(device), lengths, h1)
+
+            h2 = tuple([each.data for each in h2])
+            _, _, weights2 = model2(inputs2.to(device), lengths, h2)
+
+            joined_inputs = torch.cat((weights1, weights2), 2)
+
+            h = tuple([each.data for each in h])
+            output, _, _ = best_model(joined_inputs, lengths, h)
+            test_losses.append(criterion(output, labels).item())
+
+            _, predicted = torch.max(output.data, 1)
+            test_predictions += predicted.data.tolist()
+            test_golds += labels.data.tolist()
+            test_ids += ids.data.tolist()
+
+    metrics_str = get_metrics_str(test_golds, test_predictions)
+    logger.info(metrics_str)
+
+    model_path = os.path.join(experiment_path, "model.pth")
+    torch.save(best_model.state_dict(), model_path)
+
+    log_results = metrics_str + "\n\n"
+    log_results += "Predicted\tGold\tName\n"
+
+    for i in range(len(test_predictions)):
+        log_results += str(test_predictions[i]) + "\t" + str(test_golds[i]) + "\t" + id_to_name[test_ids[i]] + "\n"
+    log_results_path = os.path.join(experiment_path, "results.txt")
+    with open(log_results_path, "w") as f:
+        f.write(log_results)
+
+    return test_golds, test_predictions
+
 
 def train_two_modality_max_prob_classifier(resources_modality_1, resources_modality_2, logger, params):
     """
@@ -255,8 +277,8 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
     train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=False, batch_size=params["batch_size"])
     train_loader2 = utils.DataLoader(resources_modality_2['train_dataset'], shuffle=False, batch_size=params["batch_size"])
 
-    dev_loader1 = utils.DataLoader(resources_modality_1['dev_dataset'], shuffle=False, batch_size=params["batch_size"])
-    dev_loader2 = utils.DataLoader(resources_modality_2['dev_dataset'], shuffle=False, batch_size=params["batch_size"])
+    test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=params["batch_size"])
+    test_loader2 = utils.DataLoader(resources_modality_2['test_dataset'], shuffle=False, batch_size=params["batch_size"])
 
     h1 = model1.init_hidden(params["batch_size"])
     h2 = model2.init_hidden(params["batch_size"])
@@ -280,7 +302,6 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
             lengths2, inputs2, labels2, ids2 = sort_tensors(lengths2, inputs2, labels2, ids2)
 
             labels1 = labels1.to(device, dtype=torch.int64).view(-1)
-            ids1 = ids1.to(device, dtype=torch.int64).view(-1)
             lengths1 = lengths1.to(device, dtype=torch.int64).view(-1)
             lengths2 = lengths2.to(device, dtype=torch.int64).view(-1)
 
@@ -304,11 +325,11 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
     pickle.dump(classifier, f)
     f.close()
 
-    dev_vectors = np.empty((0,8))
-    dev_labels = np.empty((0))
+    test_vectors = np.empty((0,8))
+    test_labels = np.empty((0))
     with torch.no_grad():
-        dev2_iter = iter(dev_loader2)
-        for inputs1, labels1, lengths1, ids1 in dev_loader1:
+        dev2_iter = iter(test_loader2)
+        for inputs1, labels1, lengths1, ids1 in test_loader1:
             if inputs1.shape[0] != params["batch_size"]:
                 continue
 
@@ -335,11 +356,33 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
 
             added_outputs = np.append(output1.cpu().numpy(), output2.cpu().numpy(), axis=1)
 
-            dev_vectors = np.concatenate((dev_vectors, added_outputs), axis=0)
-            dev_labels = np.concatenate((dev_labels, labels1.cpu().numpy()), axis=0)
+            test_vectors = np.concatenate((test_vectors, added_outputs), axis=0)
+            test_labels = np.concatenate((test_labels, labels1.cpu().numpy()), axis=0)
 
-    pred = np.array(classifier.predict(dev_vectors))
-    pred = [str(int(i)) for i in pred]
-    dev_labels = [str(int(i)) for i in dev_labels]
+    test_predictions = np.array(classifier.predict(test_vectors))
+    test_predictions = [str(int(i)) for i in test_predictions]
+    test_golds = [str(int(i)) for i in test_labels]
+
+    metrics_str = get_metrics_str(test_golds, test_predictions)
+    logger.info(metrics_str)
+
+
+
+    model_path = os.path.join(experiment_path, "model.pth")
+    torch.save(best_model.state_dict(), model_path)
+
+    log_results = metrics_str + "\n\n"
+    log_results += "Predicted\tGold\tName\n"
+
+    for i in range(len(test_predictions)):
+        log_results += str(test_predictions[i]) + "\t" + str(test_golds[i]) + "\t" + id_to_name[test_ids[i]] + "\n"
+    log_results_path = os.path.join(experiment_path, "results.txt")
+    with open(log_results_path, "w") as f:
+        f.write(log_results)
+
+    return test_golds, test_predictions
+
+
+
 
     logger.info(get_metrics_str(dev_labels, pred))
