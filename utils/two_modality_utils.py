@@ -1,9 +1,10 @@
 import numpy as np
 import torch
 import torch.utils.data as utils
+from sklearn.svm import SVC
 import torch.nn as nn
 import torch.optim as optim
-import os
+import pickle, os
 from utils.experiments_util import get_metrics_str, sort_tensors, get_metrics
 
 """
@@ -180,9 +181,6 @@ def train_two_modality_max_prob_classifier(resources_modality_1, resources_modal
     Selects the label with the highest probability for both modalities (text and audio) and classifies based on this
     :param resources_modality_1:
     :param resources_modality_2:
-    :param id_to_name:
-    :param experiment_path:
-    :param model:
     :param logger:
     :param params:
     :return:
@@ -194,7 +192,6 @@ def train_two_modality_max_prob_classifier(resources_modality_1, resources_modal
     dev_loader1 = utils.DataLoader(resources_modality_1['dev_dataset'], shuffle=False, batch_size=params["batch_size"])
     dev_loader2 = utils.DataLoader(resources_modality_2['dev_dataset'], shuffle=False, batch_size=params["batch_size"])
 
-    test_losses = []
     test_preds = []
     test_golds = []
     test_ids = []
@@ -202,9 +199,7 @@ def train_two_modality_max_prob_classifier(resources_modality_1, resources_modal
     h1 = model1.init_hidden(params["batch_size"])
     h2 = model2.init_hidden(params["batch_size"])
 
-
-    probabilities = []
-    softmax = nn.Softmax()
+    softmax = nn.Softmax(dim=1)
     with torch.no_grad():
         dev2_iter = iter(dev_loader2)
         for inputs1, labels1, lengths1, ids1 in dev_loader1:
@@ -242,3 +237,109 @@ def train_two_modality_max_prob_classifier(resources_modality_1, resources_modal
 
     logger.info(get_metrics_str(test_golds, test_preds))
 
+def train_two_modality_final_output_svm(resources_modality_1, resources_modality_2, experiment_path, logger, params):
+    """
+    Trains a Support Vector Machine based on the outputs of the two models and tests it
+    :param resources_modality_1:
+    :param resources_modality_2:
+    :param id_to_name:
+    :param experiment_path:
+    :param model:
+    :param logger:
+    :param params:
+    :return:
+    """
+    model1 = resources_modality_1['model'].to(device)
+    model2 = resources_modality_2['model'].to(device)
+
+    train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=False, batch_size=params["batch_size"])
+    train_loader2 = utils.DataLoader(resources_modality_2['train_dataset'], shuffle=False, batch_size=params["batch_size"])
+
+    dev_loader1 = utils.DataLoader(resources_modality_1['dev_dataset'], shuffle=False, batch_size=params["batch_size"])
+    dev_loader2 = utils.DataLoader(resources_modality_2['dev_dataset'], shuffle=False, batch_size=params["batch_size"])
+
+    h1 = model1.init_hidden(params["batch_size"])
+    h2 = model2.init_hidden(params["batch_size"])
+
+    train_vectors = np.empty((0,8))
+    train_labels = np.empty((0))
+
+    softmax = nn.Softmax(dim=1)
+    with torch.no_grad():
+        train2_iter = iter(train_loader2)
+        for inputs1, labels1, lengths1, ids1 in train_loader1:
+            if inputs1.shape[0] != params["batch_size"]:
+                continue
+
+            inputs2, labels2, lengths2, ids2 = next(train2_iter)
+            if not torch.all(torch.eq(ids1, ids2)):
+                print('Expected the same instances for both modalities. Break')
+                break
+
+            lengths1, inputs1, labels1, ids1 = sort_tensors(lengths1, inputs1, labels1, ids1)
+            lengths2, inputs2, labels2, ids2 = sort_tensors(lengths2, inputs2, labels2, ids2)
+
+            labels1 = labels1.to(device, dtype=torch.int64).view(-1)
+            ids1 = ids1.to(device, dtype=torch.int64).view(-1)
+            lengths1 = lengths1.to(device, dtype=torch.int64).view(-1)
+            lengths2 = lengths2.to(device, dtype=torch.int64).view(-1)
+
+            h1 = tuple([each.data for each in h1])
+            output1, _, _ = model1(inputs1.to(device), lengths1, h1)
+            output1 = softmax(output1)
+
+            h2 = tuple([each.data for each in h2])
+            output2, _, _ = model2(inputs2.to(device), lengths2, h2)
+            output2 = softmax(output2)
+
+            added_outputs = np.append(output1.cpu().numpy(), output2.cpu().numpy(), axis=1)
+
+            train_vectors = np.concatenate((train_vectors, added_outputs), axis=0)
+            train_labels = np.concatenate((train_labels, labels1.cpu().numpy()), axis=0)
+
+    classifier = SVC(gamma='scale', decision_function_shape='ovo')
+    classifier.fit(train_vectors, train_labels)
+    model_path = os.path.join(experiment_path, 'svm_model.pkl')
+    f = open(model_path, 'wb')
+    pickle.dump(classifier, f)
+    f.close()
+
+    dev_vectors = np.empty((0,8))
+    dev_labels = np.empty((0))
+    with torch.no_grad():
+        dev2_iter = iter(dev_loader2)
+        for inputs1, labels1, lengths1, ids1 in dev_loader1:
+            if inputs1.shape[0] != params["batch_size"]:
+                continue
+
+            inputs2, labels2, lengths2, ids2 = next(dev2_iter)
+            if not torch.all(torch.eq(ids1, ids2)):
+                print('Expected the same instances for both modalities. Break')
+                break
+
+            lengths1, inputs1, labels1, ids1 = sort_tensors(lengths1, inputs1, labels1, ids1)
+            lengths2, inputs2, labels2, ids2 = sort_tensors(lengths2, inputs2, labels2, ids2)
+
+            labels1 = labels1.to(device, dtype=torch.int64).view(-1)
+            ids1 = ids1.to(device, dtype=torch.int64).view(-1)
+            lengths1 = lengths1.to(device, dtype=torch.int64).view(-1)
+            lengths2 = lengths2.to(device, dtype=torch.int64).view(-1)
+
+            h1 = tuple([each.data for each in h1])
+            output1, _, _ = model1(inputs1.to(device), lengths1, h1)
+            output1 = softmax(output1)
+
+            h2 = tuple([each.data for each in h2])
+            output2, _, _ = model2(inputs2.to(device), lengths2, h2)
+            output2 = softmax(output2)
+
+            added_outputs = np.append(output1.cpu().numpy(), output2.cpu().numpy(), axis=1)
+
+            dev_vectors = np.concatenate((dev_vectors, added_outputs), axis=0)
+            dev_labels = np.concatenate((dev_labels, labels1.cpu().numpy()), axis=0)
+
+    pred = np.array(classifier.predict(dev_vectors))
+    pred = [str(int(i)) for i in pred]
+    dev_labels = [str(int(i)) for i in dev_labels]
+
+    logger.info(get_metrics_str(dev_labels, pred))

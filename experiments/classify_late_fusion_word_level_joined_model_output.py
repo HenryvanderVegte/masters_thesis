@@ -5,8 +5,8 @@ from utils.dataset_utils import create_sequence_dataset_from_metadata
 from utils.two_modality_utils import *
 
 '''
-This experiment takes two previously trained model (one acoustic and one textual) and creates a new model
-based on the RNN output on each timestep
+This experiment takes two previously trained model (one acoustic and one textual) and creates a support vector machine
+based on the final output of the two models.
 '''
 
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
@@ -79,21 +79,8 @@ emobase_resources['model'] = emobase_model
 emobase_resources['train_dataset'] = emobase_dataset_train
 emobase_resources['dev_dataset'] = emobase_dataset_test
 
-# Set up joined model parameters:
-joined_model_params = {
+params = {
     "batch_size": 16,
-    "hidden_size": 64,
-    "drop_prob": 0.1,
-    "fully_connected_drop_prob": 0.6,
-    "layers": 2,
-    "epochs": 1000,
-    "log_x_epochs": 1,
 }
 
-joined_model_params["input_dim"] = emobase_params["hidden_size"] + word_embedding_params["hidden_size"]
-joined_model_params["label_dim"] = len(set(list(class_groups.values())))
-joined_model = LSTM.LSTM(joined_model_params)
-
-train_two_modality_max_prob_classifier(word_embedding_resources, emobase_resources, logger, joined_model_params)
-
-train_two_modality_rnn(word_embedding_resources, emobase_resources, id_to_name, experiment_dir, joined_model, logger, joined_model_params)
+train_two_modality_final_output_svm(word_embedding_resources, emobase_resources, experiment_dir, logger, params)
