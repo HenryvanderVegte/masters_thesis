@@ -33,7 +33,7 @@ class EarlyStopping:
 
         if self.best_score is None:
             self.best_score = score
-            self.best_model = model
+            self.best_model = copy.deepcopy(model)
         elif score < self.best_score - self.delta:
             self.counter += 1
             print(f'EarlyStopping counter: {self.counter} out of {self.patience}')

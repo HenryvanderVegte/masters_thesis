@@ -14,6 +14,7 @@ Usually, one is the acoustic and one is the language model.
 """
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+torch.manual_seed(0)
 
 def train_two_modality_rnn(resources_modality_1, resources_modality_2, id_to_name, experiment_path, joined_model, logger, params):
     """
@@ -49,7 +50,9 @@ def train_two_modality_rnn(resources_modality_1, resources_modality_2, id_to_nam
     weights = 1 / np.array(list(count_dict.values()))
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
+
     optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
+    #optimizer = optim.Adam(joined_model.parameters())
 
     early_stopping = EarlyStopping(verbose=True)
 
@@ -62,6 +65,7 @@ def train_two_modality_rnn(resources_modality_1, resources_modality_2, id_to_nam
 
         train2_iter = iter(train_loader2)
         for inputs1, labels1, lengths1, ids1 in train_loader1:
+            joined_model.train()
             if inputs1.shape[0] != params["batch_size"]:
                 continue
             inputs2, labels2, lengths2, ids2 = next(train2_iter)
@@ -101,6 +105,7 @@ def train_two_modality_rnn(resources_modality_1, resources_modality_2, id_to_nam
         validation_predictions = []
         validation_golds = []
         with torch.no_grad():
+            joined_model.eval()
             validation2_iter = iter(validation_loader2)
             for inputs1, labels1, lengths1, ids1 in validation_loader1:
                 if inputs1.shape[0] != params["batch_size"]:
@@ -138,6 +143,8 @@ def train_two_modality_rnn(resources_modality_1, resources_modality_2, id_to_nam
         if early_stopping.early_stop:
             print("Stopping training!")
             break
+        print("Stopping training!")
+        break
 
     best_model = early_stopping.best_model
 
@@ -146,8 +153,12 @@ def train_two_modality_rnn(resources_modality_1, resources_modality_2, id_to_nam
     test_golds = []
     test_ids = []
     with torch.no_grad():
-        test2_iter = iter(test_loader2)
-        for inputs1, labels1, lengths1, ids1 in test_loader1:
+        h = best_model.init_hidden(params["batch_size"])
+        h1 = model1.init_hidden(params["batch_size"])
+        h2 = model2.init_hidden(params["batch_size"])
+
+        test2_iter = iter(validation_loader2)
+        for inputs1, labels1, lengths1, ids1 in validation_loader1:
             if inputs1.shape[0] != params["batch_size"]:
                 continue
 
