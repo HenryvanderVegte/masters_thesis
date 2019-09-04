@@ -1,7 +1,7 @@
 from utils.experiments_util import *
 from classification.util.global_vars import *
 from utils.two_modality_utils import *
-from models import LSTM
+from models import LSTM_all_timesteps
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
@@ -63,8 +63,8 @@ for i in range(1, nr_of_folds):
     word_embedding_resources['test_dataset']  = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, test_fold)
     word_embedding_params["input_dim"] = word_embedding_resources['train_dataset'].tensors[0][0].size()[1]
     word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
-    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//0//2019-09-01_06-49-36_CV_classify_word_embeddings//' + str(i) + '//model.pth')
-    word_embedding_model = LSTM.LSTM(word_embedding_params)
+    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//3//2019-09-03_19-49-05_CV_classify_word_embeddings//' + str(i) + '//model.pth')
+    word_embedding_model = LSTM_all_timesteps.LSTM(word_embedding_params)
     word_embedding_model.load_state_dict(torch.load(word_embedding_model_path))
     word_embedding_model.eval()
     word_embedding_resources['model'] = word_embedding_model
@@ -73,26 +73,26 @@ for i in range(1, nr_of_folds):
     emobase_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, train_folds)
     emobase_resources['validation_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, validation_fold)
     emobase_resources['test_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, test_fold)
-    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//0//2019-09-01_06-06-32_CV_classify_emobase_50ms_buffer//' + str(i) + '//model.pth')
+    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//3//2019-09-03_21-44-55_CV_classify_emobase_50ms_buffer//' + str(i) + '//model.pth')
     emobase_params["input_dim"] = emobase_resources['train_dataset'].tensors[0][0].size()[1]
     emobase_params["label_dim"] = len(set(list(class_groups.values())))
-    emobase_model = LSTM.LSTM(emobase_params)
+    emobase_model = LSTM_all_timesteps.LSTM(emobase_params)
     emobase_model.load_state_dict(torch.load(emobase_model_path))
     emobase_model.eval()
     emobase_resources['model'] = emobase_model
 
     joined_model_params = {
         "batch_size": 32,
-        "hidden_size": 64,
-        "drop_prob": 0.2,
-        "fully_connected_drop_prob": 0.6,
+        "hidden_size": 1024,
+        "drop_prob": 0.0,
+        "fully_connected_drop_prob": 0.1,
         "layers": 2,
         "epochs": 1000,
     }
 
-    joined_model_params["input_dim"] = emobase_params["hidden_size"] + word_embedding_params["hidden_size"]
+    joined_model_params["input_dim"] = emobase_params["label_dim"] + word_embedding_params["label_dim"]
     joined_model_params["label_dim"] = len(set(list(class_groups.values())))
-    joined_model = LSTM.LSTM(joined_model_params)
+    joined_model = LSTM_all_timesteps.LSTM(joined_model_params)
 
     id_to_name = {}
     for m in metadata:
@@ -100,7 +100,7 @@ for i in range(1, nr_of_folds):
 
     fold_path = os.path.join(experiment_dir, str(i))
     os.mkdir(fold_path)
-    test_golds, test_preds = train_two_modality_rnn(word_embedding_resources, emobase_resources, id_to_name, fold_path, joined_model, logger, joined_model_params)
+    test_golds, test_preds = train_two_modality_rnn_join_outputs(word_embedding_resources, emobase_resources, id_to_name, fold_path, joined_model, logger, joined_model_params)
     all_golds += test_golds
     all_preds += test_preds
 

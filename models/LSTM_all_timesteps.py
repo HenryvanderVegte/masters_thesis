@@ -45,7 +45,11 @@ class LSTM(nn.Module):
         out = self.fc(out)
         out = self.relu(out)
 
-        return out, hidden, hidden_activation
+        output_all_timesteps = self.dropout(hidden_activation)
+        output_all_timesteps = self.fc(output_all_timesteps)
+        output_all_timesteps = self.relu(output_all_timesteps)
+
+        return out, hidden, hidden_activation, output_all_timesteps
 
     def init_hidden(self, batch_size):
         weight = next(self.parameters()).data
