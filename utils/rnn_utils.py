@@ -14,20 +14,20 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     logger.info(str(params))
     logger.info(model)
 
-    train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
-    validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=params["batch_size"])
-    test_loader = utils.DataLoader(test_dataset, shuffle=True, batch_size=params["batch_size"])
-
     # Loss and optimizer
     unique, counts = np.unique(train_dataset.tensors[1], return_counts=True)
     count_dict = dict(zip(unique, counts))
     weights = 1 / np.array(list(count_dict.values()))
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
-    optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
+    #optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
+    optimizer = optim.Adam(model.parameters())
 
     early_stopping = EarlyStopping(verbose=True)
     for e in range(params["epochs"]):
+        train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
+        validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=params["batch_size"])
+
         h = model.init_hidden(params["batch_size"])
 
         train_losses = []
@@ -48,7 +48,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
             loss.backward()
 
             train_losses.append(loss.item())
-            #nn.utils.clip_grad_norm_(model.parameters(), 5)
+            nn.utils.clip_grad_norm_(model.parameters(), 5)
             optimizer.step()
 
         validation_losses = []
@@ -79,7 +79,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
 
         early_stopping(np.mean(validation_losses), model)
         if early_stopping.early_stop:
-            print("Stopping training!")
+            logger.info("Stopping training!")
             break
 
     best_model = early_stopping.best_model
@@ -88,6 +88,8 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     test_predictions = []
     test_golds = []
     test_ids = []
+
+    test_loader = utils.DataLoader(test_dataset, shuffle=True, batch_size=params["batch_size"])
     with torch.no_grad():
         for inputs, labels, lengths, ids in test_loader:
             if inputs.shape[0] != params["batch_size"]:
