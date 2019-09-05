@@ -17,6 +17,33 @@ Usually, one is the acoustic and one is the language model.
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 torch.manual_seed(0)
 
+def index_dataset(dataset):
+    indexed_dataset = {}
+    for i in range(len(dataset.tensors[3])):
+        features = dataset.tensors[0][i]
+        label = dataset.tensors[1][i]
+        length = dataset.tensors[2][i]
+        id = dataset.tensors[3][i]
+
+        id_as_int = int(id.data[0])
+        indexed_dataset[id_as_int] = (features, label, length, id)
+    return indexed_dataset
+
+def get_dataset_instances_by_ids(indexed_dataset, target_ids):
+    features_all = []
+    labels = []
+    lengths = []
+    ids = []
+
+    for id in target_ids:
+        features, label, length, id = indexed_dataset[int(id.data[0])]
+        features_all.append(features)
+        labels.append(label)
+        lengths.append(length)
+        ids.append(id)
+
+    return torch.stack(features_all), torch.stack(labels), torch.stack(lengths), torch.stack(ids)
+
 def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_2, id_to_name, experiment_path, joined_model, logger, params):
     """
     Trains a new RNN based on the hidden layer activation of two RNNs for each word (one acoustic RNN and one textual RNN)
@@ -36,14 +63,14 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
     model1 = resources_modality_1['model'].to(device)
     model2 = resources_modality_2['model'].to(device)
 
-    train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=False, batch_size=params["batch_size"])
-    train_loader2 = utils.DataLoader(resources_modality_2['train_dataset'], shuffle=False, batch_size=params["batch_size"])
+    train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=True, batch_size=params["batch_size"])
+    indexed_ds_train2 = index_dataset(resources_modality_2['train_dataset'])
 
     validation_loader1 = utils.DataLoader(resources_modality_1['validation_dataset'], shuffle=False, batch_size=params["batch_size"])
-    validation_loader2 = utils.DataLoader(resources_modality_2['validation_dataset'], shuffle=False, batch_size=params["batch_size"])
+    indexed_ds_validation2 = index_dataset(resources_modality_2['validation_dataset'])
 
     test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=params["batch_size"])
-    test_loader2 = utils.DataLoader(resources_modality_2['test_dataset'], shuffle=False, batch_size=params["batch_size"])
+    indexed_ds_test2 = index_dataset(resources_modality_2['test_dataset'])
 
     # Loss and optimizer
     unique, counts = np.unique(resources_modality_1['train_dataset'].tensors[1], return_counts=True)
@@ -64,11 +91,11 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
         h1 = model1.init_hidden(params["batch_size"])
         h2 = model2.init_hidden(params["batch_size"])
 
-        train2_iter = iter(train_loader2)
         for inputs1, labels1, lengths1, ids1 in train_loader1:
             if inputs1.shape[0] != params["batch_size"]:
                 continue
-            inputs2, labels2, lengths2, ids2 = next(train2_iter)
+
+            inputs2, labels2, lengths2, ids2 =get_dataset_instances_by_ids(indexed_ds_train2, ids1)
 
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')
@@ -105,12 +132,11 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
         validation_predictions = []
         validation_golds = []
         with torch.no_grad():
-            validation2_iter = iter(validation_loader2)
             for inputs1, labels1, lengths1, ids1 in validation_loader1:
                 if inputs1.shape[0] != params["batch_size"]:
                     continue
 
-                inputs2, labels2, lengths2, ids2 = next(validation2_iter)
+                inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_validation2, ids1)
                 if not torch.all(torch.eq(ids1, ids2)):
                     print('Expected the same instances for both modalities. Break')
                     break
@@ -154,12 +180,11 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
         h1 = model1.init_hidden(params["batch_size"])
         h2 = model2.init_hidden(params["batch_size"])
 
-        test2_iter = iter(test_loader2)
         for inputs1, labels1, lengths1, ids1 in test_loader1:
             if inputs1.shape[0] != params["batch_size"]:
                 continue
 
-            inputs2, labels2, lengths2, ids2 = next(test2_iter)
+            inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_test2, ids1)
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')
                 break
