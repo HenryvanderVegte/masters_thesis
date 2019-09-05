@@ -1,5 +1,5 @@
 git+git://github.com/Bjarten/early-stopping-pytorch@master
-numpy
+numpy==1.16.2
 scikit-learn
 pydotplus
 librosa
