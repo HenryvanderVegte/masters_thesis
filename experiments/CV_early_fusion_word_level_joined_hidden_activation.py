@@ -29,7 +29,7 @@ word_embeddings_dataset = np.load(word_embeddings_dataset_path).item()
 word_embeddings_dataset = normalize_sequence_features(word_embeddings_dataset)
 
 emobase_params = {
-    "hidden_size": 16,
+    "hidden_size": 64,
     "drop_prob": 0.1,
     "fully_connected_drop_prob": 0.2,
     "layers": 2,
@@ -82,10 +82,10 @@ for i in range(1, nr_of_folds):
     emobase_resources['model'] = emobase_model
 
     joined_model_params = {
-        "batch_size": 32,
-        "hidden_size": 64,
-        "drop_prob": 0.2,
-        "fully_connected_drop_prob": 0.6,
+        "batch_size": 16,
+        "hidden_size": 1024,
+        "drop_prob": 0.0,
+        "fully_connected_drop_prob": 0.1,
         "layers": 2,
         "epochs": 1000,
     }
