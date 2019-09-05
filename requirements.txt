@@ -1,1 +1,10 @@
 git+git://github.com/Bjarten/early-stopping-pytorch@master
+numpy
+scikit-learn
+pydotplus
+librosa
+tqdm
+pytorch torchvision cudatoolkit=10.0 -c pytorch
+nltk
+pydub
+gensim
