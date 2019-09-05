@@ -37,7 +37,6 @@ all_golds = []
 all_preds = []
 
 for i in range(1, nr_of_folds):
-    i = 8
     test_fold_nr = i
     validation_fold_nr = (i + 1) % nr_of_folds
 
