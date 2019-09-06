@@ -9,7 +9,7 @@ from pytorchtools import EarlyStopping
 from utils.experiments_util import get_metrics_str, sort_tensors, get_metrics
 
 """
-This class is used everytime two pretrained models are combined (early or late) based on the hidden layer
+This class is used everytime two pretrained pytorch models are combined (early or late) based on the hidden layer
 activation to get an output.
 Usually, one is the acoustic and one is the language model.
 """
@@ -75,8 +75,8 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
 
-    #optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
-    optimizer = optim.Adam(joined_model.parameters())
+    optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
+    #optimizer = optim.Adam(joined_model.parameters())
 
     early_stopping = EarlyStopping(verbose=True)
 

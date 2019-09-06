@@ -17,8 +17,8 @@ class_groups = {
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_early_fusion_word_level_joined_model_output", use_timestamp=True)
 
 word_embedding_params = {
-    "hidden_size": 64,
-    "drop_prob": 0.1,
+    "hidden_size": 32,
+    "drop_prob": 0.0,
     "fully_connected_drop_prob": 0.2,
     "layers": 2,
 }
@@ -29,8 +29,8 @@ word_embeddings_dataset = np.load(word_embeddings_dataset_path).item()
 word_embeddings_dataset = normalize_sequence_features(word_embeddings_dataset)
 
 emobase_params = {
-    "hidden_size": 64,
-    "drop_prob": 0.1,
+    "hidden_size": 32,
+    "drop_prob": 0.0,
     "fully_connected_drop_prob": 0.2,
     "layers": 2,
 }
@@ -63,7 +63,7 @@ for i in range(1, nr_of_folds):
     word_embedding_resources['test_dataset']  = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, test_fold)
     word_embedding_params["input_dim"] = word_embedding_resources['train_dataset'].tensors[0][0].size()[1]
     word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
-    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//3//2019-09-03_19-49-05_CV_classify_word_embeddings//' + str(i) + '//model.pth')
+    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//4//CV_classify_word_embeddings//' + str(i) + '//model.pth')
     word_embedding_model = LSTM_all_timesteps.LSTM(word_embedding_params)
     word_embedding_model.load_state_dict(torch.load(word_embedding_model_path))
     word_embedding_model.eval()
@@ -73,7 +73,7 @@ for i in range(1, nr_of_folds):
     emobase_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, train_folds)
     emobase_resources['validation_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, validation_fold)
     emobase_resources['test_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, test_fold)
-    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//3//2019-09-03_21-44-55_CV_classify_emobase_50ms_buffer//' + str(i) + '//model.pth')
+    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//4//CV_classify_emobase_50ms_buffer//' + str(i) + '//model.pth')
     emobase_params["input_dim"] = emobase_resources['train_dataset'].tensors[0][0].size()[1]
     emobase_params["label_dim"] = len(set(list(class_groups.values())))
     emobase_model = LSTM_all_timesteps.LSTM(emobase_params)
@@ -83,9 +83,9 @@ for i in range(1, nr_of_folds):
 
     joined_model_params = {
         "batch_size": 32,
-        "hidden_size": 1024,
+        "hidden_size": 16,
         "drop_prob": 0.0,
-        "fully_connected_drop_prob": 0.1,
+        "fully_connected_drop_prob": 0.2,
         "layers": 2,
         "epochs": 1000,
     }
