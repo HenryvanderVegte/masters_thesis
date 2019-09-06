@@ -63,13 +63,9 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
     model1 = resources_modality_1['model'].to(device)
     model2 = resources_modality_2['model'].to(device)
 
-    train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=True, batch_size=params["batch_size"])
     indexed_ds_train2 = index_dataset(resources_modality_2['train_dataset'])
-
-    validation_loader1 = utils.DataLoader(resources_modality_1['validation_dataset'], shuffle=False, batch_size=params["batch_size"])
     indexed_ds_validation2 = index_dataset(resources_modality_2['validation_dataset'])
 
-    test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=params["batch_size"])
     indexed_ds_test2 = index_dataset(resources_modality_2['test_dataset'])
 
     # Loss and optimizer
@@ -79,14 +75,18 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
 
-    optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
-    #optimizer = optim.Adam(joined_model.parameters())
+    #optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
+    optimizer = optim.Adam(joined_model.parameters())
 
     early_stopping = EarlyStopping(verbose=True)
 
     for e in range(params["epochs"]):
-        train_losses = []
+        train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=True,
+                                         batch_size=params["batch_size"])
+        validation_loader1 = utils.DataLoader(resources_modality_1['validation_dataset'], shuffle=False,
+                                              batch_size=params["batch_size"])
 
+        train_losses = []
         h = joined_model.init_hidden(params["batch_size"])
         h1 = model1.init_hidden(params["batch_size"])
         h2 = model2.init_hidden(params["batch_size"])
@@ -179,7 +179,8 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
         h = best_model.init_hidden(params["batch_size"])
         h1 = model1.init_hidden(params["batch_size"])
         h2 = model2.init_hidden(params["batch_size"])
-
+        test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False,
+                                        batch_size=params["batch_size"])
         for inputs1, labels1, lengths1, ids1 in test_loader1:
             if inputs1.shape[0] != params["batch_size"]:
                 continue
