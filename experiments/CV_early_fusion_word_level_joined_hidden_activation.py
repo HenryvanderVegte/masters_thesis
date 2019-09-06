@@ -1,7 +1,7 @@
 from utils.experiments_util import *
 from classification.util.global_vars import *
 from utils.two_modality_utils import *
-from models import LSTM
+from models import LSTM, LSTM2
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
@@ -92,7 +92,7 @@ for i in range(1, nr_of_folds):
 
     joined_model_params["input_dim"] = emobase_params["hidden_size"] + word_embedding_params["hidden_size"]
     joined_model_params["label_dim"] = len(set(list(class_groups.values())))
-    joined_model = LSTM.LSTM(joined_model_params)
+    joined_model = LSTM2.LSTM(joined_model_params)
 
     id_to_name = {}
     for m in metadata:

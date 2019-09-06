@@ -74,8 +74,8 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
 
-    optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
-    #optimizer = optim.Adam(joined_model.parameters())
+    #optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
+    optimizer = optim.Adam(joined_model.parameters())
 
     early_stopping = EarlyStopping(verbose=True)
 
@@ -451,7 +451,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
     #optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
     optimizer = optim.Adam(joined_model.parameters())
 
-    early_stopping = EarlyStopping(verbose=True, patience=3)
+    early_stopping = EarlyStopping(verbose=True)
     softmax = nn.Softmax(dim=2)
 
     for e in range(params["epochs"]):

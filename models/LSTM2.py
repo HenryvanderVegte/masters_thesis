@@ -21,10 +21,12 @@ class LSTM(nn.Module):
             elif 'weight' in name:
                 nn.init.xavier_normal_(param)
 
+        self.fc = nn.Linear(params["hidden_size"], params["hidden_size"])
         self.dropout = nn.Dropout(params["fully_connected_drop_prob"])
-        self.fc = nn.Linear(params["hidden_size"], params["label_dim"])
         torch.nn.init.xavier_uniform_(self.fc.weight)
         self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(params["hidden_size"], params["label_dim"])
+        torch.nn.init.xavier_uniform_(self.fc2.weight)
 
     def forward(self, x, lengths, hidden):
         batch_size = x.shape[0]
@@ -39,11 +41,10 @@ class LSTM(nn.Module):
         for j, x in enumerate(len):
             last_out[j,:] = hidden_activation[j,(x-1),:]
 
-        out = self.dropout(last_out)
-
-        out = self.fc(out)
+        out = self.fc(last_out)
+        out = self.dropout(out)
         out = self.relu(out)
-
+        out = self.fc2(out)
         return out, hidden, hidden_activation
 
     def init_hidden(self, batch_size):
