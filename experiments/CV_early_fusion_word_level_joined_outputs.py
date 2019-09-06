@@ -82,7 +82,7 @@ for i in range(1, nr_of_folds):
     emobase_resources['model'] = emobase_model
 
     joined_model_params = {
-        "batch_size": 32,
+        "batch_size": 16,
         "hidden_size": 16,
         "drop_prob": 0.0,
         "fully_connected_drop_prob": 0.2,
