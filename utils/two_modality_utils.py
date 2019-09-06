@@ -65,7 +65,6 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
 
     indexed_ds_train2 = index_dataset(resources_modality_2['train_dataset'])
     indexed_ds_validation2 = index_dataset(resources_modality_2['validation_dataset'])
-
     indexed_ds_test2 = index_dataset(resources_modality_2['test_dataset'])
 
     # Loss and optimizer
@@ -437,14 +436,10 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
     model1 = resources_modality_1['model'].to(device)
     model2 = resources_modality_2['model'].to(device)
 
-    train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=False, batch_size=params["batch_size"])
-    train_loader2 = utils.DataLoader(resources_modality_2['train_dataset'], shuffle=False, batch_size=params["batch_size"])
+    indexed_ds_train2 = index_dataset(resources_modality_2['train_dataset'])
+    indexed_ds_validation2 = index_dataset(resources_modality_2['validation_dataset'])
+    indexed_ds_test2 = index_dataset(resources_modality_2['test_dataset'])
 
-    validation_loader1 = utils.DataLoader(resources_modality_1['validation_dataset'], shuffle=False, batch_size=params["batch_size"])
-    validation_loader2 = utils.DataLoader(resources_modality_2['validation_dataset'], shuffle=False, batch_size=params["batch_size"])
-
-    test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=params["batch_size"])
-    test_loader2 = utils.DataLoader(resources_modality_2['test_dataset'], shuffle=False, batch_size=params["batch_size"])
 
     # Loss and optimizer
     unique, counts = np.unique(resources_modality_1['train_dataset'].tensors[1], return_counts=True)
@@ -460,18 +455,21 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
     softmax = nn.Softmax(dim=2)
 
     for e in range(params["epochs"]):
-        train_losses = []
+        train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=True,
+                                         batch_size=params["batch_size"])
+        validation_loader1 = utils.DataLoader(resources_modality_1['validation_dataset'], shuffle=False,
+                                              batch_size=params["batch_size"])
 
+        train_losses = []
         h = joined_model.init_hidden(params["batch_size"])
         h1 = model1.init_hidden(params["batch_size"])
         h2 = model2.init_hidden(params["batch_size"])
 
-        train2_iter = iter(train_loader2)
         for inputs1, labels1, lengths1, ids1 in train_loader1:
             if inputs1.shape[0] != params["batch_size"]:
                 continue
-            inputs2, labels2, lengths2, ids2 = next(train2_iter)
 
+            inputs2, labels2, lengths2, ids2 =get_dataset_instances_by_ids(indexed_ds_train2, ids1)
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')
                 break
@@ -508,13 +506,13 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
         validation_losses = []
         validation_predictions = []
         validation_golds = []
+
         with torch.no_grad():
-            validation2_iter = iter(validation_loader2)
             for inputs1, labels1, lengths1, ids1 in validation_loader1:
                 if inputs1.shape[0] != params["batch_size"]:
                     continue
 
-                inputs2, labels2, lengths2, ids2 = next(validation2_iter)
+                inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_train2, ids1)
                 if not torch.all(torch.eq(ids1, ids2)):
                     print('Expected the same instances for both modalities. Break')
                     break
@@ -556,17 +554,18 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
     test_predictions = []
     test_golds = []
     test_ids = []
+
+    test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=params["batch_size"])
     with torch.no_grad():
         h = best_model.init_hidden(params["batch_size"])
         h1 = model1.init_hidden(params["batch_size"])
         h2 = model2.init_hidden(params["batch_size"])
 
-        test2_iter = iter(test_loader2)
         for inputs1, labels1, lengths1, ids1 in test_loader1:
             if inputs1.shape[0] != params["batch_size"]:
                 continue
 
-            inputs2, labels2, lengths2, ids2 = next(test2_iter)
+            inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_train2, ids1)
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')
                 break
