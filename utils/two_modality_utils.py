@@ -512,7 +512,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
                 if inputs1.shape[0] != params["batch_size"]:
                     continue
 
-                inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_train2, ids1)
+                inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_validation2, ids1)
                 if not torch.all(torch.eq(ids1, ids2)):
                     print('Expected the same instances for both modalities. Break')
                     break
@@ -565,7 +565,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
             if inputs1.shape[0] != params["batch_size"]:
                 continue
 
-            inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_train2, ids1)
+            inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_test2, ids1)
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')
                 break
