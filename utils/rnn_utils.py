@@ -23,7 +23,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     #optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
     optimizer = optim.Adam(model.parameters())
 
-    early_stopping = EarlyStopping(verbose=True, patience=20)
+    early_stopping = EarlyStopping(verbose=True)
     for e in range(params["epochs"]):
         train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
         validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=params["batch_size"])
