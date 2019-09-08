@@ -49,19 +49,17 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
             loss.backward()
 
             train_losses.append(loss.item())
-            nn.utils.clip_grad_norm_(model.parameters(), 5)
+            #nn.utils.clip_grad_norm_(model.parameters(), 5)
             optimizer.step()
 
         validation_losses = []
         validation_predictions = []
         validation_golds = []
-        h = model.init_hidden(params["batch_size"])
-
-        validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=validation_dataset.tensors[0].size()[0])
+        validation_instance_count = validation_dataset.tensors[0].size()[0]
+        h = model.init_hidden(validation_instance_count)
+        validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=validation_instance_count)
         with torch.no_grad():
             for inputs, labels, lengths, _ in validation_loader:
-                if inputs.shape[0] != params["batch_size"]:
-                    continue
                 lengths, inputs, labels = sort_tensors(lengths, inputs, labels)
 
                 inputs = inputs.to(device)
@@ -84,7 +82,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
         if early_stopping.early_stop:
             logger.info("Stopping training!")
             break
-
+        break
     best_model = early_stopping.best_model
 
     test_losses = []
@@ -92,11 +90,11 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     test_golds = []
     test_ids = []
 
-    test_loader = utils.DataLoader(test_dataset, shuffle=True, batch_size=test_dataset.tensors[0].size()[0])
+    test_instance_count = test_dataset.tensors[0].size()[0]
+    h = best_model.init_hidden(test_instance_count)
+    test_loader = utils.DataLoader(test_dataset, shuffle=False, batch_size=test_instance_count)
     with torch.no_grad():
         for inputs, labels, lengths, ids in test_loader:
-            if inputs.shape[0] != params["batch_size"]:
-                continue
             lengths, inputs, labels, ids = sort_tensors(lengths, inputs, labels, ids)
 
             inputs = inputs.to(device)
