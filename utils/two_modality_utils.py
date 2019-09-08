@@ -446,7 +446,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
     #optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
     optimizer = optim.Adam(joined_model.parameters())
 
-    early_stopping = EarlyStopping(verbose=True)
+    early_stopping = EarlyStopping()
     softmax = nn.Softmax(dim=2)
 
     for e in range(params["epochs"]):
@@ -498,9 +498,8 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
         validation_losses = []
         validation_predictions = []
         validation_golds = []
-        validation_instance_count = resources_modality_1['validation_dataset'].tensors[0].size()[0]
         validation_loader1 = utils.DataLoader(resources_modality_1['validation_dataset'], shuffle=False,
-                                              batch_size=validation_instance_count)
+                                              batch_size=params["batch_size"])
         with torch.no_grad():
             for inputs1, labels1, lengths1, ids1 in validation_loader1:
                 if inputs1.shape[0] != params["batch_size"]:
@@ -552,14 +551,11 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
     test_instance_count = resources_modality_1['test_dataset'].tensors[0].size()[0]
     test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=test_instance_count)
     with torch.no_grad():
-        h = best_model.init_hidden(params["batch_size"])
-        h1 = model1.init_hidden(params["batch_size"])
-        h2 = model2.init_hidden(params["batch_size"])
+        h = best_model.init_hidden(test_instance_count)
+        h1 = model1.init_hidden(test_instance_count)
+        h2 = model2.init_hidden(test_instance_count)
 
         for inputs1, labels1, lengths1, ids1 in test_loader1:
-            if inputs1.shape[0] != params["batch_size"]:
-                continue
-
             inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_test2, ids1)
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')

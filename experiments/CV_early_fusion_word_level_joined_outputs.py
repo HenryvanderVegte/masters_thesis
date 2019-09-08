@@ -63,7 +63,7 @@ for i in range(0, nr_of_folds):
     word_embedding_resources['test_dataset']  = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, test_fold)
     word_embedding_params["input_dim"] = word_embedding_resources['train_dataset'].tensors[0][0].size()[1]
     word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
-    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//4//CV_classify_word_embeddings//' + str(i) + '//model.pth')
+    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//8//CV_classify_word_embeddings//' + str(i) + '//model.pth')
     word_embedding_model = LSTM_all_timesteps.LSTM(word_embedding_params)
     word_embedding_model.load_state_dict(torch.load(word_embedding_model_path))
     word_embedding_model.eval()
@@ -73,7 +73,7 @@ for i in range(0, nr_of_folds):
     emobase_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, train_folds)
     emobase_resources['validation_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, validation_fold)
     emobase_resources['test_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, test_fold)
-    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//4//CV_classify_emobase_50ms_buffer//' + str(i) + '//model.pth')
+    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//8//CV_classify_emobase_50ms_buffer//' + str(i) + '//model.pth')
     emobase_params["input_dim"] = emobase_resources['train_dataset'].tensors[0][0].size()[1]
     emobase_params["label_dim"] = len(set(list(class_groups.values())))
     emobase_model = LSTM_all_timesteps.LSTM(emobase_params)
