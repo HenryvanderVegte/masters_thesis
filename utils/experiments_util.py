@@ -131,11 +131,14 @@ def get_metrics(labels, predictions):
     UAF = np.sum(fscore) / len(fscore)
     return acc, UAP, UAR, UAF
 
-def normalize_sequence_features(feature_dict):
+def normalize_sequence_features(feature_dict, class_groups, metadata):
     full_fl = []
 
-    for fl in feature_dict.values():
-        for arr in fl:
+    for instance in metadata:
+        if instance["Label"] not in class_groups:
+            continue
+
+        for arr in feature_dict[instance['Name']]:
             full_fl.append(arr)
 
     fl = np.array(full_fl)

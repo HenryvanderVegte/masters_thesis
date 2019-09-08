@@ -30,14 +30,14 @@ def print_m_f_statistics(gender_info_file):
         print(get_metrics_str(f_gold, f_predicted))
 
 
-gender_info_file = os.path.join(ROOT_FOLDER, 'gender//audio_classifier.txt')
+gender_info_file = os.path.join(ROOT_FOLDER, 'gender//audio_utterance_svm.txt')
 print('AUDIO:')
 print_m_f_statistics(gender_info_file)
 
-gender_info_file = os.path.join(ROOT_FOLDER, 'gender//text_classifier.txt')
-print('TEXT:')
-print_m_f_statistics(gender_info_file)
+#gender_info_file = os.path.join(ROOT_FOLDER, 'gender//text_classifier.txt')
+#print('TEXT:')
+#print_m_f_statistics(gender_info_file)
 
-gender_info_file = os.path.join(ROOT_FOLDER, 'gender//combined_classifier.txt')
-print('COMBINED:')
-print_m_f_statistics(gender_info_file)
+#gender_info_file = os.path.join(ROOT_FOLDER, 'gender//combined_classifier.txt')
+#print('COMBINED:')
+#print_m_f_statistics(gender_info_file)

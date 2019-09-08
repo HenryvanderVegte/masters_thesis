@@ -25,7 +25,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
 
     logger.info(optimizer)
 
-    early_stopping = EarlyStopping()
+    early_stopping = EarlyStopping(patience=5)
     logger.info(early_stopping)
     for e in range(params["epochs"]):
         train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])

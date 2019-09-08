@@ -29,7 +29,7 @@ params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_emobase_50ms_buffer", use_timestamp=True)
 
 emobase_features = np.load(emobase_features).item()
-emobase_features = normalize_sequence_features(emobase_features)
+emobase_features = normalize_sequence_features(emobase_features, class_groups, metadata)
 
 nr_of_folds = 10
 
