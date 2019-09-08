@@ -47,7 +47,7 @@ nr_of_folds = 10
 
 all_golds = []
 all_preds = []
-for i in range(1, nr_of_folds):
+for i in range(0, nr_of_folds):
     logger.info('Testing on fold ' + str(i))
     test_fold = [i]
 
