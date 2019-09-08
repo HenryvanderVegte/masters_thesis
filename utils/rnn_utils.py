@@ -82,7 +82,6 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
         if early_stopping.early_stop:
             logger.info("Stopping training!")
             break
-        break
     best_model = early_stopping.best_model
 
     test_losses = []
