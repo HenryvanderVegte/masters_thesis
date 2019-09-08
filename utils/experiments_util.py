@@ -135,7 +135,7 @@ def normalize_sequence_features(feature_dict, class_groups, metadata):
     full_fl = []
 
     for instance in metadata:
-        if instance["Label"] not in class_groups:
+        if instance["Label"] not in class_groups or instance['Name'] not in feature_dict:
             continue
 
         for arr in feature_dict[instance['Name']]:
