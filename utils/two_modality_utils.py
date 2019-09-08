@@ -287,7 +287,7 @@ def train_two_modality_max_prob_classifier(resources_modality_1, resources_modal
 
     logger.info(get_metrics_str(test_golds, test_preds))
 
-def train_two_modality_final_output_svm(resources_modality_1, resources_modality_2, id_to_name, experiment_path, logger, params):
+def train_two_modality_final_output_svm(resources_modality_1, resources_modality_2, id_to_name, experiment_path, logger):
     """
     Trains a Support Vector Machine based on the outputs of the two models and tests it
     :param resources_modality_1:
@@ -296,7 +296,6 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
     :param experiment_path:
     :param model:
     :param logger:
-    :param params:
     :return:
     """
     model1 = resources_modality_1['model'].to(device)
@@ -312,8 +311,6 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
     test_instance_count2 = resources_modality_2['test_dataset'].tensors[0].size()[0]
     test_loader2 = utils.DataLoader(resources_modality_2['test_dataset'], shuffle=False, batch_size=test_instance_count2)
 
-    h1 = model1.init_hidden(params["batch_size"])
-    h2 = model2.init_hidden(params["batch_size"])
 
     train_vectors = np.empty((0,8))
     train_labels = np.empty((0))
@@ -321,10 +318,10 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
     softmax = nn.Softmax(dim=1)
     with torch.no_grad():
         train2_iter = iter(train_loader2)
-        for inputs1, labels1, lengths1, ids1 in train_loader1:
-            if inputs1.shape[0] != params["batch_size"]:
-                continue
+        h1 = model1.init_hidden(train_instance_count1)
+        h2 = model2.init_hidden(train_instance_count2)
 
+        for inputs1, labels1, lengths1, ids1 in train_loader1:
             inputs2, labels2, lengths2, ids2 = next(train2_iter)
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')
@@ -361,11 +358,11 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
     test_labels = np.empty((0))
     test_ids = []
     with torch.no_grad():
+        h1 = model1.init_hidden(test_instance_count1)
+        h2 = model2.init_hidden(test_instance_count2)
+
         test2_iter = iter(test_loader2)
         for inputs1, labels1, lengths1, ids1 in test_loader1:
-            if inputs1.shape[0] != params["batch_size"]:
-                continue
-
             inputs2, labels2, lengths2, ids2 = next(test2_iter)
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')

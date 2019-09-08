@@ -46,7 +46,7 @@ for i in range(0, nr_of_folds):
     logger.info('Testing on fold ' + str(i))
     test_fold = [i]
 
-    train_folds = list(range(1, nr_of_folds))
+    train_folds = list(range(0, nr_of_folds))
     train_folds.remove(i)
 
     word_embedding_resources = {}
