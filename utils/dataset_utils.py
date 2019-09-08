@@ -163,11 +163,20 @@ def create_dataset_from_metadata(metadata, features_dict, class_groups, folds):
             print('No features for:' + instance['Name'])
             continue
 
+        #male = 1
+        #female = 0
+        #if instance['Name'].split('_')[-1].startswith('F'):
+         #   male = 0
+        #    female = 1
+
         features = features_dict[instance['Name']]
 
         if len(features) == 0:
             print('No features for:' + instance['Name'])
             continue
+
+        #features = np.append(features, male)
+        #features = np.append(features, female)
 
         feature_list.append(features)
         labels.append(label)

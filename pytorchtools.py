@@ -8,7 +8,7 @@ import copy
 
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
-    def __init__(self, patience=7, verbose=False, delta=0):
+    def __init__(self, patience=7, delta=0):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
@@ -19,7 +19,6 @@ class EarlyStopping:
                             Default: 0
         """
         self.patience = patience
-        self.verbose = verbose
         self.counter = 0
         self.best_score = None
         self.early_stop = False
@@ -43,3 +42,6 @@ class EarlyStopping:
             self.best_score = score
             self.counter = 0
             self.best_model = copy.deepcopy(model)
+
+    def __str__(self):
+        return "EarlyStopping ( \n patience: {0},\n delta: {1} \n )".format(self.patience, self.delta)

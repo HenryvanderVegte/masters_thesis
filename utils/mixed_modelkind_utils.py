@@ -39,7 +39,7 @@ def get_dataset_instances_by_ids(indexed_dataset, target_ids):
 
     return torch.stack(features_all), torch.stack(labels), torch.stack(ids)
 
-def train_two_modality_final_output_svm(pytorch_mod, sklearn_mod, id_to_name, experiment_path, logger, params):
+def train_mixed_modality_final_output_svm(pytorch_mod, sklearn_mod, id_to_name, experiment_path, logger, params):
     """
     Trains a Support Vector Machine based on the outputs of the two models and tests it
     :param pytorch_mod:
@@ -54,10 +54,12 @@ def train_two_modality_final_output_svm(pytorch_mod, sklearn_mod, id_to_name, ex
     model1 = pytorch_mod['model'].to(device)
     model2 = sklearn_mod['model']
 
-    train_loader1 = utils.DataLoader(pytorch_mod['train_dataset'], shuffle=False, batch_size=params["batch_size"])
+    train_instance_count1 = pytorch_mod['train_dataset'].tensors[0].size()[0]
+    train_loader1 = utils.DataLoader(pytorch_mod['train_dataset'], shuffle=False, batch_size=train_instance_count1)
     index_train_dataset_sklearn = index_dataset(sklearn_mod['train_dataset'])
 
-    test_loader1 = utils.DataLoader(pytorch_mod['test_dataset'], shuffle=False, batch_size=params["batch_size"])
+    test_instance_count1 = pytorch_mod['test_dataset'].tensors[0].size()[0]
+    test_loader1 = utils.DataLoader(pytorch_mod['test_dataset'], shuffle=False, batch_size=test_instance_count1)
     index_test_dataset_sklearn = index_dataset(sklearn_mod['test_dataset'])
 
     h1 = model1.init_hidden(params["batch_size"])

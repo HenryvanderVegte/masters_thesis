@@ -15,7 +15,7 @@ class_groups = {
     "neu":3,
 }
 
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_emobase_utterance_level_svm", use_timestamp=True)
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_emobase_utterance_level_svm_with_gender", use_timestamp=True)
 emobase_features = np.load(emobase_features).item()
 emobase_features = normalize_features(emobase_features)
 

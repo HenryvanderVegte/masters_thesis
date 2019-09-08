@@ -76,7 +76,7 @@ for i in range(1, nr_of_folds):
 
     fold_path = os.path.join(experiment_dir, str(i))
     os.mkdir(fold_path)
-    test_golds, test_preds = train_two_modality_final_output_svm(word_embedding_resources, emobase_resources, id_to_name, fold_path, logger, experiment_params)
+    test_golds, test_preds = train_mixed_modality_final_output_svm(word_embedding_resources, emobase_resources, id_to_name, fold_path, logger, experiment_params)
     all_golds += test_golds
     all_preds += test_preds
 

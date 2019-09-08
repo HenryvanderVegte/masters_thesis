@@ -23,11 +23,12 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     #optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
     optimizer = optim.Adam(model.parameters())
 
-    early_stopping = EarlyStopping(verbose=True)
+    logger.info(optimizer)
+
+    early_stopping = EarlyStopping()
+    logger.info(early_stopping)
     for e in range(params["epochs"]):
         train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
-        validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=params["batch_size"])
-
         h = model.init_hidden(params["batch_size"])
 
         train_losses = []
@@ -55,6 +56,8 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
         validation_predictions = []
         validation_golds = []
         h = model.init_hidden(params["batch_size"])
+
+        validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=validation_dataset.tensors[0].size()[0])
         with torch.no_grad():
             for inputs, labels, lengths, _ in validation_loader:
                 if inputs.shape[0] != params["batch_size"]:
@@ -89,7 +92,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     test_golds = []
     test_ids = []
 
-    test_loader = utils.DataLoader(test_dataset, shuffle=True, batch_size=params["batch_size"])
+    test_loader = utils.DataLoader(test_dataset, shuffle=True, batch_size=test_dataset.tensors[0].size()[0])
     with torch.no_grad():
         for inputs, labels, lengths, ids in test_loader:
             if inputs.shape[0] != params["batch_size"]:

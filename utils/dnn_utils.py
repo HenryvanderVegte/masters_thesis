@@ -9,14 +9,16 @@ from utils.experiments_util import get_metrics_str, get_metrics
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+torch.manual_seed(0)
+
 def train(train_dataset, validation_dataset, test_dataset, id_to_name, experiment_path, model, logger, params):
     model = model.to(device)
     logger.info(str(params))
     logger.info(model)
 
     train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
-    validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=params["batch_size"])
-    test_loader = utils.DataLoader(test_dataset, shuffle=True, batch_size=params["batch_size"])
+    validation_loader = utils.DataLoader(validation_dataset, shuffle=False, batch_size=validation_dataset.tensors[0].size()[0])
+    test_loader = utils.DataLoader(test_dataset, shuffle=False, batch_size=test_dataset.tensors[0].size()[0])
 
     # Loss and optimizer
     unique, counts = np.unique(train_dataset.tensors[1], return_counts=True)
@@ -24,9 +26,11 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     weights = 1 / np.array(list(count_dict.values()))
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
-    optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
+    
+    #optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
+    optimizer = optim.Adam(model.parameters())
 
-    early_stopping = EarlyStopping(verbose=True)
+    early_stopping = EarlyStopping(verbose=True, patience=20)
     for e in range(params["epochs"]):
         train_losses = []
 
@@ -129,42 +133,3 @@ def test(dev_dataset, model, logger, params):
             gold += labels.data.tolist()
 
     logger.info(get_metrics_str(gold, predictions))
-
-def eval_get_probabilities(test_file_in, experiment_path, label_to_id, logger):
-    logger.info("############ Getting prob scores for DNN classifier. ########## \n\n" )
-
-    test_vectors, test_labels = data_loader_txt.get_test_data(test_file_in, label_to_id, experiment_path, True, logger)
-
-    instances_count = test_vectors.shape[0]
-    features_count = test_vectors.shape[1]
-    labels_count = len(set(list(label_to_id.values())))
-    test_labels = np.array(test_labels).reshape(-1, 1)
-
-    info = "labels: " + str(labels_count) + ", instances: " + str(instances_count) + ", features: " + str(features_count)
-    logger.info("Data info: " + info)
-
-    tensor_test_x = torch.stack([torch.Tensor(i) for i in test_vectors])
-    tensor_test_y = torch.stack([torch.Tensor(i) for i in test_labels])
-
-    test_dataset = utils.TensorDataset(tensor_test_x, tensor_test_y)
-    test_dataloader = utils.DataLoader(test_dataset, batch_size=32)
-
-    model_path = os.path.join(experiment_path, "dnn_audio.pth")
-    model = Net(features_count, labels_count).to(device)
-    model.load_state_dict(torch.load(model_path))
-    model.eval()
-    logger.info("Loaded model from" + model_path)
-
-    probabilities = []
-    softmax = nn.Softmax()
-
-    with torch.no_grad():
-        for test_vectors, _ in test_dataloader:
-            test_vectors = test_vectors.to(device)
-
-            outputs = model(test_vectors)
-
-            probability = softmax(outputs).data.tolist()
-            probabilities += probability
-
-    return probabilities
