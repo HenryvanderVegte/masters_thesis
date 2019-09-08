@@ -26,7 +26,7 @@ word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
 
 word_embeddings_dataset_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings.npy')
 word_embeddings_dataset = np.load(word_embeddings_dataset_path).item()
-word_embeddings_dataset = normalize_sequence_features(word_embeddings_dataset)
+word_embeddings_dataset = normalize_sequence_features(word_embeddings_dataset, class_groups, metadata)
 
 emobase_params = {}
 emobase_params["label_dim"] = len(set(list(class_groups.values())))

@@ -30,7 +30,7 @@ params["label_dim"] = len(set(list(class_groups.values())))
 
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "classify_word_embeddings", use_timestamp=True)
 embeddings = np.load(embeddings).item()
-embeddings = normalize_sequence_features(embeddings)
+embeddings = normalize_sequence_features(embeddings, class_groups, metadata)
 
 train_dataset = create_sequence_dataset_from_metadata(metadata,embeddings, class_groups, 'train')
 dev_dataset = create_sequence_dataset_from_metadata(metadata,embeddings, class_groups, 'dev')

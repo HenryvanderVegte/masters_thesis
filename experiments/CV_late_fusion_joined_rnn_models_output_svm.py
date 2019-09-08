@@ -26,7 +26,7 @@ word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
 
 word_embeddings_dataset_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings.npy')
 word_embeddings_dataset = np.load(word_embeddings_dataset_path).item()
-word_embeddings_dataset = normalize_sequence_features(word_embeddings_dataset)
+word_embeddings_dataset = normalize_sequence_features(word_embeddings_dataset, class_groups, metadata)
 
 emobase_params = {
     "hidden_size": 32,
@@ -37,7 +37,7 @@ emobase_params = {
 emobase_params["label_dim"] = len(set(list(class_groups.values())))
 emobase_dataset_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_50ms_buffer.npy')
 emobase_dataset = np.load(emobase_dataset_path).item()
-emobase_dataset = normalize_sequence_features(emobase_dataset)
+emobase_dataset = normalize_sequence_features(emobase_dataset, class_groups, metadata)
 
 experiment_params = {
     "batch_size": 32,
