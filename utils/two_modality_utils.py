@@ -484,7 +484,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
             joined_inputs = torch.cat((outputs1, outputs2), 2)
             h = tuple([each.data for each in h])
             joined_model.zero_grad()
-            output, h, _, _ = joined_model(joined_inputs, lengths1.to(device, dtype=torch.int64).view(-1), h)
+            output, h, _ = joined_model(joined_inputs, lengths1.to(device, dtype=torch.int64).view(-1), h)
 
             loss = criterion(output, labels1.to(device, dtype=torch.int64).view(-1))
             loss.backward()
@@ -529,7 +529,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
                 joined_inputs = torch.cat((outputs1, outputs2), 2)
 
                 h = tuple([each.data for each in h])
-                output, _, _, _ = joined_model(joined_inputs, lengths, h)
+                output, _, _ = joined_model(joined_inputs, lengths, h)
                 validation_losses.append(criterion(output, labels).item())
                 _, predicted = torch.max(output.data, 1)
                 validation_predictions += predicted.data.tolist()
@@ -581,7 +581,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
             joined_inputs = torch.cat((outputs1, outputs2), 2)
 
             h = tuple([each.data for each in h])
-            output, _, _, _ = best_model(joined_inputs, lengths, h)
+            output, _, _ = best_model(joined_inputs, lengths, h)
             test_losses.append(criterion(output, labels).item())
 
             _, predicted = torch.max(output.data, 1)
