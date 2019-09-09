@@ -50,10 +50,8 @@ class RNN(nn.Module):
         weight = next(self.parameters()).data
 
         if str(device) == 'cuda':
-            hidden = (weight.new(self.n_layers, batch_size, self.hidden_size).zero_().cuda(),
-                      weight.new(self.n_layers, batch_size, self.hidden_size).zero_().cuda())
+            hidden = weight.new(self.n_layers, batch_size, self.hidden_size).zero_().cuda()
         else:
-            hidden = (weight.new(self.n_layers, batch_size, self.hidden_size).zero_(),
-                      weight.new(self.n_layers, batch_size, self.hidden_size).zero_())
+            hidden = weight.new(self.n_layers, batch_size, self.hidden_size).zero_()
 
         return hidden
