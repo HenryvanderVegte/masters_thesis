@@ -83,7 +83,7 @@ for i in range(0, nr_of_folds):
 
     joined_model_params = {
         "batch_size": 16,
-        "hidden_size": 16,
+        "hidden_size": 32,
         "drop_prob": 0.0,
         "fully_connected_drop_prob": 0.2,
         "layers": 2,
