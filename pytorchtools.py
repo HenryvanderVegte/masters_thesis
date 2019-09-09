@@ -20,14 +20,16 @@ class EarlyStopping:
         """
         self.patience = patience
         self.counter = 0
+        self.epoch = 0
         self.best_score = None
+        self.best_epoch = 0
         self.early_stop = False
         self.val_loss_min = np.Inf
         self.delta = delta
         self.best_model = None
 
     def __call__(self, val_loss, model):
-
+        self.epoch += 1
         score = -val_loss
 
         if self.best_score is None:
@@ -40,6 +42,7 @@ class EarlyStopping:
                 self.early_stop = True
         else:
             self.best_score = score
+            self.best_epoch = self.epoch
             self.counter = 0
             self.best_model = copy.deepcopy(model)
 

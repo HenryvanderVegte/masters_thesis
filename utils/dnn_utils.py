@@ -72,7 +72,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
 
         early_stopping(np.mean(validation_losses), model)
         if early_stopping.early_stop:
-            print("Stopping training!")
+            logger.info('Stop training. Take model from epoch ' + str(early_stopping.best_epoch))
             break
 
     best_model = early_stopping.best_model

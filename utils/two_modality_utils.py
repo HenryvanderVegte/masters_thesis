@@ -77,7 +77,7 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
     #optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
     optimizer = optim.Adam(joined_model.parameters())
 
-    early_stopping = EarlyStopping(verbose=True)
+    early_stopping = EarlyStopping()
 
     for e in range(params["epochs"]):
         train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=True,
@@ -163,7 +163,7 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
 
         early_stopping(np.mean(validation_losses), joined_model)
         if early_stopping.early_stop:
-            print("Stopping training!")
+            logger.info('Stop training. Take model from epoch ' + str(early_stopping.best_epoch))
             break
 
     best_model = early_stopping.best_model
@@ -569,11 +569,11 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
                 validation_golds += labels.data.tolist()
 
         acc, _, _, _ = get_metrics(validation_golds, validation_predictions)
-        logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e + 1, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
+        logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
 
         early_stopping(np.mean(validation_losses), joined_model)
         if early_stopping.early_stop:
-            print("Stopping training!")
+            logger.info('Stop training. Take model from epoch ' + str(e))
             break
 
     best_model = early_stopping.best_model

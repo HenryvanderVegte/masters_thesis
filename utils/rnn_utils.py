@@ -76,11 +76,11 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
                 validation_golds += labels.data.tolist()
 
         acc, _, _, _ = get_metrics(validation_golds, validation_predictions)
-        logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e + 1, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
+        logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
 
         early_stopping(np.mean(validation_losses), model)
         if early_stopping.early_stop:
-            logger.info("Stopping training!")
+            logger.info('Stop training. Take model from epoch ' + str(early_stopping.best_epoch))
             break
     best_model = early_stopping.best_model
 
