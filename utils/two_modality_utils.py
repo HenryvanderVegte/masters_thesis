@@ -436,6 +436,37 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
     indexed_ds_validation2 = index_dataset(resources_modality_2['validation_dataset'])
     indexed_ds_test2 = index_dataset(resources_modality_2['test_dataset'])
 
+    train_instance_count = resources_modality_1['train_dataset'].tensors[0].size()[0]
+    train_instance_count = 32
+    train_loader_all = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=False,
+                                     batch_size=train_instance_count)
+
+    train_vectors = np.empty((0,8))
+    for inputs1, labels1, lengths1, ids1 in train_loader_all:
+        inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_train2, ids1)
+        lengths1, inputs1, labels1, ids1 = sort_tensors(lengths1, inputs1, labels1, ids1)
+        lengths2, inputs2, labels2, ids2 = sort_tensors(lengths2, inputs2, labels2, ids2)
+        h1 = model1.init_hidden(train_instance_count)
+        h2 = model2.init_hidden(train_instance_count)
+        with torch.no_grad():
+            if inputs1.shape[0] != train_instance_count:
+                continue
+            h1 = tuple([each.data for each in h1])
+            _, _, _, outputs1 = model1(inputs1.to(device), lengths1.to(device, dtype=torch.int64).view(-1), h1)
+            h2 = tuple([each.data for each in h2])
+            _, _, _, outputs2 = model2(inputs2.to(device), lengths2.to(device, dtype=torch.int64).view(-1), h2)
+            joined_inputs = torch.cat((outputs1, outputs2), 2)
+
+            for i in range(lengths1.size()[0]):
+                length = int(lengths1[i].data.cpu().numpy()[0])
+                vecs = joined_inputs[i][:length]
+                train_vectors = np.concatenate((train_vectors, vecs.cpu().numpy(),), axis=0)
+
+    means = torch.Tensor(train_vectors.mean(axis=0)).to(device)
+    stddevs = train_vectors.std(axis=0)
+    stddevs[stddevs == 0] = 1
+    stddevs = torch.Tensor(stddevs).to(device)
+
     # Loss and optimizer
     unique, counts = np.unique(resources_modality_1['train_dataset'].tensors[1], return_counts=True)
     count_dict = dict(zip(unique, counts))
@@ -482,6 +513,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
             #combine weights of the two other models to create the input for the joined model
             joined_inputs = torch.cat((outputs1, outputs2), 2)
+            joined_inputs = (joined_inputs - means) / stddevs
             h = tuple([each.data for each in h])
             joined_model.zero_grad()
             output, h, _ = joined_model(joined_inputs, lengths1.to(device, dtype=torch.int64).view(-1), h)
@@ -527,6 +559,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
                 #outputs2 = softmax(outputs2)
 
                 joined_inputs = torch.cat((outputs1, outputs2), 2)
+                joined_inputs = (joined_inputs - means) / stddevs
 
                 h = tuple([each.data for each in h])
                 output, _, _ = joined_model(joined_inputs, lengths, h)
@@ -579,6 +612,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
             #outputs2 = softmax(outputs2)
 
             joined_inputs = torch.cat((outputs1, outputs2), 2)
+            joined_inputs = (joined_inputs - means) / stddevs
 
             h = tuple([each.data for each in h])
             output, _, _ = best_model(joined_inputs, lengths, h)
