@@ -573,7 +573,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
         early_stopping(np.mean(validation_losses), joined_model)
         if early_stopping.early_stop:
-            logger.info('Stop training. Take model from epoch ' + str(e))
+            logger.info('Stop training. Take model from epoch ' + str(early_stopping.best_epoch))
             break
 
     best_model = early_stopping.best_model
