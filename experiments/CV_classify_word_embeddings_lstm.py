@@ -32,7 +32,6 @@ embeddings = np.load(embeddings).item()
 embeddings = normalize_sequence_features(embeddings, class_groups, metadata)
 
 nr_of_folds = 10
-nr_of_holdouts = 3
 
 all_golds = []
 all_preds = []
@@ -41,20 +40,15 @@ for i in range(0, nr_of_folds):
     test_fold_nr = i
     validation_fold_nr = (i + 1) % nr_of_folds
 
-    holdout_folds = list(range(validation_fold_nr + 1, validation_fold_nr + nr_of_holdouts + 1))
-    holdout_folds = [x % nr_of_folds for x in holdout_folds]
-
     train_folds = list(range(0, nr_of_folds))
     train_folds.remove(i)
     train_folds.remove(validation_fold_nr)
-    train_folds = [e for e in train_folds if e not in holdout_folds]
 
     validation_folds = [validation_fold_nr]
     test_folds = [test_fold_nr]
 
     logger.info('Testing on folds: ' + str(test_folds))
     logger.info('Validating on folds: ' + str(validation_folds))
-    logger.info('Holding out folds: ' + str(holdout_folds))
     logger.info('Training on folds: ' + str(train_folds))
 
     train_dataset = create_sequence_dataset_from_metadata(metadata, embeddings, class_groups, train_folds)

@@ -40,7 +40,6 @@ emobase_dataset = np.load(emobase_dataset_path).item()
 emobase_dataset = normalize_sequence_features(emobase_dataset, class_groups, metadata)
 
 nr_of_folds = 10
-nr_of_holdouts = 3
 
 all_golds = []
 all_preds = []
@@ -49,20 +48,15 @@ for i in range(0, nr_of_folds):
     test_fold_nr = i
     validation_fold_nr = (i + 1) % nr_of_folds
 
-    train_folds = list(range(validation_fold_nr + 1, validation_fold_nr + nr_of_holdouts + 1))
-    train_folds = [x % nr_of_folds for x in train_folds]
-
-    holdout_folds = list(range(0, nr_of_folds))
-    holdout_folds.remove(i)
-    holdout_folds.remove(validation_fold_nr)
-    holdout_folds = [e for e in holdout_folds if e not in train_folds]
+    train_folds = list(range(0, nr_of_folds))
+    train_folds.remove(i)
+    train_folds.remove(validation_fold_nr)
 
     validation_folds = [validation_fold_nr]
     test_folds = [test_fold_nr]
 
     logger.info('Testing on folds: ' + str(test_folds))
     logger.info('Validating on folds: ' + str(validation_folds))
-    logger.info('Holding out folds: ' + str(holdout_folds))
     logger.info('Training on folds: ' + str(train_folds))
 
     word_embedding_resources = {}
