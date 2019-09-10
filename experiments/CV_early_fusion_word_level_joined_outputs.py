@@ -40,30 +40,38 @@ emobase_dataset = np.load(emobase_dataset_path).item()
 emobase_dataset = normalize_sequence_features(emobase_dataset, class_groups, metadata)
 
 nr_of_folds = 10
+nr_of_holdouts = 3
 
 all_golds = []
 all_preds = []
+
 for i in range(0, nr_of_folds):
     test_fold_nr = i
     validation_fold_nr = (i + 1) % nr_of_folds
 
-    logger.info('Testing on fold ' + str(test_fold_nr))
-    logger.info('Validating on fold ' + str(validation_fold_nr))
+    train_folds = list(range(validation_fold_nr + 1, validation_fold_nr + nr_of_holdouts + 1))
+    train_folds = [x % nr_of_folds for x in train_folds]
 
-    validation_fold = [validation_fold_nr]
-    test_fold = [test_fold_nr]
+    holdout_folds = list(range(0, nr_of_folds))
+    holdout_folds.remove(i)
+    holdout_folds.remove(validation_fold_nr)
+    holdout_folds = [e for e in holdout_folds if e not in train_folds]
 
-    train_folds = list(range(0, nr_of_folds))
-    train_folds.remove(i)
-    train_folds.remove(validation_fold_nr)
+    validation_folds = [validation_fold_nr]
+    test_folds = [test_fold_nr]
+
+    logger.info('Testing on folds: ' + str(test_folds))
+    logger.info('Validating on folds: ' + str(validation_folds))
+    logger.info('Holding out folds: ' + str(holdout_folds))
+    logger.info('Training on folds: ' + str(train_folds))
 
     word_embedding_resources = {}
     word_embedding_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, train_folds)
-    word_embedding_resources['validation_dataset']  = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, validation_fold)
-    word_embedding_resources['test_dataset']  = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, test_fold)
+    word_embedding_resources['validation_dataset']  = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, validation_folds)
+    word_embedding_resources['test_dataset']  = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, test_folds)
     word_embedding_params["input_dim"] = word_embedding_resources['train_dataset'].tensors[0][0].size()[1]
     word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
-    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//8//CV_classify_word_embeddings//' + str(i) + '//model.pth')
+    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//9//CV_classify_word_embeddings//' + str(i) + '//model.pth')
     word_embedding_model = LSTM_all_timesteps.LSTM(word_embedding_params)
     word_embedding_model.load_state_dict(torch.load(word_embedding_model_path))
     word_embedding_model.eval()
@@ -71,9 +79,9 @@ for i in range(0, nr_of_folds):
 
     emobase_resources = {}
     emobase_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, train_folds)
-    emobase_resources['validation_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, validation_fold)
-    emobase_resources['test_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, test_fold)
-    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//8//CV_classify_emobase_50ms_buffer//' + str(i) + '//model.pth')
+    emobase_resources['validation_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, validation_folds)
+    emobase_resources['test_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, test_folds)
+    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//9//CV_classify_emobase_50ms_buffer//' + str(i) + '//model.pth')
     emobase_params["input_dim"] = emobase_resources['train_dataset'].tensors[0][0].size()[1]
     emobase_params["label_dim"] = len(set(list(class_groups.values())))
     emobase_model = LSTM_all_timesteps.LSTM(emobase_params)
