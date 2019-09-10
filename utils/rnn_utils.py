@@ -21,11 +21,11 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
     #optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
-    optimizer = optim.Adam(model.parameters())
+    optimizer = optim.AdamW(model.parameters())
 
     logger.info(optimizer)
 
-    early_stopping = EarlyStopping(patience=5)
+    early_stopping = EarlyStopping(patience=10)
     logger.info(early_stopping)
     for e in range(params["epochs"]):
         train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
