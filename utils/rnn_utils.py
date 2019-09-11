@@ -139,7 +139,7 @@ def train_multilabel(train_dataset, validation_dataset, test_dataset, id_to_name
     weights = 1 / np.array(list(count_dict.values()))
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.BCEWithLogitsLoss(weight=weights)
-    optimizer = optim.AdamW(model.parameters())
+    optimizer = optim.Adam(model.parameters())
 
     logger.info(optimizer)
 
@@ -224,7 +224,7 @@ def train_multilabel(train_dataset, validation_dataset, test_dataset, id_to_name
 
             output, _, _ = best_model(inputs, lengths, h)
 
-            test_losses.append(criterion(output, labels).item())
+            test_losses.append(criterion(output, all_labels).item())
 
             _, predicted = torch.max(output.data, 1)
             test_predictions += predicted.data.tolist()
