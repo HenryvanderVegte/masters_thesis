@@ -3,7 +3,8 @@ scikit-learn
 pydotplus
 librosa
 tqdm
-pytorch torchvision cudatoolkit=10.0 -c pytorch
+torch
+torchvision
 nltk
 pydub
 gensim
