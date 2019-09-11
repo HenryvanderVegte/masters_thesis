@@ -198,7 +198,7 @@ def train_multilabel(train_dataset, validation_dataset, test_dataset, id_to_name
         acc, _, _, _ = get_metrics(validation_golds, validation_predictions)
         logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
 
-        early_stopping(np.mean(validation_losses), model)
+        early_stopping((1-acc), model)
         if early_stopping.early_stop:
             logger.info('Stop training. Take model from epoch ' + str(early_stopping.best_epoch))
             break

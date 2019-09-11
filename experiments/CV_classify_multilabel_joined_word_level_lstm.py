@@ -4,9 +4,10 @@ from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_multilabel_sequence_dataset_from_metadata
 
-emobase_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_50ms_buffer.npy')
+emobase_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_50ms_buffer_top200_features.npy')
+embedding_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings.npy')
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
-EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//audio')
+EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//fusion')
 
 class_groups = {
     "hap":0,
@@ -26,10 +27,13 @@ params = {
 }
 
 params["label_dim"] = len(set(list(class_groups.values())))
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_multilabel_emobase", use_timestamp=True)
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_multilabel_word_level_fusion", use_timestamp=True)
 
 emobase_features = np.load(emobase_features).item()
-emobase_features = normalize_sequence_features(emobase_features, class_groups, metadata)
+embedding_features = np.load(embedding_features).item()
+
+joined_features = join_feature_dicts(emobase_features, embedding_features)
+joined_features = normalize_sequence_features(joined_features, class_groups, metadata)
 
 nr_of_folds = 10
 
@@ -51,9 +55,9 @@ for i in range(0, nr_of_folds):
     logger.info('Validating on folds: ' + str(validation_folds))
     logger.info('Training on folds: ' + str(train_folds))
 
-    train_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, train_folds)
-    validation_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, validation_folds)
-    test_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, test_folds)
+    train_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, joined_features, class_groups, train_folds)
+    validation_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, joined_features, class_groups, validation_folds)
+    test_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, joined_features, class_groups, test_folds)
 
     params["input_dim"] = train_dataset.tensors[0][0].size()[1]
 
