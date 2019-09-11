@@ -151,6 +151,30 @@ def normalize_sequence_features(feature_dict, class_groups, metadata):
 
     return feature_dict
 
+def exclude_sequence_features_by_id(feature_dict, exclude_ids):
+    for key in feature_dict.keys():
+        new_seq = []
+        for vec in feature_dict[key]:
+            new_vec = []
+            for i in range(len(vec)):
+                if i in exclude_ids:
+                    continue
+                new_vec.append(vec[i])
+            new_seq.append(new_vec)
+        feature_dict[key] = np.array(new_seq)
+        print(key)
+    return feature_dict
+
+def exclude_features_by_id(feature_dict, exclude_ids):
+    for key in feature_dict.keys():
+        new_fl = []
+        for i in range(len(feature_dict[key])):
+            if i in exclude_ids:
+                continue
+            new_fl.append(feature_dict[key][i])
+        feature_dict[key] = np.asarray(new_fl)
+    return feature_dict
+
 def normalize_features(feature_dict):
     full_fl = []
 
@@ -166,3 +190,14 @@ def normalize_features(feature_dict):
         feature_dict[key] = (feature_dict[key] - means) / stddevs
 
     return feature_dict
+
+def join_feature_dicts(feature_dict1, feature_dict2):
+    joined_dict = {}
+    for key in feature_dict1.keys():
+        joined_vecs = []
+        for i in range(len(feature_dict1[key])):
+            vec1 = feature_dict1[key][i]
+            vec2 = feature_dict2[key][i]
+            joined_vecs.append(np.concatenate((vec1, vec2), axis=0))
+        joined_dict[key] = np.asarray(joined_vecs)
+    return joined_dict

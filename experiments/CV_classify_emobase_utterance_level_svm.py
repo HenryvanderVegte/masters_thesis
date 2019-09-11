@@ -35,7 +35,7 @@ for i in range(0, nr_of_folds):
     test_fold = [test_fold_nr]
 
     train_folds = list(range(0, nr_of_folds))
-    train_folds.remove(i)
+    train_folds.remove(test_fold_nr)
     train_folds.remove(validation_fold_nr)
 
     train_dataset = create_dataset_from_metadata(metadata, emobase_features, class_groups, train_folds)

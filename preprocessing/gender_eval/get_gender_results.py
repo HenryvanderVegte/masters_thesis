@@ -1,43 +1,59 @@
 from utils.experiments_util import *
-from preprocessing.emobase.emobase_feature_extractor import *
+from classification.util.global_vars import *
 
-def print_m_f_statistics(gender_info_file):
-    with open(gender_info_file, "r") as f:
+def print_m_f_statistics(gender_infos):
+    m_predicted = []
+    m_gold = []
+    f_predicted = []
+    f_gold = []
+    all_predicted = []
+    all_gold = []
 
-        m_predicted = []
-        m_gold = []
-        f_predicted = []
-        f_gold = []
+    for line in gender_infos:
+        split = line.split('\t')
+        predicted = int(split[0])
+        gold = int(split[1])
+        utterance_name = split[2]
 
-        lines = f.readlines()
-        for line in lines:
-            split = line.split('\t')
-            predicted = int(split[0])
-            gold = int(split[1])
-            utterance_name = split[2]
+        if utterance_name.split('_')[-1].startswith('F'):
+            f_predicted.append(predicted)
+            f_gold.append(gold)
+        elif utterance_name.split('_')[-1].startswith('M'):
+            m_predicted.append(predicted)
+            m_gold.append(gold)
+        else:
+            print('Unexpected Name')
+        all_predicted.append(predicted)
+        all_gold.append(gold)
 
-            if utterance_name.split('_')[-1].startswith('F'):
-                f_predicted.append(predicted)
-                f_gold.append(gold)
-            else:
-                m_predicted.append(predicted)
-                m_gold.append(gold)
+    print('Male stats: ')
+    print('Count: ' + str(len(m_gold)))
+    print(get_metrics_str(m_gold, m_predicted))
 
-        print('Male stats: ')
-        print(get_metrics_str(m_gold, m_predicted))
+    print('Female stats: ')
+    print('Count: ' + str(len(f_gold)))
+    print(get_metrics_str(f_gold, f_predicted))
 
-        print('Female stats: ')
-        print(get_metrics_str(f_gold, f_predicted))
+    print('Total stats: ')
+    print('Count: ' + str(len(all_gold)))
+    print(get_metrics_str(all_gold, all_predicted))
+
+def get_gender_info_str_from_CV(experiment_path):
+    all_results = []
+    for i in range(0,9):
+        results = os.path.join(experiment_path, str(i), 'results.txt')
+        reached_res = False
+        for line in open(results).read().splitlines():
+            if line.startswith('Predicted	Gold	Name'):
+                reached_res = True
+                continue
+            if not reached_res:
+                continue
+            all_results.append(line)
+    return all_results
 
 
-gender_info_file = os.path.join(ROOT_FOLDER, 'gender//audio_utterance_svm.txt')
-print('AUDIO:')
-print_m_f_statistics(gender_info_file)
+experiment_path = os.path.join(ROOT_FOLDER, "models//CV//8//CV_early_fusion_word_level_joined_model_output")
+gender_info_as_str = get_gender_info_str_from_CV(experiment_path)
+print_m_f_statistics(gender_info_as_str)
 
-#gender_info_file = os.path.join(ROOT_FOLDER, 'gender//text_classifier.txt')
-#print('TEXT:')
-#print_m_f_statistics(gender_info_file)
-
-#gender_info_file = os.path.join(ROOT_FOLDER, 'gender//combined_classifier.txt')
-#print('COMBINED:')
-#print_m_f_statistics(gender_info_file)

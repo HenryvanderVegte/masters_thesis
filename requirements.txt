@@ -7,3 +7,4 @@ pytorch torchvision cudatoolkit=10.0 -c pytorch
 nltk
 pydub
 gensim
+pydub

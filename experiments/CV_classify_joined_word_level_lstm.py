@@ -4,7 +4,8 @@ from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
-emobase_and_embedding_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//fusion//emobase_50ms_buffer_and_embeddings.npy')
+emobase_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_50ms_buffer_top200_features.npy')
+embedding_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings.npy')
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//fusion')
 
@@ -28,8 +29,12 @@ params = {
 params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_joined_word_level", use_timestamp=True)
 
-emobase_and_embedding_features = np.load(emobase_and_embedding_features).item()
-emobase_and_embedding_features = normalize_sequence_features(emobase_and_embedding_features, class_groups, metadata)
+emobase_features = np.load(emobase_features).item()
+embedding_features = np.load(embedding_features).item()
+
+joined_features = join_feature_dicts(emobase_features, embedding_features)
+
+emobase_and_embedding_features = normalize_sequence_features(joined_features, class_groups, metadata)
 
 nr_of_folds = 10
 
