@@ -143,7 +143,7 @@ def train_multilabel(train_dataset, validation_dataset, test_dataset, id_to_name
 
     logger.info(optimizer)
 
-    early_stopping = EarlyStopping(patience=10)
+    early_stopping = EarlyStopping(patience=2)
     logger.info(early_stopping)
     for e in range(params["epochs"]):
         train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
@@ -219,6 +219,7 @@ def train_multilabel(train_dataset, validation_dataset, test_dataset, id_to_name
             inputs = inputs.to(device)
             labels = labels.to(device, dtype=torch.int64).view(-1)
             lengths = lengths.to(device, dtype=torch.int64).view(-1)
+            all_labels = all_labels.to(device, dtype=torch.float32)
             ids = ids.to(device, dtype=torch.int64).view(-1)
             h = tuple([each.data for each in h])
 
