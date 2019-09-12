@@ -76,6 +76,43 @@ def create_word_level_wavs(wav_file, words_with_timestamps, out_folder):
         word_level_wavs.append(word_wav_file)
     return word_level_wavs
 
+def create_word_level_wavs_with_pauses(wav_file, words_with_timestamps, out_folder):
+    """
+    Creates word level wave files based on words_with_timestamps, writes them into out_folder and
+    returns their paths
+    :param wav_file:
+    :param words_with_timestamps:
+    :param out_folder:
+    :return:
+    """
+    word_level_wavs = []
+    wav_audio = AudioSegment.from_file(wav_file, "wav")
+    chunks = make_chunks(wav_audio, chunk_length_ms)
+    chunk_length = len(chunks)
+    wav_file_name = os.path.basename(wav_file)[:-4]
+
+    for i in range(len(words_with_timestamps)):
+        word_wav_file = wav_file_name + '_' + str(words_with_timestamps[i]['id']) + '_' + words_with_timestamps[i]['word'] + '.wav'
+        word_wav_file = os.path.join(out_folder, word_wav_file)
+
+        if i == 0:
+            start = 0
+        else:
+            start = words_with_timestamps[i-1]['end']
+
+        if i == len(words_with_timestamps) - 1:
+            end = chunk_length
+        else:
+            end = words_with_timestamps[i+1]['start']
+
+        segments = chunks[int(start):int(end)]
+        combined = AudioSegment.empty()
+        for segment in segments:
+            combined += segment
+        combined.export(word_wav_file, format="wav")
+        word_level_wavs.append(word_wav_file)
+    return word_level_wavs
+
 def extract_word_level_emobase_features(utterance_name):
     wdseg_file = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//features//forced_alignment//wdseg", utterance_name + ".wdseg")
     wav_file = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//wavs", utterance_name + ".wav")
@@ -85,7 +122,7 @@ def extract_word_level_emobase_features(utterance_name):
 
     if words_with_timestamps is not None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            word_level_wavs = create_word_level_wavs(wav_file, words_with_timestamps, temp_dir)
+            word_level_wavs = create_word_level_wavs_with_pauses(wav_file, words_with_timestamps, temp_dir)
             for word_level_wav in word_level_wavs:
                 emobase_features = opensmile.get_emobase_features(word_level_wav)
                 if emobase_features is not None:
