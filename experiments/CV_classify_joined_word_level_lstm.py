@@ -22,6 +22,7 @@ params = {
     "hidden_size": 32,
     "drop_prob": 0.0,
     "fully_connected_drop_prob": 0.2,
+    "learning_rate": 1e-3,
     "layers": 2,
     "epochs": 1000
 }

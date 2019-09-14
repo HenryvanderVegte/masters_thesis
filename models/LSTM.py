@@ -13,6 +13,7 @@ class LSTM(nn.Module):
 
         self.hidden_size = params["hidden_size"]
         self.n_layers = params["layers"]
+
         self.rnn = nn.LSTM(input_size=params["input_dim"], hidden_size=params["hidden_size"], num_layers=params["layers"], dropout=params["drop_prob"], batch_first=True)
 
         for name, param in self.rnn.named_parameters():

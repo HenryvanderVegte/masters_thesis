@@ -53,7 +53,7 @@ def get_gender_info_str_from_CV(experiment_path):
     return all_results
 
 
-experiment_path = os.path.join(ROOT_FOLDER, "models//CV//8//CV_early_fusion_word_level_joined_model_output")
+experiment_path = os.path.join(ROOT_FOLDER, "models//CV//8//2019-09-11_13-20-32_CV_classify_joined_word_level_emotop200")
 gender_info_as_str = get_gender_info_str_from_CV(experiment_path)
 print_m_f_statistics(gender_info_as_str)
 

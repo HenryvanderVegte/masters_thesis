@@ -4,7 +4,7 @@ from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
-emobase_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_50ms_buffer_top200_features.npy')
+emobase_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_pauses.npy')
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//audio')
 
@@ -18,15 +18,16 @@ class_groups = {
 
 params = {
     "batch_size": 16,
-    "hidden_size": 8,
+    "hidden_size": 256,
     "drop_prob": 0.0,
-    "fully_connected_drop_prob": 0.2,
+    "fully_connected_drop_prob": 0.0,
     "layers": 2,
+    "learning_rate": 1e-5,
     "epochs": 1000
 }
 
 params["label_dim"] = len(set(list(class_groups.values())))
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_emobase_50ms_buffer", use_timestamp=True)
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_emobase_word_level", use_timestamp=True)
 
 emobase_features = np.load(emobase_features).item()
 emobase_features = normalize_sequence_features(emobase_features, class_groups, metadata)

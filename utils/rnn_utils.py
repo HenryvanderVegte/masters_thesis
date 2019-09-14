@@ -21,7 +21,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     weights = torch.FloatTensor(weights).cuda()
     criterion = nn.CrossEntropyLoss(weight=weights)
     #optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
-    optimizer = optim.AdamW(model.parameters())
+    optimizer = optim.AdamW(model.parameters(), lr=params['learning_rate'])
 
     logger.info(optimizer)
 
@@ -143,7 +143,7 @@ def train_multilabel(train_dataset, validation_dataset, test_dataset, id_to_name
 
     logger.info(optimizer)
 
-    early_stopping = EarlyStopping(patience=2)
+    early_stopping = EarlyStopping()
     logger.info(early_stopping)
     for e in range(params["epochs"]):
         train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
@@ -158,6 +158,8 @@ def train_multilabel(train_dataset, validation_dataset, test_dataset, id_to_name
             inputs = inputs.to(device)
             labels = labels.to(device, dtype=torch.int64).view(-1)
             all_labels = all_labels.to(device, dtype=torch.float32)
+            #all_labels[all_labels > 0] = 1
+
             lengths = lengths.to(device, dtype=torch.int64).view(-1)
             h = tuple([each.data for each in h])
 
