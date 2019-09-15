@@ -13,6 +13,7 @@ def create_all_words_set_from_metadata(metadata, class_groups, folds):
             continue
         transcription = regex.sub('', instance['Transcription'].lower())
         tokens = nltk.word_tokenize(transcription)
+
         all_words.update(tokens)
     return all_words
 
@@ -32,7 +33,7 @@ def create_dataset_from_metadata(metadata, class_groups, all_words_set,  folds):
 
 def train(train_dataset, test_dataset, experiment_path, logger):
     classifier = nltk.NaiveBayesClassifier.train(train_dataset)
-    classifier.show_most_informative_features()
+    classifier.show_most_informative_features(n=400)
 
     model_path = os.path.join(experiment_path, "model.pkl")
     f = open(model_path, 'wb')

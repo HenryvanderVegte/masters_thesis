@@ -19,7 +19,6 @@ def get_emobase_features(audio_file):
     :return:
     """
     cmdline = cmdline_base + " -inputfile " + audio_file
-
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_file = os.path.join(temp_dir, 'out.arff')
         cmdline += " -arffout " + temp_file
@@ -27,7 +26,7 @@ def get_emobase_features(audio_file):
             subprocess.call(cmdline, stdout=devnull, stderr=subprocess.STDOUT)
 
         with open(temp_file, "rb") as f:
-            # only read last line (https://stackoverflow.com/questions/3346430)
+            # only read last line (parts copied from https://stackoverflow.com/questions/3346430)
             f.seek(-2, os.SEEK_END)
             while f.read(1) != b"\n":
                 f.seek(-2, os.SEEK_CUR)
