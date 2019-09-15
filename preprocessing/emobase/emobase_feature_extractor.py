@@ -203,14 +203,12 @@ def extract_word_level_emobase_features(audio_info):
     all_emobase_features = []
 
     if words_with_timestamps is not None:
-        #with tempfile.TemporaryDirectory() as temp_dir:
-        temp_dir = os.path.join(ROOT_FOLDER,'test')
-
-        word_level_wavs = create_word_level_audios_with_pauses(wav_file, words_with_timestamps, temp_dir, format='m4a')
-        for word_level_wav in word_level_wavs:
-            emobase_features = opensmile.get_emobase_features(word_level_wav)
-            if emobase_features is not None:
-                all_emobase_features.append(emobase_features)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            word_level_wavs = create_word_level_audios_with_pauses(wav_file, words_with_timestamps, temp_dir, format='m4a')
+            for word_level_wav in word_level_wavs:
+                emobase_features = opensmile.get_emobase_features(word_level_wav)
+                if emobase_features is not None:
+                    all_emobase_features.append(emobase_features)
 
     print('completed ' + utterance_name)
     return all_emobase_features

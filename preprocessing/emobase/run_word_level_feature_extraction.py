@@ -5,7 +5,7 @@ from multiprocessing.pool import ThreadPool
 wltfile = os.path.join(ROOT_FOLDER, 'datasets//MS//transcriptions//dev.txt')
 features_out = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_dev.npy')
 
-lines = open(wltfile).read().splitlines()[:1]
+lines = open(wltfile).read().splitlines()
 
 pool = ThreadPool(8)
 results = pool.map(extract_word_level_emobase_features, lines)
