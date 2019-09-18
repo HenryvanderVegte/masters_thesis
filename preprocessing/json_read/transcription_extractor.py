@@ -1,8 +1,8 @@
 import os
 import json
-input_folder = "E://masters_thesis//datasets//MSP_IMPROV//transcriptions//transcriptions"
+input_folder = "C://Users//Henry//Desktop//datasets//MS//sentiment dataset//transcriptions//test"
 
-output_file  = "E://masters_thesis//datasets//MSP_IMPROV//transcriptions//transcriptions.txt"
+output_file  = "C://Users//Henry//Desktop//datasets//MS//sentiment dataset//transcriptions//test.txt"
 
 out_str = ''
 
@@ -13,7 +13,7 @@ for r, d, f in os.walk(input_folder):
             file_err = False
 
             json_obj = json.load(f)
-            file_name = json_obj['AudioFileResults'][0]['AudioFileName'].split('/')[-1]
+            file_name = '/'.join(json_obj['AudioFileResults'][0]['AudioFileName'].split('/')[2:])
 
             segment_results = json_obj['AudioFileResults'][0]['SegmentResults']
 
@@ -24,6 +24,8 @@ for r, d, f in os.walk(input_folder):
             line = file_name
 
             for segment in segment_results:
+                if segment['ChannelNumber'] != '0':
+                    continue
                 nbests = segment['NBest']
                 if len(nbests) != 1:
                     print("NBest length: " + str(len(nbests)) + ' ' + file_path)

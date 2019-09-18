@@ -9,15 +9,13 @@ This script uses the recognized words with an existing word level audio and extr
 '''
 
 utterances_with_words = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//forced_alignment//utterances')
-embeddings_out = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//embeddings//2d//embeddings_normalized.npy')
-model = gensim.models.KeyedVectors.load_word2vec_format('file://C://Users//Henry.000//Desktop//Masterarbeit//pretrained_embeddings//GoogleNews-vectors-negative300.bin', binary=True)
+embeddings_out = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings_oov_per_word.npy')
+model = gensim.models.KeyedVectors.load_word2vec_format('file://C://Users//Henry//Desktop//Masterarbeit//pretrained_embeddings//GoogleNews-vectors-negative300.bin', binary=True)
 
-oov_vector = np.random.normal(0, 0.1, model.vector_size)
 vector_size = model.vector_size
 
-normalize_features = True
-
 instance_dict = {}
+oovs = {}
 full_fl = []
 for r, d, f in os.walk(utterances_with_words):
     for file in f:
@@ -35,19 +33,18 @@ for r, d, f in os.walk(utterances_with_words):
                 word = word.lower()
                 word = re.sub(r'\W+', '', word)
 
-                instance_matrix[i, :] = np.array(model.wv[word]) if word in model.wv else oov_vector
+                if word in model.wv:
+                    instance_matrix[i, :] = np.array(model.wv[word])
+                else:
+                    if word in oovs:
+                        instance_matrix[i, :] = oovs[word]
+                    else:
+                        oov_vector = np.random.normal(0, 0.1, 300)
+                        oovs[word] = oov_vector
+                        print('Not in modeL: ' + word)
+
                 full_fl.append(instance_matrix[i])
                 i += 1
         instance_dict[name] = instance_matrix
-
-#normalization
-if normalize_features:
-    fl = np.array(full_fl)
-    means = fl.mean(axis=0)
-    stddevs = fl.std(axis=0)
-    stddevs[stddevs == 0] = 1
-
-    for key in instance_dict.keys():
-        instance_dict[key] = (instance_dict[key] - means) / stddevs
 
 np.save(embeddings_out, instance_dict)

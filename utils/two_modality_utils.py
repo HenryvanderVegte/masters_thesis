@@ -15,7 +15,7 @@ Usually, one is the acoustic and one is the language model.
 """
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-torch.manual_seed(0)
+torch.manual_seed(17092019)
 
 def index_dataset(dataset):
     indexed_dataset = {}
@@ -301,9 +301,9 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
     model1 = resources_modality_1['model'].to(device)
     model2 = resources_modality_2['model'].to(device)
 
-    train_instance_count1 = resources_modality_1['train_dataset'].tensors[0].size()[0]
+    train_instance_count1 = 32#resources_modality_1['train_dataset'].tensors[0].size()[0]
     train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=False, batch_size=train_instance_count1)
-    train_instance_count2 = resources_modality_2['train_dataset'].tensors[0].size()[0]
+    train_instance_count2 = 32#resources_modality_2['train_dataset'].tensors[0].size()[0]
     train_loader2 = utils.DataLoader(resources_modality_2['train_dataset'], shuffle=False, batch_size=train_instance_count2)
 
     test_instance_count1 = resources_modality_1['test_dataset'].tensors[0].size()[0]
@@ -323,6 +323,9 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
 
         for inputs1, labels1, lengths1, ids1 in train_loader1:
             inputs2, labels2, lengths2, ids2 = next(train2_iter)
+            if inputs1.shape[0] != train_instance_count1:
+                continue
+
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')
                 break
@@ -436,49 +439,18 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
     indexed_ds_validation2 = index_dataset(resources_modality_2['validation_dataset'])
     indexed_ds_test2 = index_dataset(resources_modality_2['test_dataset'])
 
-    train_instance_count = resources_modality_1['train_dataset'].tensors[0].size()[0]
-    train_instance_count = 32
-    train_loader_all = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=False,
-                                     batch_size=train_instance_count)
-
-    train_vectors = np.empty((0,8))
-    for inputs1, labels1, lengths1, ids1 in train_loader_all:
-        inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_train2, ids1)
-        lengths1, inputs1, labels1, ids1 = sort_tensors(lengths1, inputs1, labels1, ids1)
-        lengths2, inputs2, labels2, ids2 = sort_tensors(lengths2, inputs2, labels2, ids2)
-        h1 = model1.init_hidden(train_instance_count)
-        h2 = model2.init_hidden(train_instance_count)
-        with torch.no_grad():
-            if inputs1.shape[0] != train_instance_count:
-                continue
-            h1 = tuple([each.data for each in h1])
-            _, _, _, outputs1 = model1(inputs1.to(device), lengths1.to(device, dtype=torch.int64).view(-1), h1)
-            h2 = tuple([each.data for each in h2])
-            _, _, _, outputs2 = model2(inputs2.to(device), lengths2.to(device, dtype=torch.int64).view(-1), h2)
-            joined_inputs = torch.cat((outputs1, outputs2), 2)
-
-            for i in range(lengths1.size()[0]):
-                length = int(lengths1[i].data.cpu().numpy()[0])
-                vecs = joined_inputs[i][:length]
-                train_vectors = np.concatenate((train_vectors, vecs.cpu().numpy(),), axis=0)
-
-    means = torch.Tensor(train_vectors.mean(axis=0)).to(device)
-    stddevs = train_vectors.std(axis=0)
-    stddevs[stddevs == 0] = 1
-    stddevs = torch.Tensor(stddevs).to(device)
-
     # Loss and optimizer
     unique, counts = np.unique(resources_modality_1['train_dataset'].tensors[1], return_counts=True)
     count_dict = dict(zip(unique, counts))
     weights = 1 / np.array(list(count_dict.values()))
     weights = torch.FloatTensor(weights).cuda()
-    criterion = nn.CrossEntropyLoss(weight=weights)
+    criterion = nn.CrossEntropyLoss()#weight=weights)
 
     #optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
-    optimizer = optim.Adam(joined_model.parameters())
+    optimizer = optim.AdamW(joined_model.parameters(), lr=1e-2)
     logger.info(optimizer)
 
-    early_stopping = EarlyStopping()
+    early_stopping = EarlyStopping(patience=6)
     logger.info(early_stopping)
     softmax = nn.Softmax(dim=2)
 
@@ -513,7 +485,6 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
             #combine weights of the two other models to create the input for the joined model
             joined_inputs = torch.cat((outputs1, outputs2), 2)
-            joined_inputs = (joined_inputs - means) / stddevs
             h = tuple([each.data for each in h])
             joined_model.zero_grad()
             output, h, _ = joined_model(joined_inputs, lengths1.to(device, dtype=torch.int64).view(-1), h)
@@ -559,7 +530,6 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
                 #outputs2 = softmax(outputs2)
 
                 joined_inputs = torch.cat((outputs1, outputs2), 2)
-                joined_inputs = (joined_inputs - means) / stddevs
 
                 h = tuple([each.data for each in h])
                 output, _, _ = joined_model(joined_inputs, lengths, h)
@@ -572,6 +542,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
         logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
 
         early_stopping(np.mean(validation_losses), joined_model)
+        #early_stopping(1-acc, joined_model)
         if early_stopping.early_stop:
             logger.info('Stop training. Take model from epoch ' + str(early_stopping.best_epoch))
             break
@@ -612,7 +583,6 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
             #outputs2 = softmax(outputs2)
 
             joined_inputs = torch.cat((outputs1, outputs2), 2)
-            joined_inputs = (joined_inputs - means) / stddevs
 
             h = tuple([each.data for each in h])
             output, _, _ = best_model(joined_inputs, lengths, h)
