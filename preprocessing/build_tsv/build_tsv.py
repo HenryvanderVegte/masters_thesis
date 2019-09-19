@@ -70,6 +70,13 @@ def add_all_labels (tsv_data):
         instance['Labels_All'] = name_to_labels[name]['labels']
     return tsv_data
 
+def add_gender(tsv_data):
+    for instance in tsv_data:
+        name = instance['Name']
+        gender = name.split('_')[-1][:1]
+        instance['Gender'] = gender
+    return tsv_data
+
 def tsv_data_to_string(tsv_data):
     keys = tsv_data[0].keys()
     tsv_str = '\t'.join(keys) + '\n'
@@ -81,10 +88,12 @@ def tsv_data_to_string(tsv_data):
     return tsv_str
 
 
-add_all_labels(tsv_data)
-tsv_data = add_word_count(tsv_data)
-tsv_data = add_all_labels(tsv_data)
+#add_all_labels(tsv_data)
+#tsv_data = add_word_count(tsv_data)
+#tsv_data = add_all_labels(tsv_data)
 
+
+tsv_data = add_gender(tsv_data)
 tsv_str = tsv_data_to_string(tsv_data)
 
 with open(tsv_data_new, "w") as f:

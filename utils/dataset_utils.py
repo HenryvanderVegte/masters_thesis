@@ -86,7 +86,7 @@ def create_sequence_dataset_with_pad_val(feature_dict, name_to_label_dict, seq_l
 
     return dataset, id_to_name
 
-def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups, folds, max_seq_length = None):
+def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups, folds, max_seq_length = None, take_gender = None):
     """
     Loads sequence data into a TensorDataset,
     if max_seq_length is set, sequences longer than seq_length will be cut.
@@ -109,6 +109,9 @@ def create_sequence_dataset_from_metadata(metadata, features_dict, class_groups,
 
         if instance['Name'] not in features_dict:
             print('No features for:' + instance['Name'])
+            continue
+
+        if take_gender is not None and instance['Gender'] != take_gender:
             continue
 
         features = features_dict[instance['Name']]
@@ -180,7 +183,7 @@ def create_multilabel_sequence_dataset_from_metadata(metadata, features_dict, cl
 
         label_dist = [ int(class_groups[x]) for x in instance['Labels_All'].split(';') if x in class_groups]
         one_hot_vecs = np.eye(label_count)[np.array(label_dist).reshape(-1)]
-        all_labels_vec = np.sum(one_hot_vecs, axis=0) #/ len(label_dist)
+        all_labels_vec = np.sum(one_hot_vecs, axis=0) / len(label_dist)
 
         if max_seq_length is None:
             fl.append(torch.stack([torch.Tensor(i) for i in features]))

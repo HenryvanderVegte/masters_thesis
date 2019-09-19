@@ -25,7 +25,7 @@ class LSTM(nn.Module):
         self.dropout = nn.Dropout(params["fully_connected_drop_prob"])
         self.fc = nn.Linear(params["hidden_size"], params["label_dim"])
         torch.nn.init.xavier_uniform_(self.fc.weight)
-        self.relu = nn.ReLU()
+        self.sm = nn.LogSoftmax(dim=1)
 
     def forward(self, x, lengths, hidden):
         batch_size = x.shape[0]
@@ -41,9 +41,9 @@ class LSTM(nn.Module):
             last_out[j,:] = hidden_activation[j,(x-1),:]
 
         out = self.dropout(last_out)
-        out = self.fc(out)
-        out = self.relu(out)
 
+        out = self.fc(out)
+        out = self.sm(out)
         return out, hidden, hidden_activation
 
     def init_hidden(self, batch_size):

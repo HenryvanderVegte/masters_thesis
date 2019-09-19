@@ -151,6 +151,30 @@ def normalize_sequence_features(feature_dict, class_groups, metadata):
 
     return feature_dict
 
+def normalize_sequence_features_explicit_means_and_stddevs(dataset_dict, means, stddevs):
+    for key in dataset_dict.keys():
+        dataset_dict[key] = (dataset_dict[key] - means) / stddevs
+    return dataset_dict
+
+def get_means_and_stddevs_from_dataset(metadata, dataset_dict, class_groups, folds):
+    full_fl = []
+    for instance in metadata:
+        if instance["Label"] not in class_groups or int(instance["Fold"]) not in folds or instance['Name'] not in dataset_dict:
+            continue
+        for arr in dataset_dict[instance['Name']]:
+            full_fl.append(arr)
+
+    fl = np.array(full_fl)
+    means = fl.mean(axis=0)
+    stddevs = fl.std(axis=0)
+    stddevs[stddevs == 0] = 1
+    return means, stddevs
+
+def normalize_sequence_dataset(dataset_dict, means, stddevs):
+    for key in dataset_dict.keys():
+        dataset_dict[key] = (dataset_dict[key] - means) / stddevs
+    return dataset_dict
+
 def exclude_sequence_features_by_id(feature_dict, exclude_ids):
     for key in feature_dict.keys():
         new_seq = []

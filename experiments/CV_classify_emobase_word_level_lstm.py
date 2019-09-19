@@ -30,8 +30,6 @@ params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_emobase_word_level", use_timestamp=True)
 
 emobase_features = np.load(emobase_features).item()
-emobase_features = normalize_sequence_features(emobase_features, class_groups, metadata)
-
 
 nr_of_folds = 10
 all_golds = []
@@ -51,6 +49,9 @@ for i in range(0, nr_of_folds):
     logger.info('Testing on folds: ' + str(test_folds))
     logger.info('Validating on folds: ' + str(validation_folds))
     logger.info('Training on folds: ' + str(train_folds))
+
+    means, stddevs = get_means_and_stddevs_from_dataset(metadata, emobase_features, class_groups, train_folds)
+    emobase_features = normalize_sequence_features_explicit_means_and_stddevs(emobase_features, means, stddevs)
 
     train_dataset = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, train_folds)
     validation_dataset = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, validation_folds)

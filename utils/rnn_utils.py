@@ -19,13 +19,13 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     count_dict = dict(zip(unique, counts))
     weights = 1 / np.array(list(count_dict.values()))
     weights = torch.FloatTensor(weights).cuda()
-    criterion = nn.CrossEntropyLoss(weight=weights)
+    criterion = nn.CrossEntropyLoss()#weight=weights)
     #optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
     optimizer = optim.AdamW(model.parameters(), lr=params['learning_rate'])
 
     logger.info(optimizer)
 
-    early_stopping = EarlyStopping(patience=10)
+    early_stopping = EarlyStopping(patience=4)
     logger.info(early_stopping)
     for e in range(params["epochs"]):
         train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
@@ -138,12 +138,13 @@ def train_multilabel(train_dataset, validation_dataset, test_dataset, id_to_name
     count_dict = dict(zip(unique, counts))
     weights = 1 / np.array(list(count_dict.values()))
     weights = torch.FloatTensor(weights).cuda()
-    criterion = nn.BCEWithLogitsLoss(weight=weights)
-    optimizer = optim.Adam(model.parameters())
+    #nn.KLDivLoss
+    criterion = nn.KLDivLoss()#(weight=weights)
+    optimizer = optim.Adam(model.parameters(), lr=1e-5)
 
     logger.info(optimizer)
 
-    early_stopping = EarlyStopping()
+    early_stopping = EarlyStopping(patience=3)
     logger.info(early_stopping)
     for e in range(params["epochs"]):
         train_loader = utils.DataLoader(train_dataset, shuffle=True, batch_size=params["batch_size"])
@@ -200,7 +201,7 @@ def train_multilabel(train_dataset, validation_dataset, test_dataset, id_to_name
         acc, _, _, _ = get_metrics(validation_golds, validation_predictions)
         logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
 
-        early_stopping((1-acc), model)
+        early_stopping(np.mean(validation_losses), model)
         if early_stopping.early_stop:
             logger.info('Stop training. Take model from epoch ' + str(early_stopping.best_epoch))
             break
