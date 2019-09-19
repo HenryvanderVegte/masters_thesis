@@ -156,10 +156,13 @@ def normalize_sequence_features_explicit_means_and_stddevs(dataset_dict, means, 
         dataset_dict[key] = (dataset_dict[key] - means) / stddevs
     return dataset_dict
 
-def get_means_and_stddevs_from_dataset(metadata, dataset_dict, class_groups, folds):
+def get_means_and_stddevs_from_dataset(metadata, dataset_dict, class_groups, folds, take_gender = None):
     full_fl = []
     for instance in metadata:
         if instance["Label"] not in class_groups or int(instance["Fold"]) not in folds or instance['Name'] not in dataset_dict:
+            continue
+
+        if take_gender is not None and instance['Gender'] != take_gender:
             continue
         for arr in dataset_dict[instance['Name']]:
             full_fl.append(arr)
