@@ -203,7 +203,6 @@ def join_feature_dicts(feature_dict1, feature_dict2):
     for key in feature_dict1.keys():
         joined_vecs = []
 
-        print(str(len(feature_dict1[key])) + ' ' + str(len(feature_dict2[key])))
         if len(feature_dict1[key]) != len(feature_dict2[key]):
             print('Unequal lengths!')
 
