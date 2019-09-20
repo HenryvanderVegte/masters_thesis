@@ -1,10 +1,10 @@
 from utils.experiments_util import *
 from classification.util.global_vars import *
 from utils.rnn_utils import *
-from models import LSTM
+from models import MultilabelLSTM
 from utils.dataset_utils import create_multilabel_sequence_dataset_from_metadata
 
-embeddings = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings.npy')
+embeddings_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings.npy')
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//text')
 
@@ -28,9 +28,6 @@ params = {
 params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_word_embeddings", use_timestamp=True)
 
-embeddings = np.load(embeddings).item()
-embeddings = normalize_sequence_features(embeddings, class_groups, metadata)
-
 nr_of_folds = 10
 
 all_golds = []
@@ -51,13 +48,17 @@ for i in range(0, nr_of_folds):
     logger.info('Validating on folds: ' + str(validation_folds))
     logger.info('Training on folds: ' + str(train_folds))
 
+    embeddings = np.load(embeddings_path).item()
+    means, stddevs = get_means_and_stddevs_from_dataset(metadata, embeddings, class_groups, train_folds)
+    embeddings = normalize_sequence_features_explicit_means_and_stddevs(embeddings, means, stddevs)
+
     train_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, embeddings, class_groups, train_folds)
     validation_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, embeddings, class_groups, validation_folds)
     test_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, embeddings, class_groups, test_folds)
 
     params["input_dim"] = train_dataset.tensors[0][0].size()[1]
 
-    model = LSTM.LSTM(params)
+    model = MultilabelLSTM.LSTM(params)
 
     id_to_name = {}
     for m in metadata:

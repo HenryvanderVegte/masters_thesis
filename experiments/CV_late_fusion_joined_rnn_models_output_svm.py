@@ -4,6 +4,8 @@ from utils.two_modality_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
+embedding_features_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings.npy')
+emobase_features_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_pauses.npy')
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//fusion')
 
@@ -24,10 +26,6 @@ word_embedding_params = {
 }
 word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
 
-word_embeddings_dataset_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings.npy')
-word_embeddings_dataset = np.load(word_embeddings_dataset_path).item()
-word_embeddings_dataset = normalize_sequence_features(word_embeddings_dataset, class_groups, metadata)
-
 emobase_params = {
     "hidden_size": 256,
     "drop_prob": 0.0,
@@ -35,9 +33,6 @@ emobase_params = {
     "layers": 2,
 }
 emobase_params["label_dim"] = len(set(list(class_groups.values())))
-emobase_dataset_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_pauses.npy')
-emobase_dataset = np.load(emobase_dataset_path).item()
-emobase_dataset = normalize_sequence_features(emobase_dataset, class_groups, metadata)
 
 nr_of_folds = 10
 
@@ -58,9 +53,13 @@ for i in range(0, nr_of_folds):
     logger.info('Testing on folds: ' + str(test_folds))
     logger.info('Training on folds: ' + str(train_folds))
 
+    embedding_features = np.load(embedding_features_path).item()
+    means, stddevs = get_means_and_stddevs_from_dataset(metadata, embedding_features, class_groups, train_folds)
+    embedding_features = normalize_sequence_features_explicit_means_and_stddevs(embedding_features, means, stddevs)
+
     word_embedding_resources = {}
-    word_embedding_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, train_folds)
-    word_embedding_resources['test_dataset']  = create_sequence_dataset_from_metadata(metadata, word_embeddings_dataset, class_groups, test_folds)
+    word_embedding_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, embedding_features, class_groups, train_folds)
+    word_embedding_resources['test_dataset']  = create_sequence_dataset_from_metadata(metadata, embedding_features, class_groups, test_folds)
     word_embedding_params["input_dim"] = word_embedding_resources['train_dataset'].tensors[0][0].size()[1]
     word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
     word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//8//CV_classify_word_embeddings////' + str(i) + '//model.pth')
@@ -70,14 +69,18 @@ for i in range(0, nr_of_folds):
     word_embedding_model.eval()
     word_embedding_resources['model'] = word_embedding_model
 
-    emobase_resources = {}
-    emobase_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, train_folds)
-    emobase_resources['test_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_dataset, class_groups, test_folds)
 
-    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//8//CV_classify_emobase_with_pauses//' + str(i) + '//model.pth')
-    logger.info(emobase_model_path)
+    emobase_features = np.load(emobase_features_path).item()
+    means, stddevs = get_means_and_stddevs_from_dataset(metadata, emobase_features, class_groups, train_folds)
+    emobase_features = normalize_sequence_features_explicit_means_and_stddevs(emobase_features, means, stddevs)
+
+    emobase_resources = {}
+    emobase_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, train_folds)
+    emobase_resources['test_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, test_folds)
     emobase_params["input_dim"] = emobase_resources['train_dataset'].tensors[0][0].size()[1]
     emobase_params["label_dim"] = len(set(list(class_groups.values())))
+    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//8//CV_classify_emobase_with_pauses//' + str(i) + '//model.pth')
+    logger.info(emobase_model_path)
     emobase_model = LSTM.LSTM(emobase_params)
     emobase_model.load_state_dict(torch.load(emobase_model_path))
     emobase_model.eval()
@@ -93,6 +96,6 @@ for i in range(0, nr_of_folds):
     all_golds += test_golds
     all_preds += test_preds
 
-logger.info('!Final result!:')
+logger.info('\nFinal result:')
 metrics_str = get_metrics_str(all_golds, all_preds)
 logger.info(metrics_str)

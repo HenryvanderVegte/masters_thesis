@@ -4,7 +4,7 @@ from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
-emobase_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_pauses.npy')
+emobase_features_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_pauses.npy')
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//audio')
 
@@ -29,8 +29,6 @@ params = {
 params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_emobase_word_level", use_timestamp=True)
 
-emobase_features = np.load(emobase_features).item()
-
 nr_of_folds = 10
 all_golds = []
 all_preds = []
@@ -50,6 +48,7 @@ for i in range(0, nr_of_folds):
     logger.info('Validating on folds: ' + str(validation_folds))
     logger.info('Training on folds: ' + str(train_folds))
 
+    emobase_features = np.load(emobase_features_path).item()
     means, stddevs = get_means_and_stddevs_from_dataset(metadata, emobase_features, class_groups, train_folds)
     emobase_features = normalize_sequence_features_explicit_means_and_stddevs(emobase_features, means, stddevs)
 
