@@ -222,6 +222,12 @@ def join_feature_dicts(feature_dict1, feature_dict2):
     joined_dict = {}
     for key in feature_dict1.keys():
         joined_vecs = []
+
+        print(str(len(feature_dict1[key])) + ' ' + str(len(feature_dict2[key])))
+        if len(feature_dict1[key]) != len(feature_dict2[key]):
+            print('Unequal lengths!')
+
+
         for i in range(len(feature_dict1[key])):
             vec1 = feature_dict1[key][i]
             vec2 = feature_dict2[key][i]
