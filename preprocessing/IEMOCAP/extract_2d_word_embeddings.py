@@ -38,16 +38,11 @@ for r, d, f in os.walk(utterances_with_words):
                     instance_matrix[i, :] = np.array(model.wv[word])
                 else:
                     if word not in oov_words:
-                        print(word)
                         oov_words.append(word)
                     instance_matrix[i, :] = oov_vector
 
                 full_fl.append(instance_matrix[i])
                 i += 1
         instance_dict[name] = instance_matrix
-
-oov_words.sort()
-print('----------')
-print(oov_words)
 
 np.save(embeddings_out, instance_dict)
