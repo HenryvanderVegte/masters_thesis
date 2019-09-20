@@ -131,27 +131,7 @@ def get_metrics(labels, predictions):
     UAF = np.sum(fscore) / len(fscore)
     return acc, UAP, UAR, UAF
 
-def normalize_sequence_features(feature_dict, class_groups, metadata):
-    full_fl = []
-
-    for instance in metadata:
-        if instance["Label"] not in class_groups or instance['Name'] not in feature_dict:
-            continue
-
-        for arr in feature_dict[instance['Name']]:
-            full_fl.append(arr)
-
-    fl = np.array(full_fl)
-    means = fl.mean(axis=0)
-    stddevs = fl.std(axis=0)
-    stddevs[stddevs == 0] = 1
-
-    for key in feature_dict.keys():
-        feature_dict[key] = (feature_dict[key] - means) / stddevs
-
-    return feature_dict
-
-def normalize_sequence_features_explicit_means_and_stddevs(dataset_dict, means, stddevs):
+def normalize_sequence_features(dataset_dict, means, stddevs):
     for key in dataset_dict.keys():
         dataset_dict[key] = (dataset_dict[key] - means) / stddevs
     return dataset_dict

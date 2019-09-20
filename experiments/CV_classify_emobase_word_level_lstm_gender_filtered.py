@@ -53,7 +53,7 @@ for i in range(0, nr_of_folds):
 
     emobase_features = np.load(emobase_features_path).item()
     means, stddevs = get_means_and_stddevs_from_dataset(metadata, emobase_features, class_groups, train_folds, take_gender = take_gender)
-    emobase_features = normalize_sequence_features_explicit_means_and_stddevs(emobase_features, means, stddevs)
+    emobase_features = normalize_sequence_features(emobase_features, means, stddevs)
 
     train_dataset = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, train_folds, take_gender = take_gender)
     validation_dataset = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, validation_folds, take_gender = take_gender)
