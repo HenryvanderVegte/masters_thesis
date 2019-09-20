@@ -211,7 +211,7 @@ def create_multilabel_sequence_dataset_from_metadata(metadata, features_dict, cl
 
     return dataset
 
-def create_dataset_from_metadata(metadata, features_dict, class_groups, folds):
+def create_dataset_from_metadata(metadata, features_dict, class_groups, folds, take_gender = None):
     """
     Loads data into a TensorDataset,
     Returns a TensorDataset which contains features, labels, and ids
@@ -227,17 +227,15 @@ def create_dataset_from_metadata(metadata, features_dict, class_groups, folds):
         if instance["Label"] not in class_groups or int(instance["Fold"]) not in folds:
             continue
 
+        if take_gender is not None and instance['Gender'] != take_gender:
+            continue
+
+
         label = class_groups[instance["Label"]]
 
         if instance['Name'] not in features_dict:
             print('No features for:' + instance['Name'])
             continue
-
-        #male = 1
-        #female = 0
-        #if instance['Name'].split('_')[-1].startswith('F'):
-         #   male = 0
-        #    female = 1
 
         features = features_dict[instance['Name']]
 
@@ -245,8 +243,6 @@ def create_dataset_from_metadata(metadata, features_dict, class_groups, folds):
             print('No features for:' + instance['Name'])
             continue
 
-        #features = np.append(features, male)
-        #features = np.append(features, female)
 
         feature_list.append(features)
         labels.append(label)
