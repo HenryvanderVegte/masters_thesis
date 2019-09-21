@@ -50,8 +50,8 @@ for i in range(0, nr_of_folds):
     logger.info('Training on folds: ' + str(train_folds))
 
     embedding_features = np.load(embedding_features_path).item()
-    means, stddevs = get_means_and_stddevs_from_dataset(metadata, embedding_features, class_groups, train_folds)
-    embedding_features = normalize_sequence_features(embedding_features, means, stddevs)
+    means, stddevs = get_means_and_stddevs_from_sequence_dataset(metadata, embedding_features, class_groups, train_folds)
+    embedding_features = normalize_dataset(embedding_features, means, stddevs)
 
     train_dataset = create_sequence_dataset_from_metadata(metadata, embedding_features, class_groups, train_folds)
     validation_dataset = create_sequence_dataset_from_metadata(metadata, embedding_features, class_groups, validation_folds)

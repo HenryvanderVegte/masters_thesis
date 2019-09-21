@@ -53,8 +53,8 @@ for i in range(0, nr_of_folds):
     embedding_features = np.load(embedding_features_path).item()
     joined_features = join_feature_dicts(emobase_features, embedding_features)
 
-    means, stddevs = get_means_and_stddevs_from_dataset(metadata, joined_features, class_groups, train_folds)
-    joined_features = normalize_sequence_features(joined_features, means, stddevs)
+    means, stddevs = get_means_and_stddevs_from_sequence_dataset(metadata, joined_features, class_groups, train_folds)
+    joined_features = normalize_dataset(joined_features, means, stddevs)
 
     train_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, joined_features, class_groups, train_folds)
     validation_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, joined_features, class_groups, validation_folds)

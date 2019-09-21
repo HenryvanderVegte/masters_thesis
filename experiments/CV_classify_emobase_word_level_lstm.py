@@ -49,8 +49,8 @@ for i in range(0, nr_of_folds):
     logger.info('Training on folds: ' + str(train_folds))
 
     emobase_features = np.load(emobase_features_path).item()
-    means, stddevs = get_means_and_stddevs_from_dataset(metadata, emobase_features, class_groups, train_folds)
-    emobase_features = normalize_sequence_features(emobase_features, means, stddevs)
+    means, stddevs = get_means_and_stddevs_from_sequence_dataset(metadata, emobase_features, class_groups, train_folds)
+    emobase_features = normalize_dataset(emobase_features, means, stddevs)
 
     train_dataset = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, train_folds)
     validation_dataset = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, validation_folds)

@@ -49,8 +49,8 @@ for i in range(0, nr_of_folds):
     logger.info('Training on folds: ' + str(train_folds))
 
     embeddings = np.load(embeddings_path).item()
-    means, stddevs = get_means_and_stddevs_from_dataset(metadata, embeddings, class_groups, train_folds)
-    embeddings = normalize_sequence_features(embeddings, means, stddevs)
+    means, stddevs = get_means_and_stddevs_from_sequence_dataset(metadata, embeddings, class_groups, train_folds)
+    embeddings = normalize_dataset(embeddings, means, stddevs)
 
     train_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, embeddings, class_groups, train_folds)
     validation_dataset = create_multilabel_sequence_dataset_from_metadata(metadata, embeddings, class_groups, validation_folds)

@@ -3,7 +3,7 @@ from classification.util.global_vars import *
 from utils.svm_utils import *
 from utils.dataset_utils import create_dataset_from_metadata
 
-emobase_features = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_utterance_level.npy')
+emobase_features_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_utterance_level.npy')
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//audio')
 
@@ -16,8 +16,6 @@ class_groups = {
 }
 
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_emobase_utterance_level_svm", use_timestamp=True)
-emobase_features = np.load(emobase_features).item()
-emobase_features = normalize_features(emobase_features)
 
 nr_of_folds = 10
 
@@ -37,6 +35,10 @@ for i in range(0, nr_of_folds):
     train_folds = list(range(0, nr_of_folds))
     train_folds.remove(test_fold_nr)
     train_folds.remove(validation_fold_nr)
+
+    emobase_features = np.load(emobase_features_path).item()
+    means, stddevs = get_means_and_stddevs_from_dataset(metadata, emobase_features, class_groups, train_folds, take_gender='M')
+    emobase_features = normalize_dataset(emobase_features, means, stddevs)
 
     train_dataset = create_dataset_from_metadata(metadata, emobase_features, class_groups, train_folds, take_gender='M')
     test_dataset = create_dataset_from_metadata(metadata, emobase_features, class_groups, test_fold, take_gender='M')

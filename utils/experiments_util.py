@@ -131,12 +131,7 @@ def get_metrics(labels, predictions):
     UAF = np.sum(fscore) / len(fscore)
     return acc, UAP, UAR, UAF
 
-def normalize_sequence_features(dataset_dict, means, stddevs):
-    for key in dataset_dict.keys():
-        dataset_dict[key] = (dataset_dict[key] - means) / stddevs
-    return dataset_dict
-
-def get_means_and_stddevs_from_dataset(metadata, dataset_dict, class_groups, folds, take_gender = None):
+def get_means_and_stddevs_from_sequence_dataset(metadata, dataset_dict, class_groups, folds, take_gender = None):
     full_fl = []
     for instance in metadata:
         if instance["Label"] not in class_groups or int(instance["Fold"]) not in folds or instance['Name'] not in dataset_dict:
@@ -153,7 +148,26 @@ def get_means_and_stddevs_from_dataset(metadata, dataset_dict, class_groups, fol
     stddevs[stddevs == 0] = 1
     return means, stddevs
 
-def normalize_sequence_dataset(dataset_dict, means, stddevs):
+def get_means_and_stddevs_from_dataset(metadata, dataset_dict, class_groups, folds, take_gender = None):
+    full_fl = []
+
+    for instance in metadata:
+        if instance["Label"] not in class_groups or int(instance["Fold"]) not in folds or instance['Name'] not in dataset_dict:
+            continue
+
+        if take_gender is not None and instance['Gender'] != take_gender:
+            continue
+
+        full_fl.append(dataset_dict[instance['Name']])
+
+    fl = np.array(full_fl)
+    means = fl.mean(axis=0)
+    stddevs = fl.std(axis=0)
+    stddevs[stddevs == 0] = 1
+
+    return means, stddevs
+
+def normalize_dataset(dataset_dict, means, stddevs):
     for key in dataset_dict.keys():
         dataset_dict[key] = (dataset_dict[key] - means) / stddevs
     return dataset_dict

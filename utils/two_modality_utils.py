@@ -76,8 +76,10 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
 
     #optimizer = optim.Adam(joined_model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
     optimizer = optim.Adam(joined_model.parameters())
+    logger.info(optimizer)
 
     early_stopping = EarlyStopping()
+    logger.info(early_stopping)
 
     for e in range(params["epochs"]):
         train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=True,
@@ -227,13 +229,12 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
     return test_golds, test_predictions
 
 
-def train_two_modality_max_prob_classifier(resources_modality_1, resources_modality_2, logger, params):
+def train_two_modality_max_prob_classifier(resources_modality_1, resources_modality_2, logger):
     """
     Selects the label with the highest probability for both modalities (text and audio) and classifies based on this
     :param resources_modality_1:
     :param resources_modality_2:
     :param logger:
-    :param params:
     :return:
     """
 
@@ -249,8 +250,8 @@ def train_two_modality_max_prob_classifier(resources_modality_1, resources_modal
     test_golds = []
     test_ids = []
 
-    h1 = model1.init_hidden(params["batch_size"])
-    h2 = model2.init_hidden(params["batch_size"])
+    h1 = model1.init_hidden(test_instance_count1)
+    h2 = model2.init_hidden(test_instance_count2)
 
     softmax = nn.Softmax(dim=1)
     with torch.no_grad():
@@ -286,6 +287,7 @@ def train_two_modality_max_prob_classifier(resources_modality_1, resources_modal
             test_ids += ids1.data.tolist()
 
     logger.info(get_metrics_str(test_golds, test_preds))
+    return test_golds, test_preds
 
 def train_two_modality_final_output_svm(resources_modality_1, resources_modality_2, id_to_name, experiment_path, logger):
     """

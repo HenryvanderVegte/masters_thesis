@@ -54,8 +54,8 @@ for i in range(0, nr_of_folds):
     logger.info('Training on folds: ' + str(train_folds))
 
     embedding_features = np.load(embedding_features_path).item()
-    means, stddevs = get_means_and_stddevs_from_dataset(metadata, embedding_features, class_groups, train_folds)
-    embedding_features = normalize_sequence_features(embedding_features, means, stddevs)
+    means, stddevs = get_means_and_stddevs_from_sequence_dataset(metadata, embedding_features, class_groups, train_folds)
+    embedding_features = normalize_dataset(embedding_features, means, stddevs)
 
     word_embedding_resources = {}
     word_embedding_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, embedding_features, class_groups, train_folds)
@@ -70,8 +70,8 @@ for i in range(0, nr_of_folds):
     word_embedding_resources['model'] = word_embedding_model
 
     emobase_features = np.load(emobase_features_path).item()
-    means, stddevs = get_means_and_stddevs_from_dataset(metadata, emobase_features, class_groups, train_folds)
-    emobase_features = normalize_sequence_features(emobase_features, means, stddevs)
+    means, stddevs = get_means_and_stddevs_from_sequence_dataset(metadata, emobase_features, class_groups, train_folds)
+    emobase_features = normalize_dataset(emobase_features, means, stddevs)
 
     emobase_resources = {}
     emobase_resources['train_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, train_folds)

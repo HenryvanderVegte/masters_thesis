@@ -11,7 +11,7 @@ def train(train_dataset, test_dataset, id_to_name, experiment_path, logger):
     test_labels = np.ravel(np.array(test_dataset.tensors[1]))
     test_ids = np.ravel(np.array(test_dataset.tensors[2]))
 
-    classifier = SVC(gamma='scale', decision_function_shape='ovo', probability=True)
+    classifier = SVC(gamma='scale', decision_function_shape='ovo')
     classifier.fit(train_features, train_labels)
 
     model_path = os.path.join(experiment_path, 'svm_model.pkl')
