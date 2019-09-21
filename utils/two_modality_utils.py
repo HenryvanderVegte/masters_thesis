@@ -481,7 +481,7 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
                 h2 = tuple([each.data for each in h2])
                 _, _, _, outputs2 = model2(inputs2.to(device), lengths2.to(device, dtype=torch.int64).view(-1), h2)
-                #outputs1 = softmax(outputs1)
+                #outputs2 = softmax(outputs2)
 
             #combine weights of the two other models to create the input for the joined model
             joined_inputs = torch.cat((outputs1, outputs2), 2)
