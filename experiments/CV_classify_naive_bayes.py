@@ -31,7 +31,7 @@ for i in range(0, nr_of_folds):
     logger.info('Testing on folds: ' + str(test_folds))
     logger.info('Training on folds: ' + str(train_folds))
 
-    all_words_set = create_all_words_set_from_metadata(metadata, class_groups, train_folds)
+    all_words_set = create_top_n_words_set_from_metadata(metadata, class_groups, train_folds, top_n=100)
     train_dataset = create_dataset_from_metadata(metadata, class_groups, all_words_set, train_folds)
     test_dataset = create_dataset_from_metadata(metadata, class_groups, all_words_set, test_folds)
 

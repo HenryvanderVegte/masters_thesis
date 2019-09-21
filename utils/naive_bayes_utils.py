@@ -3,6 +3,7 @@ import nltk
 import os
 import pickle
 import re
+from collections import Counter
 
 regex = re.compile('[^A-Za-z0-9 ]+')
 
@@ -13,9 +14,22 @@ def create_all_words_set_from_metadata(metadata, class_groups, folds):
             continue
         transcription = regex.sub('', instance['Transcription'].lower())
         tokens = nltk.word_tokenize(transcription)
-
         all_words.update(tokens)
     return all_words
+
+def create_top_n_words_set_from_metadata(metadata, class_groups, folds, top_n =1000):
+    counter = Counter()
+    for instance in metadata:
+        if instance["Label"] not in class_groups or int(instance["Fold"]) not in folds:
+            continue
+        transcription = regex.sub('', instance['Transcription'].lower())
+        tokens = nltk.word_tokenize(transcription)
+
+        counter.update(tokens)
+
+    most_common = counter.most_common(top_n)
+    words = [x[0] for x in most_common]
+    return words
 
 def create_dataset_from_metadata(metadata, class_groups, all_words_set,  folds):
     dataset = []
@@ -33,7 +47,7 @@ def create_dataset_from_metadata(metadata, class_groups, all_words_set,  folds):
 
 def train(train_dataset, test_dataset, experiment_path, logger):
     classifier = nltk.NaiveBayesClassifier.train(train_dataset)
-    classifier.show_most_informative_features(n=400)
+    classifier.show_most_informative_features(n=50)
 
     model_path = os.path.join(experiment_path, "model.pkl")
     f = open(model_path, 'wb')
