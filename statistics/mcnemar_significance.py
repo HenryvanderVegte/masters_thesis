@@ -62,7 +62,7 @@ def run_mcnemar(experiment_path1, experiment_path2):
     elif result.pvalue < 0.05:
         print('*')
 
-experiment_path1 = os.path.join(ROOT_FOLDER, "models//CV//12//CV_late_fusion_joined_model_output_svm")
-experiment_path2 = os.path.join(ROOT_FOLDER, "models//CV//12//CV_late_fusion_joined_model_output_max_prob")
+experiment_path1 = os.path.join(ROOT_FOLDER, "models//CV//12//CV_classify_joined_word_level_256_emo")
+experiment_path2 = os.path.join(ROOT_FOLDER, "models//CV//12//CV_classify_word_level_fusion_joined_features")
 
 run_mcnemar(experiment_path1, experiment_path2)

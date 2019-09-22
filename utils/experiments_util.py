@@ -176,11 +176,7 @@ def exclude_sequence_features_by_id(feature_dict, exclude_ids):
     for key in feature_dict.keys():
         new_seq = []
         for vec in feature_dict[key]:
-            new_vec = []
-            for i in range(len(vec)):
-                if i in exclude_ids:
-                    continue
-                new_vec.append(vec[i])
+            new_vec = np.delete(vec, exclude_ids)
             new_seq.append(new_vec)
         feature_dict[key] = np.array(new_seq)
         print(key)

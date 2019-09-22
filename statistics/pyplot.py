@@ -15,10 +15,10 @@ fig = plt.figure()
 plt.xlabel("Features (Count)")
 plt.ylabel("Accuracy (%)")
 plt.xlim(1, 989)
-#plt.ylim(0, 100)
+plt.ylim(0, 100)
 #plt.xscale('log', basex=2)
 
 line, = plt.plot(x, y, color='blue', lw=2)
 
-plt.savefig(os.path.join(ROOT_FOLDER, 'test//feature_plot2.png'))
+plt.savefig(os.path.join(ROOT_FOLDER, 'test//feature_plot3.png'))
 
