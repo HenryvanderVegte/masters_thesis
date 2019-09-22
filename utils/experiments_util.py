@@ -188,11 +188,7 @@ def exclude_sequence_features_by_id(feature_dict, exclude_ids):
 
 def exclude_features_by_id(feature_dict, exclude_ids):
     for key in feature_dict.keys():
-        new_fl = []
-        for i in range(len(feature_dict[key])):
-            if i in exclude_ids:
-                continue
-            new_fl.append(feature_dict[key][i])
+        new_fl = np.delete(feature_dict[key], exclude_ids)
         feature_dict[key] = np.asarray(new_fl)
     return feature_dict
 

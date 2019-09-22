@@ -9,3 +9,4 @@ nltk
 pydub
 gensim
 pydub
+statsmodels

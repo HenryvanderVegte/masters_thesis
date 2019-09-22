@@ -40,7 +40,7 @@ def print_m_f_statistics(gender_infos):
 
 def get_gender_info_str_from_CV(experiment_path):
     all_results = []
-    for i in range(0,9):
+    for i in range(0,10):
         results = os.path.join(experiment_path, str(i), 'results.txt')
         reached_res = False
         for line in open(results).read().splitlines():

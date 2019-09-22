@@ -1,7 +1,7 @@
 from utils.experiments_util import *
 from classification.util.global_vars import *
 from utils.two_modality_utils import *
-from models import LSTM
+from models import LSTM_with_last_out
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
 embedding_features_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings_with_apostrophes.npy')
@@ -16,7 +16,7 @@ class_groups = {
     "ang":2,
     "neu":3,
 }
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_late_fusion_joined_model_output_max_prob", use_timestamp=True)
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_early_fusion_joined_model_activation_svm", use_timestamp=True)
 
 word_embedding_params = {
     "hidden_size": 256,
@@ -62,9 +62,9 @@ for i in range(0, nr_of_folds):
     word_embedding_resources['test_dataset']  = create_sequence_dataset_from_metadata(metadata, embedding_features, class_groups, test_folds)
     word_embedding_params["input_dim"] = word_embedding_resources['train_dataset'].tensors[0][0].size()[1]
     word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
-    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//12//CV_classify_word_embeddings////' + str(i) + '//model.pth')
+    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//11//CV_classify_word_embeddings////' + str(i) + '//model.pth')
     logger.info(word_embedding_model_path)
-    word_embedding_model = LSTM.LSTM(word_embedding_params)
+    word_embedding_model = LSTM_with_last_out.LSTM(word_embedding_params)
     word_embedding_model.load_state_dict(torch.load(word_embedding_model_path))
     word_embedding_model.eval()
     word_embedding_resources['model'] = word_embedding_model
@@ -79,9 +79,9 @@ for i in range(0, nr_of_folds):
     emobase_resources['test_dataset'] = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, test_folds)
     emobase_params["input_dim"] = emobase_resources['train_dataset'].tensors[0][0].size()[1]
     emobase_params["label_dim"] = len(set(list(class_groups.values())))
-    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//12//CV_classify_emobase_word_level//' + str(i) + '//model.pth')
+    emobase_model_path = os.path.join(ROOT_FOLDER, 'models//CV//11//CV_classify_emobase_word_level//' + str(i) + '//model.pth')
     logger.info(emobase_model_path)
-    emobase_model = LSTM.LSTM(emobase_params)
+    emobase_model = LSTM_with_last_out.LSTM(emobase_params)
     emobase_model.load_state_dict(torch.load(emobase_model_path))
     emobase_model.eval()
     emobase_resources['model'] = emobase_model
@@ -90,9 +90,13 @@ for i in range(0, nr_of_folds):
     for m in metadata:
         id_to_name[int(m["Id"])] = m["Name"]
 
+    params = {
+        "activation_dims": word_embedding_params["hidden_size"] +  emobase_params["hidden_size"],
+    }
+
     fold_path = os.path.join(experiment_dir, str(i))
     os.mkdir(fold_path)
-    test_golds, test_preds = train_two_modality_max_prob_classifier(word_embedding_resources, emobase_resources, id_to_name, fold_path, logger)
+    test_golds, test_preds = train_two_modality_final_activation_svm(word_embedding_resources, emobase_resources, id_to_name, fold_path, logger, params)
     all_golds += test_golds
     all_preds += test_preds
 

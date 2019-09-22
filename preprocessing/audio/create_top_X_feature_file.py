@@ -5,14 +5,14 @@ from utils.experiments_util import *
 import torch
 
 full_feature_file = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_pauses.npy')
-result_feature_file = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_pauses_top_50.npy')
+result_feature_file = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_pauses_top_200.npy')
 feature_ranking = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobaseFeaturesBestToWorst.txt')
 
 feature_ranking = open(feature_ranking).read().splitlines()
 
 feature_ranking = [int(i) for i in feature_ranking]
 
-exlude_features = feature_ranking[50:]
+exlude_features = feature_ranking[256:]
 
 full_feature_dict = np.load(full_feature_file).item()
 

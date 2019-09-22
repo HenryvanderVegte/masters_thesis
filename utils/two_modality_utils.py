@@ -229,7 +229,7 @@ def train_two_modality_rnn_join_hidden(resources_modality_1, resources_modality_
     return test_golds, test_predictions
 
 
-def train_two_modality_max_prob_classifier(resources_modality_1, resources_modality_2, logger):
+def train_two_modality_max_prob_classifier(resources_modality_1, resources_modality_2, id_to_name, experiment_path, logger):
     """
     Selects the label with the highest probability for both modalities (text and audio) and classifies based on this
     :param resources_modality_1:
@@ -286,7 +286,19 @@ def train_two_modality_max_prob_classifier(resources_modality_1, resources_modal
             test_golds += labels1.data.tolist()
             test_ids += ids1.data.tolist()
 
-    logger.info(get_metrics_str(test_golds, test_preds))
+
+    metrics_str = get_metrics_str(test_golds, test_preds)
+    logger.info(metrics_str)
+
+    log_results = metrics_str + "\n\n"
+    log_results += "Predicted\tGold\tName\n"
+
+    for i in range(len(test_preds)):
+        log_results += str(test_preds[i]) + "\t" + str(test_golds[i]) + "\t" + id_to_name[test_ids[i]] + "\n"
+    log_results_path = os.path.join(experiment_path, "results.txt")
+    with open(log_results_path, "w") as f:
+        f.write(log_results)
+
     return test_golds, test_preds
 
 def train_two_modality_final_output_svm(resources_modality_1, resources_modality_2, id_to_name, experiment_path, logger):
@@ -390,6 +402,120 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
             output2 = softmax(output2)
 
             added_outputs = np.append(output1.cpu().numpy(), output2.cpu().numpy(), axis=1)
+
+            test_vectors = np.concatenate((test_vectors, added_outputs), axis=0)
+            test_labels = np.concatenate((test_labels, labels1.cpu().numpy()), axis=0)
+            test_ids += ids.data.tolist()
+
+    test_predictions = np.array(classifier.predict(test_vectors))
+    test_predictions = [str(int(i)) for i in test_predictions]
+    test_golds = [str(int(i)) for i in test_labels]
+
+    metrics_str = get_metrics_str(test_golds, test_predictions)
+    logger.info(metrics_str)
+
+    model_path = os.path.join(experiment_path, 'svm_model.pkl')
+    f = open(model_path, 'wb')
+    pickle.dump(classifier, f)
+    f.close()
+
+    log_results = metrics_str + "\n\n"
+    log_results += "Predicted\tGold\tName\n"
+
+    for i in range(len(test_predictions)):
+        log_results += str(test_predictions[i]) + "\t" + str(test_golds[i]) + "\t" + id_to_name[test_ids[i]] + "\n"
+    log_results_path = os.path.join(experiment_path, "results.txt")
+    with open(log_results_path, "w") as f:
+        f.write(log_results)
+
+    return test_golds, test_predictions
+
+def train_two_modality_final_activation_svm(resources_modality_1, resources_modality_2, id_to_name, experiment_path, logger, params):
+    model1 = resources_modality_1['model'].to(device)
+    model2 = resources_modality_2['model'].to(device)
+
+    train_instance_count1 = 32#resources_modality_1['train_dataset'].tensors[0].size()[0]
+    train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=False, batch_size=train_instance_count1)
+    train_instance_count2 = 32#resources_modality_2['train_dataset'].tensors[0].size()[0]
+    train_loader2 = utils.DataLoader(resources_modality_2['train_dataset'], shuffle=False, batch_size=train_instance_count2)
+
+    test_instance_count1 = resources_modality_1['test_dataset'].tensors[0].size()[0]
+    test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=test_instance_count1)
+    test_instance_count2 = resources_modality_2['test_dataset'].tensors[0].size()[0]
+    test_loader2 = utils.DataLoader(resources_modality_2['test_dataset'], shuffle=False, batch_size=test_instance_count2)
+
+    train_vectors = np.empty((0,params["activation_dims"]))
+    train_labels = np.empty((0))
+
+    softmax = nn.Softmax(dim=1)
+    with torch.no_grad():
+        train2_iter = iter(train_loader2)
+        h1 = model1.init_hidden(train_instance_count1)
+        h2 = model2.init_hidden(train_instance_count2)
+
+        for inputs1, labels1, lengths1, ids1 in train_loader1:
+            inputs2, labels2, lengths2, ids2 = next(train2_iter)
+            if inputs1.shape[0] != train_instance_count1:
+                continue
+
+            if not torch.all(torch.eq(ids1, ids2)):
+                print('Expected the same instances for both modalities. Break')
+                break
+
+            lengths1, inputs1, labels1, ids1 = sort_tensors(lengths1, inputs1, labels1, ids1)
+            lengths2, inputs2, labels2, ids2 = sort_tensors(lengths2, inputs2, labels2, ids2)
+
+            labels1 = labels1.to(device, dtype=torch.int64).view(-1)
+            lengths1 = lengths1.to(device, dtype=torch.int64).view(-1)
+            lengths2 = lengths2.to(device, dtype=torch.int64).view(-1)
+
+            h1 = tuple([each.data for each in h1])
+            _, _, activation1 = model1(inputs1.to(device), lengths1, h1)
+
+            h2 = tuple([each.data for each in h2])
+            _, _, activation2 = model2(inputs2.to(device), lengths2, h2)
+
+            added_outputs = np.append(activation1.cpu().numpy(), activation2.cpu().numpy(), axis=1)
+
+            train_vectors = np.concatenate((train_vectors, added_outputs), axis=0)
+            train_labels = np.concatenate((train_labels, labels1.cpu().numpy()), axis=0)
+
+    classifier = SVC(decision_function_shape='ovr')
+    classifier.fit(train_vectors, train_labels)
+    model_path = os.path.join(experiment_path, 'svm_model.pkl')
+    f = open(model_path, 'wb')
+    pickle.dump(classifier, f)
+    f.close()
+
+    test_vectors = np.empty((0,params["activation_dims"]))
+    test_labels = np.empty((0))
+    test_ids = []
+    with torch.no_grad():
+        h1 = model1.init_hidden(test_instance_count1)
+        h2 = model2.init_hidden(test_instance_count2)
+
+        test2_iter = iter(test_loader2)
+        for inputs1, labels1, lengths1, ids1 in test_loader1:
+            inputs2, labels2, lengths2, ids2 = next(test2_iter)
+            if not torch.all(torch.eq(ids1, ids2)):
+                print('Expected the same instances for both modalities. Break')
+                break
+
+            lengths1, inputs1, labels1, ids1 = sort_tensors(lengths1, inputs1, labels1, ids1)
+            lengths2, inputs2, labels2 = sort_tensors(lengths2, inputs2, labels2)
+
+            labels1 = labels1.to(device, dtype=torch.int64).view(-1)
+            ids = ids1.to(device, dtype=torch.int64).view(-1)
+            lengths1 = lengths1.to(device, dtype=torch.int64).view(-1)
+            lengths2 = lengths2.to(device, dtype=torch.int64).view(-1)
+
+            h1 = tuple([each.data for each in h1])
+            _, _, activation1 = model1(inputs1.to(device), lengths1, h1)
+
+            h2 = tuple([each.data for each in h2])
+            _, _, activation2 = model2(inputs2.to(device), lengths2, h2)
+
+            added_outputs = np.append(activation1.cpu().numpy(), activation2.cpu().numpy(), axis=1)
 
             test_vectors = np.concatenate((test_vectors, added_outputs), axis=0)
             test_labels = np.concatenate((test_labels, labels1.cpu().numpy()), axis=0)
