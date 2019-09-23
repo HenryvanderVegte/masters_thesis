@@ -35,14 +35,26 @@ params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "MS_classify_emobase", use_timestamp=True)
 
 emobase_train_features = np.load(ms_emobase_train_path).item()
-means, stddevs = get_means_and_stddevs_from_sequence_dataset(train_metadata, emobase_train_features, class_groups)
+emobase_dev_features = np.load(ms_emobase_dev_path).item()
+emobase_test_features = np.load(ms_emobase_test_path).item()
+
+means, stddevs = get_means_and_stddevs_from_sequence_dataset(train_metadata, emobase_dev_features, class_groups)
+
+emobase_test_features = normalize_dataset(emobase_test_features, means, stddevs)
+ms_emobase_test_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_test_normalized.npy')
+np.save(ms_emobase_test_path_normalized, emobase_test_features)
+
+
 emobase_train_features = normalize_dataset(emobase_train_features, means, stddevs)
 
-emobase_dev_features = np.load(ms_emobase_dev_path).item()
-emobase_dev_features = normalize_dataset(emobase_dev_features, means, stddevs)
+ms_emobase_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_train_normalized.npy')
+np.save(ms_emobase_train_path_normalized, emobase_train_features)
 
-emobase_test_features = np.load(ms_emobase_test_path).item()
-emobase_test_features = normalize_dataset(emobase_test_features, means, stddevs)
+emobase_dev_features = normalize_dataset(emobase_dev_features, means, stddevs)
+ms_emobase_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_dev_normalized.npy')
+np.save(ms_emobase_dev_path_normalized, emobase_dev_features)
+
+
 
 train_dataset = create_sequence_dataset_from_metadata(train_metadata, emobase_train_features, class_groups)
 dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, emobase_dev_features, class_groups)
