@@ -34,7 +34,6 @@ params = {
 params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "MS_classify_emobase", use_timestamp=True)
 
-emobase_train_features = np.load(ms_emobase_train_path).item()
 emobase_dev_features = np.load(ms_emobase_dev_path).item()
 emobase_test_features = np.load(ms_emobase_test_path).item()
 
@@ -44,7 +43,9 @@ emobase_test_features = normalize_dataset(emobase_test_features, means, stddevs)
 ms_emobase_test_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_test_normalized.npy')
 np.save(ms_emobase_test_path_normalized, emobase_test_features)
 
+print('Normalized test')
 
+emobase_train_features = np.load(ms_emobase_train_path).item()
 emobase_train_features = normalize_dataset(emobase_train_features, means, stddevs)
 
 ms_emobase_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_train_normalized.npy')
