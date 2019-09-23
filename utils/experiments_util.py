@@ -131,14 +131,17 @@ def get_metrics(labels, predictions):
     UAF = np.sum(fscore) / len(fscore)
     return acc, UAP, UAR, UAF
 
-def get_means_and_stddevs_from_sequence_dataset(metadata, dataset_dict, class_groups, folds, take_gender = None):
+def get_means_and_stddevs_from_sequence_dataset(metadata, dataset_dict, class_groups, folds=None, take_gender = None):
     full_fl = []
     for instance in metadata:
-        if instance["Label"] not in class_groups or int(instance["Fold"]) not in folds or instance['Name'] not in dataset_dict:
+        if instance["Label"] not in class_groups or instance['Name'] not in dataset_dict:
             continue
 
+        if folds is not None and int(instance["Fold"]) not in folds:
+            continue
         if take_gender is not None and instance['Gender'] != take_gender:
             continue
+
         for arr in dataset_dict[instance['Name']]:
             full_fl.append(arr)
 

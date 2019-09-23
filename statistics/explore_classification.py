@@ -65,6 +65,6 @@ def get_stats(experiment_path, metadata):
     print('Classified wrong and full agreement:' + str(wrong_with_full_agree))
     print('Classified wrong and no full agreement:' + str(wrong_without_full_agree))
 
-experiment_path = os.path.join(ROOT_FOLDER, "models//CV//12//CV_early_fusion_word_level_joined_hidden_activation_1024")
+experiment_path = os.path.join(ROOT_FOLDER, "models//CV//12//CV_late_fusion_joined_model_output_svm")
 get_stats(experiment_path, metadata)
 
