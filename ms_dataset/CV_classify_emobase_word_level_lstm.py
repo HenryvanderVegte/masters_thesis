@@ -4,9 +4,10 @@ from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
-embedding_features_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings_with_apostrophes.npy')
+ms_emobase_test_path = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_test.npy')
+ms_emobase_dev_path = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_dev.npy')
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
-EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//text')
+EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//audio')
 
 class_groups = {
     "hap":0,
@@ -21,21 +22,17 @@ params = {
     "hidden_size": 256,
     "drop_prob": 0.0,
     "fully_connected_drop_prob": 0.0,
-    "learning_rate": 1e-5,
     "layers": 2,
+    "learning_rate": 1e-5,
     "epochs": 1000
 }
 
 params["label_dim"] = len(set(list(class_groups.values())))
-experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_word_embeddings_gender_filtered", use_timestamp=True)
+experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "CV_classify_emobase_word_level", use_timestamp=True)
 
 nr_of_folds = 10
-
 all_golds = []
 all_preds = []
-
-take_gender = 'M'
-logger.info('Selecting only gender: ' + take_gender)
 
 for i in range(0, nr_of_folds):
     test_fold_nr = i
@@ -52,13 +49,13 @@ for i in range(0, nr_of_folds):
     logger.info('Validating on folds: ' + str(validation_folds))
     logger.info('Training on folds: ' + str(train_folds))
 
-    embedding_features = np.load(embedding_features_path).item()
-    means, stddevs = get_means_and_stddevs_from_sequence_dataset(metadata, embedding_features, class_groups, train_folds, take_gender=take_gender)
-    embedding_features = normalize_dataset(embedding_features, means, stddevs)
+    emobase_features = np.load(emobase_features_path).item()
+    means, stddevs = get_means_and_stddevs_from_sequence_dataset(metadata, emobase_features, class_groups, train_folds)
+    emobase_features = normalize_dataset(emobase_features, means, stddevs)
 
-    train_dataset = create_sequence_dataset_from_metadata(metadata, embedding_features, class_groups, train_folds, take_gender=take_gender)
-    validation_dataset = create_sequence_dataset_from_metadata(metadata, embedding_features, class_groups, validation_folds, take_gender=take_gender)
-    test_dataset = create_sequence_dataset_from_metadata(metadata, embedding_features, class_groups, test_folds, take_gender=take_gender)
+    train_dataset = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, train_folds)
+    validation_dataset = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, validation_folds)
+    test_dataset = create_sequence_dataset_from_metadata(metadata, emobase_features, class_groups, test_folds)
 
     params["input_dim"] = train_dataset.tensors[0][0].size()[1]
 
