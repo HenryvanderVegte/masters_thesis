@@ -12,8 +12,8 @@ def read_ms_tsv_metadata(dataset):
 
         instance = {headers[i]: row[i] for i in range(len(row))}
         id = instance['mPhraseId']
-        instance['Name'] = instance['mRawDataId'] + '/' + id.zfill(3) + '.m4a'
+        instance['Name'] = instance['mRawDataId'] + '/' + id.zfill(4) + '.m4a'
         instance['Label'] = instance['Rating']
-
+        ret.append(instance)
     return ret
 
