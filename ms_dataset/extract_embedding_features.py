@@ -34,6 +34,10 @@ for line in tqdm.tqdm(txt_lines):
             instance_matrix.append(np.array(model.wv[word]))
         else:
             instance_matrix.append(oov_vector)
+
+    if not instance_matrix:
+        continue
+
     instance_matrix = np.vstack(instance_matrix)
     instance_dict[name] = instance_matrix
 
