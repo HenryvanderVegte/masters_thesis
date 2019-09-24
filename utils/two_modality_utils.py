@@ -371,7 +371,7 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
     pickle.dump(classifier, f)
     f.close()
 
-    test_vectors = np.empty((0,8))
+    test_vectors = np.empty((0,6))
     test_labels = np.empty((0))
     test_ids = []
     with torch.no_grad():
