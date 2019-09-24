@@ -1,7 +1,7 @@
 import librosa, librosa.display
 from tqdm import tqdm
 import pickle
-from classification.util.cnn_utils import *
+from old.cnn_utils import *
 import torch.utils.data as utils
 from torch.nn.utils.rnn import pad_sequence
 from models import VGG_M

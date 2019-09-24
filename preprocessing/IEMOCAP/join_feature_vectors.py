@@ -1,6 +1,6 @@
 from classification.util.global_vars import *
 from utils.experiments_util import *
-from classification.text.word_embeddings import *
+from old.word_embeddings import *
 import os
 
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))

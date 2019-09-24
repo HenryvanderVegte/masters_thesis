@@ -1,6 +1,6 @@
 import re
 from classification.util.global_vars import *
-from classification.text.word_embeddings import *
+from old.word_embeddings import *
 import gensim
 import os
 

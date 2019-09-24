@@ -1,8 +1,8 @@
-import classification.util.data_loader_pickle as data_loader
+import old.data_loader_pickle as data_loader
 from utils.experiments_util import *
 from utils.rnn_utils import *
 from classification.util.global_vars import *
-from classification.text import rnn_embeddings
+from models import SelfLearnedEmbeddingsLSTM
 from classification.util.text_preprocessing import create_sequence_dataset_with_pad_val
 import numpy as np
 
@@ -47,6 +47,6 @@ train_dataset, _ = create_sequence_dataset_with_pad_val(train_features, train_la
 dev_labels, dev_features = data_loader.load_dict_from_binary(dev_labels, dev_token_id_vectors, class_groups)
 dev_dataset, id_to_name = create_sequence_dataset_with_pad_val(dev_features, dev_labels, params["max_sequence_length"], token_to_id_dict["EOU"])
 
-model = rnn_embeddings.SelfLearnedEmbeddingsLSTM(params)
+model = SelfLearnedEmbeddingsLSTM.SelfLearnedEmbeddingsLSTM(params)
 
 train(train_dataset, dev_dataset, id_to_name, experiment_dir, model, logger, params)

@@ -1,8 +1,4 @@
-from utils.experiments_util import *
 from classification.util.global_vars import *
-import re
-from classification.util.global_vars import *
-from classification.text.word_embeddings import *
 import gensim
 import os
 import tqdm

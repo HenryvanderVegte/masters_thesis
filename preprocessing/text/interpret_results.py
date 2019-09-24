@@ -1,6 +1,6 @@
 import os
 from classification.util.global_vars import *
-from classification.text.word_embeddings import extract_tokens_from_utterance
+from old.word_embeddings import extract_tokens_from_utterance
 
 class_groups = {
     "0":"hxc",

@@ -1,7 +1,7 @@
-from classification.util.data_loader_pickle import *
+from old.data_loader_pickle import *
 from utils.experiments_util import *
 from classification.util.global_vars import *
-from classification.text import dnn
+from old import dnn
 
 experiments_folder = os.path.join(ROOT_FOLDER, "IEMOCAP_txt//experiments")
 
