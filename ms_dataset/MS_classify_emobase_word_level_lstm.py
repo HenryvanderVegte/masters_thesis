@@ -23,12 +23,12 @@ class_groups = {
 }
 
 params = {
-    "batch_size": 16,
+    "batch_size": 64,
     "hidden_size": 512,
     "drop_prob": 0.0,
     "fully_connected_drop_prob": 0.0,
     "layers": 2,
-    "learning_rate": 1e-5,
+    "learning_rate": 1e-3,
     "epochs": 1000
 }
 
@@ -40,25 +40,17 @@ emobase_dev_features = np.load(ms_emobase_dev_path_normalized).item()
 emobase_test_features = np.load(ms_emobase_test_path_normalized).item()
 
 train_dataset = create_sequence_dataset_from_metadata(train_metadata, emobase_train_features, class_groups)
+train_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_train_emobase_dataset.torch')
+torch.save(train_dataset, train_pkl)
 
-train_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_train_emobase_dataset.pkl')
-output = open(train_pkl, 'wb')
-pickle.dump(train_dataset, output, protocol=4)
-output.close()
 
 dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, emobase_dev_features, class_groups)
-
-dev_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_dev_emobase_dataset.pkl')
-output = open(dev_pkl, 'wb')
-pickle.dump(dev_dataset, output, protocol=4)
-output.close()
+dev_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_dev_emobase_dataset.torch')
+torch.save(dev_dataset, dev_pkl)
 
 test_dataset = create_sequence_dataset_from_metadata(test_metadata, emobase_test_features, class_groups)
-
-test_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_test_emobase_dataset.pkl')
-output = open(test_pkl, 'wb')
-pickle.dump(test_dataset, output, protocol=4)
-output.close()
+test_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_test_emobase_dataset.torch')
+torch.save(test_dataset, test_pkl)
 
 params["input_dim"] = train_dataset.tensors[0][0].size()[1]
 
