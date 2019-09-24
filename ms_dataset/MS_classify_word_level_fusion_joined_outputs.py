@@ -2,7 +2,7 @@ from utils.experiments_util import *
 from ms_dataset.ms_util import *
 from global_vars import *
 from utils.two_modality_utils import *
-from models import LSTM, LSTM2
+from models import LSTM, LSTM_all_timesteps
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
 class_groups = {
@@ -82,7 +82,7 @@ acoustic_resources['test_dataset'] = acoustic_test_dataset
 acoustic_params["input_dim"] = acoustic_resources['train_dataset'].tensors[0][0].size()[1]
 acoustic_params["label_dim"] = len(set(list(class_groups.values())))
 
-acoustic_model = LSTM.LSTM(acoustic_params)
+acoustic_model = LSTM_all_timesteps.LSTM(acoustic_params)
 acoustic_model.load_state_dict(torch.load(acoustic_model_path))
 acoustic_model.eval()
 acoustic_resources['model'] = acoustic_model

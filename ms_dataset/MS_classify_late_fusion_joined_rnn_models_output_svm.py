@@ -15,7 +15,6 @@ EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//ms//fusion')
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "MS_classify_fusion_output_svm", use_timestamp=True)
 
 train_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//train.tsv'))
-dev_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//dev.tsv'))
 test_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//test.tsv'))
 
 ################################################## Load embeddings model: ##################################################
@@ -80,8 +79,6 @@ acoustic_resources['model'] = acoustic_model
 
 id_to_name = {}
 for m in train_metadata:
-    id_to_name[int(m["Id"])] = m["Name"]
-for m in dev_metadata:
     id_to_name[int(m["Id"])] = m["Name"]
 for m in test_metadata:
     id_to_name[int(m["Id"])] = m["Name"]
