@@ -56,6 +56,10 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
         validation_predictions = []
         validation_golds = []
         validation_instance_count = validation_dataset.tensors[0].size()[0]
+
+        if validation_instance_count > 10000:
+            validation_instance_count = 256
+
         h = model.init_hidden(validation_instance_count)
         validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=validation_instance_count)
         with torch.no_grad():
@@ -90,6 +94,9 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     test_ids = []
 
     test_instance_count = test_dataset.tensors[0].size()[0]
+    if test_instance_count > 10000:
+        test_instance_count = 256
+
     h = best_model.init_hidden(test_instance_count)
     test_loader = utils.DataLoader(test_dataset, shuffle=False, batch_size=test_instance_count)
     with torch.no_grad():
