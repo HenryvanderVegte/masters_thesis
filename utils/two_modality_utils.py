@@ -326,7 +326,7 @@ def train_two_modality_final_output_svm(resources_modality_1, resources_modality
     test_loader2 = utils.DataLoader(resources_modality_2['test_dataset'], shuffle=False, batch_size=test_instance_count2)
 
 
-    train_vectors = np.empty((0,8))
+    train_vectors = np.empty((0,6))
     train_labels = np.empty((0))
 
     softmax = nn.Softmax(dim=1)
