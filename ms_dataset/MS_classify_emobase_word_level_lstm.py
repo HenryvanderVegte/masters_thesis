@@ -4,7 +4,6 @@ from classification.util.global_vars import *
 from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
-import pickle
 
 ms_emobase_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_train_normalized.npy')
 ms_emobase_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_dev_normalized.npy')
@@ -35,24 +34,13 @@ params = {
 params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "MS_classify_emobase", use_timestamp=True)
 
-#emobase_train_features = np.load(ms_emobase_train_path_normalized).item()
-#emobase_dev_features = np.load(ms_emobase_dev_path_normalized).item()
-#emobase_test_features = np.load(ms_emobase_test_path_normalized).item()
+emobase_train_features = np.load(ms_emobase_train_path_normalized).item()
+emobase_dev_features = np.load(ms_emobase_dev_path_normalized).item()
+emobase_test_features = np.load(ms_emobase_test_path_normalized).item()
 
-#train_dataset = create_sequence_dataset_from_metadata(train_metadata, emobase_train_features, class_groups)
-train_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_train_emobase_dataset.torch')
-train_dataset = torch.load(train_pkl)
-#torch.save(train_dataset, train_pkl)
-
-#dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, emobase_dev_features, class_groups)
-dev_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_dev_emobase_dataset.torch')
-dev_dataset = torch.load(dev_pkl)
-#torch.save(dev_dataset, dev_pkl)
-
-#test_dataset = create_sequence_dataset_from_metadata(test_metadata, emobase_test_features, class_groups)
-test_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_test_emobase_dataset.torch')
-test_dataset = torch.load(test_pkl)
-#torch.save(test_dataset, test_pkl)
+train_dataset = create_sequence_dataset_from_metadata(train_metadata, emobase_train_features, class_groups)
+dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, emobase_dev_features, class_groups)
+test_dataset = create_sequence_dataset_from_metadata(test_metadata, emobase_test_features, class_groups)
 
 params["input_dim"] = train_dataset.tensors[0][0].size()[1]
 
