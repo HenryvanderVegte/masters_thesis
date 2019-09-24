@@ -5,16 +5,6 @@ from utils.two_modality_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
-params = {
-    "batch_size": 64,
-    "hidden_size": 256,
-    "drop_prob": 0.0,
-    "fully_connected_drop_prob": 0.0,
-    "layers": 2,
-    "learning_rate": 1e-2,
-    "epochs": 1000
-}
-
 class_groups = {
     "Neutral":0,
     "Positive":1,
@@ -22,7 +12,6 @@ class_groups = {
 }
 
 EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//ms//fusion')
-params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "MS_classify_fusion_output_svm", use_timestamp=True)
 
 train_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//train.tsv'))
@@ -97,6 +86,5 @@ for m in dev_metadata:
     id_to_name[int(m["Id"])] = m["Name"]
 for m in test_metadata:
     id_to_name[int(m["Id"])] = m["Name"]
-
 
 train_two_modality_final_output_svm(embeddings_resources, acoustic_resources, id_to_name, experiment_dir, logger)
