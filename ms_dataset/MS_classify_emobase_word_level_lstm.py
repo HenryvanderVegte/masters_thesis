@@ -43,21 +43,21 @@ train_dataset = create_sequence_dataset_from_metadata(train_metadata, emobase_tr
 
 train_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_train_emobase_dataset.pkl')
 output = open(train_pkl, 'wb')
-pickle.dump(train_dataset, output)
+pickle.dump(train_dataset, output, protocol=4)
 output.close()
 
 dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, emobase_dev_features, class_groups)
 
 dev_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_dev_emobase_dataset.pkl')
 output = open(dev_pkl, 'wb')
-pickle.dump(dev_dataset, output)
+pickle.dump(dev_dataset, output, protocol=4)
 output.close()
 
 test_dataset = create_sequence_dataset_from_metadata(test_metadata, emobase_test_features, class_groups)
 
 test_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_test_emobase_dataset.pkl')
 output = open(test_pkl, 'wb')
-pickle.dump(test_dataset, output)
+pickle.dump(test_dataset, output, protocol=4)
 output.close()
 
 params["input_dim"] = train_dataset.tensors[0][0].size()[1]

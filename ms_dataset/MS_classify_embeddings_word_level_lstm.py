@@ -43,21 +43,21 @@ train_dataset = create_sequence_dataset_from_metadata(train_metadata, embeddings
 
 train_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_train_embedding_dataset.pkl')
 output = open(train_pkl, 'wb')
-pickle.dump(train_dataset, output)
+pickle.dump(train_dataset, output, protocol=4)
 output.close()
 
 dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, embeddings_dev_features, class_groups)
 
 dev_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_dev_embedding_dataset.pkl')
 output = open(dev_pkl, 'wb')
-pickle.dump(dev_dataset, output)
+pickle.dump(dev_dataset, output, protocol=4)
 output.close()
 
 test_dataset = create_sequence_dataset_from_metadata(test_metadata, embeddings_test_features, class_groups)
 
 test_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_test_embedding_dataset.pkl')
 output = open(test_pkl, 'wb')
-pickle.dump(test_dataset, output)
+pickle.dump(test_dataset, output, protocol=4)
 output.close()
 
 params["input_dim"] = train_dataset.tensors[0][0].size()[1]
