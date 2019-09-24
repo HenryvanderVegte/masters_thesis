@@ -4,7 +4,7 @@ from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
-embedding_features_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings.npy')
+embedding_features_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//text//google_news_word_embeddings_with_apostrophes.npy')
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//text')
 
@@ -18,10 +18,10 @@ class_groups = {
 
 params = {
     "batch_size": 16,
-    "hidden_size": 32,
+    "hidden_size": 256,
     "drop_prob": 0.0,
-    "fully_connected_drop_prob": 0.2,
-    "learning_rate": 1e-3,
+    "fully_connected_drop_prob": 0.0,
+    "learning_rate": 1e-5,
     "layers": 2,
     "epochs": 1000
 }
