@@ -83,6 +83,8 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
 
         acc, _, _, _ = get_metrics(validation_golds, validation_predictions)
         logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
+        metrics_str = get_metrics_str(validation_golds, validation_predictions)
+        logger.info('Validation metrics: ' + metrics_str)
 
         early_stopping(np.mean(validation_losses), model)
         if early_stopping.early_stop:
