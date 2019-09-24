@@ -18,7 +18,6 @@ train_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//t
 dev_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//dev.tsv'))
 test_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//test.tsv'))
 
-
 ################################################## Load embeddings model: ##################################################
 embeddings_model_path = os.path.join(ROOT_FOLDER, 'models//MS_classify_embeddings//model.pth')
 embeddings_params = {
@@ -58,8 +57,8 @@ acoustic_params = {
     "layers": 2,
 }
 
-ms_acoustic_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_test_normalized.npy')
-ms_acoustic_test_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_train_normalized.npy')
+ms_acoustic_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_train_normalized.npy')
+ms_acoustic_test_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_test_normalized.npy')
 
 acoustic_train_features = np.load(ms_acoustic_train_path_normalized).item()
 acoustic_test_features = np.load(ms_acoustic_test_path_normalized).item()
