@@ -29,16 +29,20 @@ embeddings_params = {
 }
 
 ms_embeddings_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_train_normalized.npy')
+ms_embeddings_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_dev_normalized.npy')
 ms_embeddings_test_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_test_normalized.npy')
 
 embeddings_train_features = np.load(ms_embeddings_train_path_normalized).item()
+embeddings_dev_features = np.load(ms_embeddings_dev_path_normalized).item()
 embeddings_test_features = np.load(ms_embeddings_test_path_normalized).item()
 
 embeddings_train_dataset = create_sequence_dataset_from_metadata(train_metadata, embeddings_train_features, class_groups)
+embeddings_dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, embeddings_dev_features, class_groups)
 embeddings_test_dataset = create_sequence_dataset_from_metadata(test_metadata, embeddings_test_features, class_groups)
 
 embeddings_resources = {}
 embeddings_resources['train_dataset'] = embeddings_train_dataset
+embeddings_resources['validation_dataset'] = embeddings_dev_dataset
 embeddings_resources['test_dataset'] = embeddings_test_dataset
 
 embeddings_params["input_dim"] = embeddings_resources['train_dataset'].tensors[0][0].size()[1]
@@ -59,16 +63,20 @@ acoustic_params = {
 }
 
 ms_acoustic_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_train_normalized.npy')
+ms_acoustic_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_dev_normalized.npy')
 ms_acoustic_test_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_test_normalized.npy')
 
 acoustic_train_features = np.load(ms_acoustic_train_path_normalized).item()
+acoustic_dev_features = np.load(ms_acoustic_dev_path_normalized).item()
 acoustic_test_features = np.load(ms_acoustic_test_path_normalized).item()
 
 acoustic_train_dataset = create_sequence_dataset_from_metadata(train_metadata, acoustic_train_features, class_groups)
+acoustic_dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, acoustic_dev_features, class_groups)
 acoustic_test_dataset = create_sequence_dataset_from_metadata(test_metadata, acoustic_test_features, class_groups)
 
 acoustic_resources = {}
 acoustic_resources['train_dataset'] = acoustic_train_dataset
+acoustic_resources['validation_dataset'] = acoustic_dev_dataset
 acoustic_resources['test_dataset'] = acoustic_test_dataset
 
 acoustic_params["input_dim"] = acoustic_resources['train_dataset'].tensors[0][0].size()[1]
