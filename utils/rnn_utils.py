@@ -32,9 +32,12 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
         h = model.init_hidden(params["batch_size"])
 
         train_losses = []
+        i = 0
         for inputs, labels, lengths, _ in train_loader:
             if inputs.shape[0] != params["batch_size"]:
                 continue
+            print('batch ' + str(i))
+            i += 1
             lengths, inputs, labels = sort_tensors(lengths, inputs, labels)
 
             inputs = inputs.to(device)

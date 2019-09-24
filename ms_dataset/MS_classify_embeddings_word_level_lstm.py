@@ -5,9 +5,9 @@ from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
 
-ms_embeddings_train_path = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_train.npy')
-ms_embeddings_dev_path = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_dev.npy')
-ms_embeddings_test_path = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_test.npy')
+ms_embeddings_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_train_normalized.npy')
+ms_embeddings_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_dev_normalized.npy')
+ms_embeddings_test_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_test_normalized.npy')
 
 train_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//train.tsv'))
 dev_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//dev.tsv'))
@@ -22,7 +22,7 @@ class_groups = {
 }
 
 params = {
-    "batch_size": 16,
+    "batch_size": 64,
     "hidden_size": 512,
     "drop_prob": 0.0,
     "fully_connected_drop_prob": 0.0,
@@ -34,23 +34,9 @@ params = {
 params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "MS_classify_embeddings", use_timestamp=True)
 
-embeddings_train_features = np.load(ms_embeddings_train_path).item()
-embeddings_test_features = np.load(ms_embeddings_test_path).item()
-embeddings_dev_features = np.load(ms_embeddings_dev_path).item()
-
-means, stddevs = get_means_and_stddevs_from_sequence_dataset(train_metadata, embeddings_train_features, class_groups)
-
-embeddings_train_features = normalize_dataset(embeddings_train_features, means, stddevs)
-ms_embeddings_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_train_normalized.npy')
-np.save(ms_embeddings_train_path_normalized, embeddings_train_features)
-
-embeddings_test_features = normalize_dataset(embeddings_test_features, means, stddevs)
-ms_embeddings_test_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_test_normalized.npy')
-np.save(ms_embeddings_test_path_normalized, embeddings_test_features)
-
-embeddings_dev_features = normalize_dataset(embeddings_dev_features, means, stddevs)
-ms_embeddings_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_dev_normalized.npy')
-np.save(ms_embeddings_dev_path_normalized, embeddings_dev_features)
+embeddings_train_features = np.load(ms_embeddings_train_path_normalized).item()
+embeddings_dev_features = np.load(ms_embeddings_dev_path_normalized).item()
+embeddings_test_features = np.load(ms_embeddings_test_path_normalized).item()
 
 train_dataset = create_sequence_dataset_from_metadata(train_metadata, embeddings_train_features, class_groups)
 dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, embeddings_dev_features, class_groups)
