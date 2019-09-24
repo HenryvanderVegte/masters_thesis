@@ -64,6 +64,8 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
         validation_loader = utils.DataLoader(validation_dataset, shuffle=True, batch_size=validation_instance_count)
         with torch.no_grad():
             for inputs, labels, lengths, _ in validation_loader:
+                if inputs.shape[0] != validation_instance_count:
+                    continue
                 lengths, inputs, labels = sort_tensors(lengths, inputs, labels)
 
                 inputs = inputs.to(device)
@@ -101,6 +103,8 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     test_loader = utils.DataLoader(test_dataset, shuffle=False, batch_size=test_instance_count)
     with torch.no_grad():
         for inputs, labels, lengths, ids in test_loader:
+            if inputs.shape[0] != test_instance_count:
+                continue
             lengths, inputs, labels, ids = sort_tensors(lengths, inputs, labels, ids)
 
             inputs = inputs.to(device)
