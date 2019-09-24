@@ -35,13 +35,13 @@ params = {
 params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "MS_classify_embeddings", use_timestamp=True)
 
-train_pkl = open(train_pickle, 'wb')
+train_pkl = open(train_pickle, 'rb')
 train_dataset = pickle.load(train_pkl)
 
-dev_pkl = open(dev_pickle, 'wb')
+dev_pkl = open(dev_pickle, 'rb')
 dev_dataset = pickle.load(dev_pkl)
 
-test_pkl = open(test_pickle, 'wb')
+test_pkl = open(test_pickle, 'rb')
 test_dataset = pickle.load(test_pkl)
 
 params["input_dim"] = train_dataset.tensors[0][0].size()[1]
