@@ -45,11 +45,11 @@ ms_embeddings_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//f
 np.save(ms_embeddings_train_path_normalized, embeddings_train_features)
 
 embeddings_test_features = normalize_dataset(embeddings_test_features, means, stddevs)
-ms_embeddings_test_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//embeddings_test_normalized.npy')
+ms_embeddings_test_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_test_normalized.npy')
 np.save(ms_embeddings_test_path_normalized, embeddings_test_features)
 
 embeddings_dev_features = normalize_dataset(embeddings_dev_features, means, stddevs)
-ms_embeddings_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//embeddings_dev_normalized.npy')
+ms_embeddings_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_dev_normalized.npy')
 np.save(ms_embeddings_dev_path_normalized, embeddings_dev_features)
 
 train_dataset = create_sequence_dataset_from_metadata(train_metadata, embeddings_train_features, class_groups)
