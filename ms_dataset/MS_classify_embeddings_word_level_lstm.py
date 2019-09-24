@@ -3,10 +3,7 @@ from ms_dataset.ms_util import *
 from global_vars import *
 from utils.rnn_utils import *
 from models import LSTM
-
-train_pickle = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_train_embedding_dataset.pkl')
-dev_pickle = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_dev_embedding_dataset.pkl')
-test_pickle = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_test_embedding_dataset.pkl')
+from utils.dataset_utils import create_sequence_dataset_from_metadata
 
 ms_embeddings_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_train_normalized.npy')
 ms_embeddings_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_dev_normalized.npy')
@@ -26,35 +23,24 @@ class_groups = {
 
 params = {
     "batch_size": 64,
-    "hidden_size": 512,
+    "hidden_size": 256,
     "drop_prob": 0.0,
     "fully_connected_drop_prob": 0.0,
     "layers": 2,
-    "learning_rate": 1e-5,
+    "learning_rate": 1e-2,
     "epochs": 1000
 }
 
 params["label_dim"] = len(set(list(class_groups.values())))
 experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "MS_classify_embeddings", use_timestamp=True)
 
-#embeddings_train_features = np.load(ms_embeddings_train_path_normalized).item()
-#embeddings_dev_features = np.load(ms_embeddings_dev_path_normalized).item()
-#embeddings_test_features = np.load(ms_embeddings_test_path_normalized).item()
+embeddings_train_features = np.load(ms_embeddings_train_path_normalized).item()
+embeddings_dev_features = np.load(ms_embeddings_dev_path_normalized).item()
+embeddings_test_features = np.load(ms_embeddings_test_path_normalized).item()
 
-#test_dataset = create_sequence_dataset_from_metadata(test_metadata, embeddings_test_features, class_groups)
-test_pt = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_test_embedding_dataset.torch')
-test_dataset = torch.load(test_pt)
-#torch.save(test_dataset, test_pt)
-
-#train_dataset = create_sequence_dataset_from_metadata(train_metadata, embeddings_train_features, class_groups)
-train_pt = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_train_embedding_dataset.torch')
-train_dataset = torch.load(train_pt)
-#torch.save(train_dataset, train_pt)
-
-#dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, embeddings_dev_features, class_groups)
-dev_pt = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_dev_embedding_dataset.torch')
-dev_dataset = torch.load(dev_pt)
-#torch.save(dev_dataset, dev_pt)
+train_dataset = create_sequence_dataset_from_metadata(train_metadata, embeddings_train_features, class_groups)
+dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, embeddings_dev_features, class_groups)
+test_dataset = create_sequence_dataset_from_metadata(test_metadata, embeddings_test_features, class_groups)
 
 params["input_dim"] = train_dataset.tensors[0][0].size()[1]
 
@@ -69,4 +55,3 @@ for m in test_metadata:
     id_to_name[int(m["Id"])] = m["Name"]
 
 train(train_dataset, dev_dataset, test_dataset, id_to_name, experiment_dir, model, logger, params)
-

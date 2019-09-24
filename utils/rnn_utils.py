@@ -57,6 +57,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
         validation_golds = []
         validation_instance_count = validation_dataset.tensors[0].size()[0]
 
+        # batching to avoid running out of memory:
         if validation_instance_count > 10000:
             validation_instance_count = 256
 
@@ -98,6 +99,8 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     test_ids = []
 
     test_instance_count = test_dataset.tensors[0].size()[0]
+
+    # batching to avoid running out of memory:
     if test_instance_count > 10000:
         test_instance_count = 256
 
@@ -106,7 +109,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     with torch.no_grad():
         for inputs, labels, lengths, ids in test_loader:
             if inputs.shape[0] != test_instance_count:
-                continue
+                h = model.init_hidden(inputs.shape[0])
             lengths, inputs, labels, ids = sort_tensors(lengths, inputs, labels, ids)
 
             inputs = inputs.to(device)
