@@ -578,9 +578,9 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
     optimizer = optim.AdamW(joined_model.parameters(), lr=1e-2)
     logger.info(optimizer)
 
-    early_stopping = EarlyStopping(patience=6)
+    early_stopping = EarlyStopping(patience=1)
     logger.info(early_stopping)
-    softmax = nn.Softmax(dim=2)
+    #softmax = nn.Softmax(dim=2)
 
     for e in range(params["epochs"]):
         train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=True,
@@ -684,6 +684,11 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
     test_instance_count = resources_modality_1['test_dataset'].tensors[0].size()[0]
     test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=test_instance_count)
+
+    # batching to avoid running out of memory:
+    if test_instance_count > 10000:
+        test_instance_count = 256
+
     with torch.no_grad():
         h = best_model.init_hidden(test_instance_count)
         h1 = model1.init_hidden(test_instance_count)
@@ -691,6 +696,10 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
         for inputs1, labels1, lengths1, ids1 in test_loader1:
             inputs2, labels2, lengths2, ids2 = get_dataset_instances_by_ids(indexed_ds_test2, ids1)
+
+            if inputs1.shape[0] != test_instance_count:
+                h = best_model.init_hidden(inputs1.shape[0])
+
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')
                 break

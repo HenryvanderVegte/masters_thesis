@@ -109,7 +109,7 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     with torch.no_grad():
         for inputs, labels, lengths, ids in test_loader:
             if inputs.shape[0] != test_instance_count:
-                h = model.init_hidden(inputs.shape[0])
+                h = best_model.init_hidden(inputs.shape[0])
             lengths, inputs, labels, ids = sort_tensors(lengths, inputs, labels, ids)
 
             inputs = inputs.to(device)
