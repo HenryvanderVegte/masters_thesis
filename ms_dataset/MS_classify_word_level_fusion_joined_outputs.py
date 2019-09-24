@@ -48,7 +48,7 @@ embeddings_resources['test_dataset'] = embeddings_test_dataset
 embeddings_params["input_dim"] = embeddings_resources['train_dataset'].tensors[0][0].size()[1]
 embeddings_params["label_dim"] = len(set(list(class_groups.values())))
 
-embeddings_model = LSTM.LSTM(embeddings_params)
+embeddings_model = LSTM_all_timesteps.LSTM(embeddings_params)
 embeddings_model.load_state_dict(torch.load(embeddings_model_path))
 embeddings_model.eval()
 embeddings_resources['model'] = embeddings_model
