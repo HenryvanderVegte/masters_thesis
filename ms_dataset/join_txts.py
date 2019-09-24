@@ -1,5 +1,5 @@
 from utils.experiments_util import *
-from classification.util.global_vars import *
+from global_vars import *
 
 train0 = os.path.join(ROOT_FOLDER, 'datasets//MS//transcriptions//train0.txt')
 train1 = os.path.join(ROOT_FOLDER, 'datasets//MS//transcriptions//train1.txt')

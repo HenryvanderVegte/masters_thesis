@@ -1,5 +1,4 @@
-import pylab
-from classification.util.global_vars import *
+from global_vars import *
 import matplotlib.pyplot as plt
 import os
 

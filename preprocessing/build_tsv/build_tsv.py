@@ -1,5 +1,4 @@
-import os
-from classification.util.global_vars import *
+from global_vars import *
 from utils.experiments_util import *
 
 tsv_data = read_tsv_metadata(os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//labels.tsv"))

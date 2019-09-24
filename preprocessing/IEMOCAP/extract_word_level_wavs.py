@@ -1,5 +1,5 @@
 import os
-from classification.util.global_vars import *
+from global_vars import *
 import re
 from pydub import AudioSegment
 from pydub.utils import make_chunks

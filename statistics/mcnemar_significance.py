@@ -1,5 +1,5 @@
 import os
-from classification.util.global_vars import *
+from global_vars import *
 from statsmodels.stats.contingency_tables import mcnemar
 
 def get_all_info_str_from_CV(experiment_path):

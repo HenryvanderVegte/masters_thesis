@@ -1,5 +1,5 @@
 from utils.experiments_util import *
-from classification.util.global_vars import *
+from global_vars import *
 
 tsv_old = os.path.join(ROOT_FOLDER, 'datasets//MS//train.tsv')
 tsv_out = os.path.join(ROOT_FOLDER, 'datasets//MS//train_new.tsv')

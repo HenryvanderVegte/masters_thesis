@@ -1,6 +1,6 @@
 from utils.experiments_util import *
 from ms_dataset.ms_util import *
-from classification.util.global_vars import *
+from global_vars import *
 from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
@@ -37,6 +37,7 @@ experiment_dir, logger = create_experiment(EXPERIMENTS_FOLDER, class_groups, "MS
 emobase_train_features = np.load(ms_emobase_train_path_normalized).item()
 emobase_dev_features = np.load(ms_emobase_dev_path_normalized).item()
 emobase_test_features = np.load(ms_emobase_test_path_normalized).item()
+np.save
 
 train_dataset = create_sequence_dataset_from_metadata(train_metadata, emobase_train_features, class_groups)
 dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, emobase_dev_features, class_groups)

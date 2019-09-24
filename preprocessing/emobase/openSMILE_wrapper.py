@@ -1,5 +1,5 @@
 import os
-from classification.util.global_vars import *
+from global_vars import *
 import tempfile
 import numpy as np
 import subprocess

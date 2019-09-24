@@ -1,5 +1,5 @@
 import os
-from classification.util.global_vars import *
+from global_vars import *
 from shutil import copyfile
 
 iemocap_full = 'E://masters_thesis//datasets//IEMOCAP_full_release_withoutVideos//IEMOCAP_full_release'

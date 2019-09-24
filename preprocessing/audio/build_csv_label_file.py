@@ -1,5 +1,5 @@
 import os
-from classification.util.global_vars import *
+from global_vars import *
 
 wav_folder = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//wavs")
 train_txt = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//features//text//utterances//train.txt")

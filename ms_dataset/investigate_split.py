@@ -1,9 +1,6 @@
-from utils.experiments_util import *
 from ms_dataset.ms_util import *
-from classification.util.global_vars import *
+from global_vars import *
 from utils.rnn_utils import *
-from models import LSTM
-from utils.dataset_utils import create_sequence_dataset_from_metadata
 
 train_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//train.tsv'))
 dev_metadata = read_ms_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//MS//dev.tsv'))

@@ -1,10 +1,8 @@
 from utils.experiments_util import *
 from ms_dataset.ms_util import *
-from classification.util.global_vars import *
+from global_vars import *
 from utils.rnn_utils import *
 from models import LSTM
-from utils.dataset_utils import create_sequence_dataset_from_metadata
-import pickle
 
 train_pickle = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_train_embedding_dataset.pkl')
 dev_pickle = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_dev_embedding_dataset.pkl')

@@ -1,6 +1,6 @@
 import os
 from pydub import AudioSegment
-from classification.util.global_vars import *
+from global_vars import *
 import wave
 import contextlib
 

@@ -1,5 +1,4 @@
 import os
-from classification.util.global_vars import *
 from shutil import copyfile
 
 input_folder = 'E://masters_thesis//datasets//MSP_IMPROV//sessions'

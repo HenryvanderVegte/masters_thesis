@@ -1,5 +1,5 @@
 import os
-from classification.util.global_vars import *
+from global_vars import *
 
 txt_files = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//features//forced_alignment//utterances")
 

@@ -1,5 +1,5 @@
 import os
-from classification.util.global_vars import *
+from global_vars import *
 from shutil import copyfile
 
 wav_folder = os.path.join(ROOT_FOLDER, "datasets//RAVDESS//wavs")

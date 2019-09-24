@@ -1,6 +1,5 @@
 import os
-from classification.util.global_vars import *
-from shutil import copyfile
+from global_vars import *
 
 '''
 Two .wav files seem to have no forced alignment - this script will identify the missing ones

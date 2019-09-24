@@ -1,5 +1,5 @@
 from utils.experiments_util import *
-from classification.util.global_vars import *
+from global_vars import *
 from collections import Counter
 
 bestToWorst = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobaseFeaturesBestToWorst.txt')

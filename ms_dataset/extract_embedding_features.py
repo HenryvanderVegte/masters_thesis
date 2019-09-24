@@ -1,4 +1,4 @@
-from classification.util.global_vars import *
+from global_vars import *
 import gensim
 import os
 import tqdm

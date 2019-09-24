@@ -1,5 +1,5 @@
 from utils.experiments_util import *
-from classification.util.global_vars import *
+from global_vars import *
 from utils.two_modality_utils import *
 from models import LSTM, LSTM2
 from utils.dataset_utils import create_sequence_dataset_from_metadata

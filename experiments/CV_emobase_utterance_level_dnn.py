@@ -1,5 +1,5 @@
 from utils.experiments_util import *
-from classification.util.global_vars import *
+from global_vars import *
 from utils.dnn_utils import *
 from models import DNN
 from utils.dataset_utils import create_dataset_from_metadata

@@ -1,7 +1,7 @@
-import librosa, librosa.display
+import librosa.display
 import numpy as np
 import os
-from classification.util.global_vars import *
+from global_vars import *
 import matplotlib.pyplot as plt
 
 audio_path = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//wavs//Ses03F_script01_1_M018.wav')

@@ -1,8 +1,5 @@
-import os
-import numpy as np
-from classification.util.global_vars import *
+from global_vars import *
 from utils.experiments_util import *
-import torch
 
 full_feature_file = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_pauses.npy')
 result_feature_file = os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//features//audio//emobase_word_level_with_pauses_top_256.npy')

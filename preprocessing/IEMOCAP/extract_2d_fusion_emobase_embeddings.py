@@ -1,5 +1,5 @@
 import re
-from classification.util.global_vars import *
+from global_vars import *
 from utils.experiments_util import *
 import gensim
 import os

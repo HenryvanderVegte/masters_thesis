@@ -1,5 +1,5 @@
 from utils.experiments_util import *
-from classification.util.global_vars import *
+from global_vars import *
 from utils.rnn_utils import *
 from models import MultilabelLSTM
 from utils.dataset_utils import create_multilabel_sequence_dataset_from_metadata

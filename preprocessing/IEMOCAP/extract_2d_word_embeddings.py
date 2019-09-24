@@ -1,5 +1,5 @@
 import re
-from classification.util.global_vars import *
+from global_vars import *
 from old.word_embeddings import *
 import gensim
 import os

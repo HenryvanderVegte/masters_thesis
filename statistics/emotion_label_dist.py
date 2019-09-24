@@ -1,5 +1,5 @@
 import os
-from classification.util.global_vars import *
+from global_vars import *
 
 labels_folder = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//labels_full")
 

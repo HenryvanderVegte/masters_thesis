@@ -1,5 +1,5 @@
 from utils.experiments_util import *
-from classification.util.global_vars import *
+from global_vars import *
 
 train0 = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_train0.npy')
 train1 = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_train1.npy')

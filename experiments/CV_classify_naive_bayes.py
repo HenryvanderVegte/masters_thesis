@@ -1,6 +1,5 @@
-from utils.experiments_util import *
 from utils.naive_bayes_utils import *
-from classification.util.global_vars import *
+from global_vars import *
 
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
 EXPERIMENTS_FOLDER = os.path.join(ROOT_FOLDER, 'experiments//text')

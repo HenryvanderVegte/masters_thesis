@@ -1,5 +1,5 @@
 import os
-from classification.util.global_vars import *
+from global_vars import *
 from old.word_embeddings import extract_tokens_from_utterance
 
 class_groups = {

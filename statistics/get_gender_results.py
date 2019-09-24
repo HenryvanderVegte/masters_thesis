@@ -1,5 +1,5 @@
 from utils.experiments_util import *
-from classification.util.global_vars import *
+from global_vars import *
 
 def print_m_f_statistics(gender_infos):
     m_predicted = []

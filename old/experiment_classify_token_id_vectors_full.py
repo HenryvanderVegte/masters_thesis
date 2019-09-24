@@ -1,6 +1,6 @@
 import old.data_loader_pickle as data_loader
 from utils.experiments_util import *
-from classification.util.global_vars import *
+from global_vars import *
 from models import SelfLearnedEmbeddingsLSTM
 from old.word_embeddings import *
 from classification.util.text_preprocessing import create_sequence_dataset_with_pad_val
