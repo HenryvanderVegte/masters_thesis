@@ -62,7 +62,7 @@ for i in range(0, nr_of_folds):
     word_embedding_resources['test_dataset']  = create_sequence_dataset_from_metadata(metadata, embedding_features, class_groups, test_folds)
     word_embedding_params["input_dim"] = word_embedding_resources['train_dataset'].tensors[0][0].size()[1]
     word_embedding_params["label_dim"] = len(set(list(class_groups.values())))
-    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//8//CV_classify_word_embeddings////' + str(i) + '//model.pth')
+    word_embedding_model_path = os.path.join(ROOT_FOLDER, 'models//CV//8//CV_classify_word_embeddings//' + str(i) + '//model.pth')
     logger.info(word_embedding_model_path)
     word_embedding_model = LSTM.LSTM(word_embedding_params)
     word_embedding_model.load_state_dict(torch.load(word_embedding_model_path))
