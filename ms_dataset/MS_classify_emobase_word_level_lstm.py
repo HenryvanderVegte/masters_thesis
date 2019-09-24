@@ -4,6 +4,7 @@ from classification.util.global_vars import *
 from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
+import pickle
 
 ms_emobase_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_train_normalized.npy')
 ms_emobase_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//emobase_word_level_dev_normalized.npy')
@@ -39,8 +40,25 @@ emobase_dev_features = np.load(ms_emobase_dev_path_normalized).item()
 emobase_test_features = np.load(ms_emobase_test_path_normalized).item()
 
 train_dataset = create_sequence_dataset_from_metadata(train_metadata, emobase_train_features, class_groups)
+
+train_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_train_emobase_dataset.pkl')
+output = open(train_pkl, 'wb')
+pickle.dump(train_dataset, output)
+output.close()
+
 dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, emobase_dev_features, class_groups)
+
+dev_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_dev_emobase_dataset.pkl')
+output = open(dev_pkl, 'wb')
+pickle.dump(dev_dataset, output)
+output.close()
+
 test_dataset = create_sequence_dataset_from_metadata(test_metadata, emobase_test_features, class_groups)
+
+test_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//audio//normalized_test_emobase_dataset.pkl')
+output = open(test_pkl, 'wb')
+pickle.dump(test_dataset, output)
+output.close()
 
 params["input_dim"] = train_dataset.tensors[0][0].size()[1]
 

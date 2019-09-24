@@ -4,6 +4,7 @@ from classification.util.global_vars import *
 from utils.rnn_utils import *
 from models import LSTM
 from utils.dataset_utils import create_sequence_dataset_from_metadata
+import pickle
 
 ms_embeddings_train_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_train_normalized.npy')
 ms_embeddings_dev_path_normalized = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//embeddings_dev_normalized.npy')
@@ -39,8 +40,25 @@ embeddings_dev_features = np.load(ms_embeddings_dev_path_normalized).item()
 embeddings_test_features = np.load(ms_embeddings_test_path_normalized).item()
 
 train_dataset = create_sequence_dataset_from_metadata(train_metadata, embeddings_train_features, class_groups)
+
+train_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_train_embedding_dataset.pkl')
+output = open(train_pkl, 'wb')
+pickle.dump(train_dataset, output)
+output.close()
+
 dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, embeddings_dev_features, class_groups)
+
+dev_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_dev_embedding_dataset.pkl')
+output = open(dev_pkl, 'wb')
+pickle.dump(dev_dataset, output)
+output.close()
+
 test_dataset = create_sequence_dataset_from_metadata(test_metadata, embeddings_test_features, class_groups)
+
+test_pkl = os.path.join(ROOT_FOLDER, 'datasets//MS//features//text//normalized_test_embedding_dataset.pkl')
+output = open(test_pkl, 'wb')
+pickle.dump(test_dataset, output)
+output.close()
 
 params["input_dim"] = train_dataset.tensors[0][0].size()[1]
 
