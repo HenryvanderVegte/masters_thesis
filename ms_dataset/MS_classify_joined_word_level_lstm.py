@@ -48,7 +48,7 @@ emobase_test_features = np.load(ms_emobase_test_path_normalized).item()
 
 joined_train_features = join_feature_dicts(embeddings_train_features, emobase_train_features)
 joined_dev_features = join_feature_dicts(embeddings_dev_features, emobase_dev_features)
-joined_test_features = join_feature_dicts(embeddings_test_features, embeddings_test_features)
+joined_test_features = join_feature_dicts(embeddings_test_features, emobase_test_features)
 
 train_dataset = create_sequence_dataset_from_metadata(train_metadata, joined_train_features, class_groups)
 dev_dataset = create_sequence_dataset_from_metadata(dev_metadata, joined_dev_features, class_groups)
