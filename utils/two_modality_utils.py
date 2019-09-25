@@ -692,8 +692,8 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
             if inputs1.shape[0] != test_instance_count:
                 h = best_model.init_hidden(inputs1.shape[0])
-                h1 = model1.init_hidden(test_instance_count)
-                h2 = model2.init_hidden(test_instance_count)
+                h1 = model1.init_hidden(inputs1.shape[0])
+                h2 = model2.init_hidden(inputs1.shape[0])
 
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')
