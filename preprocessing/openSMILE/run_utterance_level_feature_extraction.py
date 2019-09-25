@@ -1,5 +1,6 @@
 from utils.experiments_util import *
-from preprocessing.emobase.emobase_feature_extractor import *
+from global_vars import *
+from preprocessing.openSMILE.emobase_feature_extractor import *
 from multiprocessing.pool import ThreadPool
 
 metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))

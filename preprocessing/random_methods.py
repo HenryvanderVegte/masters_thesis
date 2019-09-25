@@ -1,6 +1,7 @@
 import os
 from shutil import copyfile
 import math
+import pydub
 
 def copy_wavs(input_folder, output_folder):
     """
@@ -42,3 +43,30 @@ def get_oovs_latex_format(oov_words):
     for line in lines:
         line = line[1:] + '\\\\'
         print(line)
+
+def print_unwanted_sample_rates(wav_folder):
+    """
+    Checks if any .wav file in folder contains an unwanted sample rate (!= 16000)
+    :param wav_folder:
+    :return:
+    """
+    for r, d, f in os.walk(wav_folder):
+        for file in f:
+            if '.wav' in file:
+                path = os.path.join(r, file)
+                audio = pydub.AudioSegment.from_wav(path)
+                if str(audio.frame_rate) != "16000":
+                    print(audio.frame_rate)
+
+def rename_wavs(wav_folder):
+    """
+    Iterates over a folder (recursive) and copies every .wav file to the base path
+    :param wav_folder:
+    :return:
+    """
+    for r, d, f in os.walk(wav_folder):
+        for file in f:
+            if '.wav' in file:
+                old_path = os.path.join(r, file)
+                new_path = os.path.join(wav_folder, file)
+                copyfile(old_path, new_path)
