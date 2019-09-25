@@ -1,13 +1,15 @@
 import torch
 import torch.nn as nn
-
-"""
-LSTM model, creates an n-layer LSTM with a final fully connected layer
-"""
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class LSTM(nn.Module):
+    """
+    n-layered LSTM model with a single fully connected layer applied
+    on all timesteps
+    (this is used when predictions for each word are combined to make a final prediction
+    in the word-level fusion approach)
+    """
+
     def __init__(self, params):
         super().__init__()
 

@@ -1,13 +1,15 @@
 import torch
 import torch.nn as nn
-
-"""
-LSTM model, creates an n-layer LSTM with a final fully connected layer
-"""
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class LSTM(nn.Module):
+    """
+    n-layered LSTM model with a single fully connected layer on
+    the last output of the sequence
+    (many-to-one)
+    returns the hidden activation of the last layer.
+    This is used in early fusion approaches of the network
+    """
     def __init__(self, params):
         super().__init__()
 

@@ -8,6 +8,11 @@ RNN model, creates an n-layer RNN with a final fully connected layer
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class RNN(nn.Module):
+    """
+    n-layered Recurrent Neural Network with a single fully connected layer on
+    the last output of the sequence
+    (many-to-one)
+    """
     def __init__(self, params):
         super().__init__()
 

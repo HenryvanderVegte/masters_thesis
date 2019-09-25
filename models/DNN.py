@@ -1,6 +1,9 @@
 import torch.nn as nn
 
 class DNN(nn.Module):
+    """"
+    Simple Neural Network with one input, one hidden, and one output layer
+    """
     def __init__(self, params):
         super(DNN, self).__init__()
         self.classif = nn.Sequential(

@@ -4,6 +4,13 @@ import torch.nn as nn
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class CNNBLSTM(nn.Module):
+    """
+    Convolutional neural network with LSTM layers at the end.
+    Implementation is inspired by Yang & Hirschberg 2018:
+    'Predicting Arousal and Valence from Waveforms and Spectrograms using Deep Neural Networks'
+    http://www.cs.columbia.edu/speech/PaperFiles/2018/yang_is18.pdf
+    """
+
     def __init__(self, params):
         super().__init__()
 
@@ -56,19 +63,6 @@ class CNNBLSTM(nn.Module):
         batch_size, channels, seq_length, spectograms = x3.size()
 
         x3 = x3.view(batch_size, seq_length * channels * spectograms)
-
-        #x = torch.nn.utils.rnn.pack_padded_sequence(x3, lengths, batch_first=True)
-        #out, hidden = self.rnn(x3, hidden)
-
-        '''
-        pad, inp = torch.nn.utils.rnn.pad_packed_sequence(packed, batch_first=True)
-        last_out = torch.empty(batch_size, self.hidden_size, dtype=torch.float, device=device)
-
-        for j, x in enumerate(inp):
-            last_out[j,:] = pad[j,(x-1),:]
-        
-        '''
-
         out = self.classif(x3)
         return out, hidden
 
