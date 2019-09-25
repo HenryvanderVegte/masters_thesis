@@ -228,7 +228,7 @@ def join_feature_dicts(feature_dict1, feature_dict2):
         # delete old keys to save RAM:
         if key in feature_dict1:
             del feature_dict1[key]
-        if key in feature_dict2
+        if key in feature_dict2:
             del feature_dict2[key]
 
         joined_dict[key] = np.asarray(joined_vecs)
