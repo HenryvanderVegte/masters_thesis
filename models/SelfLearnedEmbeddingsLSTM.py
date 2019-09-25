@@ -5,7 +5,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class SelfLearnedEmbeddingsLSTM(nn.Module):
     """
-    
+    LSTM with embedding layer before. Inputs to the embedding layers are one-hot encoded vectors with
+    the dimensionality of the used vocabulary.
     """
     def __init__(self, params):
         super().__init__()

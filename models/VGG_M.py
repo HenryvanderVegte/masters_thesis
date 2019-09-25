@@ -1,6 +1,13 @@
 import torch
 import torch.nn as nn
 
+"""
+Model for an end-to-end learning approach inspired by the VGG-M architecture
+(Simonyan & Zisserman, 2014: Very Deep Convolutional Networks for Large-Scale Image Recognition)
+
+Parts of this class are copied from:
+https://github.com/Cadene/pretrained-models.pytorch
+"""
 
 class SpatialCrossMapLRN(nn.Module):
     def __init__(self, local_size=1, alpha=1.0, beta=0.75, k=1, ACROSS_CHANNELS=True):
