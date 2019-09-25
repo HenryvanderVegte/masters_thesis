@@ -580,7 +580,6 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
     early_stopping = EarlyStopping(patience=1)
     logger.info(early_stopping)
-    #softmax = nn.Softmax(dim=2)
 
     for e in range(params["epochs"]):
         train_loader1 = utils.DataLoader(resources_modality_1['train_dataset'], shuffle=True,
@@ -605,11 +604,9 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
             with torch.no_grad():
                 h1 = tuple([each.data for each in h1])
                 _, _, _, outputs1 = model1(inputs1.to(device), lengths1.to(device, dtype=torch.int64).view(-1), h1)
-                #outputs1 = softmax(outputs1)
 
                 h2 = tuple([each.data for each in h2])
                 _, _, _, outputs2 = model2(inputs2.to(device), lengths2.to(device, dtype=torch.int64).view(-1), h2)
-                #outputs2 = softmax(outputs2)
 
             #combine weights of the two other models to create the input for the joined model
             joined_inputs = torch.cat((outputs1, outputs2), 2)
@@ -651,11 +648,9 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
                 h1 = tuple([each.data for each in h1])
                 _, _, _, outputs1 = model1(inputs1.to(device), lengths, h1)
-                #outputs1 = softmax(outputs1)
 
                 h2 = tuple([each.data for each in h2])
                 _, _, _, outputs2 = model2(inputs2.to(device), lengths, h2)
-                #outputs2 = softmax(outputs2)
 
                 joined_inputs = torch.cat((outputs1, outputs2), 2)
 
@@ -670,7 +665,6 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
         logger.info('Epoch:{}/{:.0f}; Train loss:{:.4f}; Validation loss:{:.4f}; Validation accuracy:{:.4f}'.format(e, params["epochs"], np.mean(train_losses), np.mean(validation_losses), acc))
 
         early_stopping(np.mean(validation_losses), joined_model)
-        #early_stopping(1-acc, joined_model)
         if early_stopping.early_stop:
             logger.info('Stop training. Take model from epoch ' + str(early_stopping.best_epoch))
             break
@@ -683,11 +677,10 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
     test_ids = []
 
     test_instance_count = resources_modality_1['test_dataset'].tensors[0].size()[0]
-    test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=test_instance_count)
-
     # batching to avoid running out of memory:
     if test_instance_count > 10000:
         test_instance_count = 256
+    test_loader1 = utils.DataLoader(resources_modality_1['test_dataset'], shuffle=False, batch_size=test_instance_count)
 
     with torch.no_grad():
         h = best_model.init_hidden(test_instance_count)
@@ -699,6 +692,8 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
             if inputs1.shape[0] != test_instance_count:
                 h = best_model.init_hidden(inputs1.shape[0])
+                h1 = model1.init_hidden(test_instance_count)
+                h2 = model2.init_hidden(test_instance_count)
 
             if not torch.all(torch.eq(ids1, ids2)):
                 print('Expected the same instances for both modalities. Break')
@@ -713,11 +708,9 @@ def train_two_modality_rnn_join_outputs(resources_modality_1, resources_modality
 
             h1 = tuple([each.data for each in h1])
             _, _, _, outputs1 = model1(inputs1.to(device), lengths, h1)
-            #outputs1 = softmax(outputs1)
 
             h2 = tuple([each.data for each in h2])
             _, _, _, outputs2 = model2(inputs2.to(device), lengths, h2)
-            #outputs2 = softmax(outputs2)
 
             joined_inputs = torch.cat((outputs1, outputs2), 2)
 
