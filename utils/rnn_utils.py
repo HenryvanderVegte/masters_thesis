@@ -19,9 +19,10 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
     count_dict = dict(zip(unique, counts))
     weights = 1 / np.array(list(count_dict.values()))
     weights = torch.FloatTensor(weights).cuda()
-    criterion = nn.CrossEntropyLoss()#weight=weights)
+    criterion = nn.CrossEntropyLoss(weight=weights)
     #optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-2, amsgrad=False)
-    optimizer = optim.Adam(model.parameters(), lr=params['learning_rate'])
+    #optimizer = optim.Adam(model.parameters(), lr=params['learning_rate'])
+    optimizer = optim.Adadelta(model.parameters(), lr=params['learning_rate'])
 
     logger.info(optimizer)
 
