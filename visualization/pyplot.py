@@ -17,5 +17,5 @@ plt.ylim(0, 100)
 
 line, = plt.plot(x, y, color='blue', lw=2)
 
-plt.savefig(os.path.join(ROOT_FOLDER, 'test//feature_plot3.png'))
+plt.savefig(os.path.join(ROOT_FOLDER, 'test//feature_plot4.png'), dpi=300)
 
