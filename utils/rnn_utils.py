@@ -92,11 +92,14 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
         if early_stopping.early_stop:
             logger.info('Stop training. Take model from epoch ' + str(early_stopping.best_epoch))
             break
-        if e > 20:
-            break
+
+        if e % 10 == 0:
+            model_path = os.path.join(experiment_path, 'model_' + str(e) + '.pth')
+            torch.save(model.state_dict(), model_path)
+
     best_model = early_stopping.best_model
 
-    model_path = os.path.join(experiment_path, "model.pth")
+    model_path = os.path.join(experiment_path, "final_model.pth")
     torch.save(best_model.state_dict(), model_path)
 
     test_losses = []
@@ -135,8 +138,6 @@ def train(train_dataset, validation_dataset, test_dataset, id_to_name, experimen
 
     metrics_str = get_metrics_str(test_golds, test_predictions)
     logger.info(metrics_str)
-
-
 
     log_results = metrics_str + "\n\n"
     log_results += "Predicted\tGold\tName\n"
