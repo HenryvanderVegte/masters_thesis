@@ -2,8 +2,6 @@ from global_vars import *
 import matplotlib.pyplot as plt
 import os
 
-a = [pow(10, i) for i in range(10)]
-
 x = [1,2,4,8,16,32,64,128,256,512,989]
 
 y = [34.46, 37.55, 41.37, 46.90, 49.42, 54.29, 56.42, 58.46, 59.89, 60.15, 61.31]

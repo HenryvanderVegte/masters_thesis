@@ -44,7 +44,6 @@ def get_stats(experiment_path, metadata):
         if instance['Name'] not in experiment_info:
             continue
 
-
         classified_correct = experiment_info[instance['Name']][0] ==experiment_info[instance['Name']][1]
         total_agreement = is_total_agreement(instance['Labels_All'])
 

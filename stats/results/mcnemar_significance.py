@@ -1,27 +1,7 @@
 import os
+from stats.results.result_utils import get_all_info_str_from_CV
 from global_vars import *
 from statsmodels.stats.contingency_tables import mcnemar
-
-def get_all_info_str_from_CV(experiment_path):
-    """
-    Returns a dictionary with Utterance Name as key with tuples (Predicted, Gold)
-    :param experiment_path:
-    :return:
-    """
-    all_results = {}
-    for i in range(0,10):
-        results = os.path.join(experiment_path, str(i), 'results.txt')
-        reached_res = False
-        for line in open(results).read().splitlines():
-            if line.startswith('Predicted	Gold	Name'):
-                reached_res = True
-                continue
-            if not reached_res:
-                continue
-
-            split = line.split('\t')
-            all_results[split[2]] = (split[0], split[1])
-    return all_results
 
 def run_mcnemar(experiment_path1, experiment_path2):
     dict1 = get_all_info_str_from_CV(experiment_path1)
@@ -64,5 +44,4 @@ def run_mcnemar(experiment_path1, experiment_path2):
 
 experiment_path1 = os.path.join(ROOT_FOLDER, "models//CV//12//CV_classify_joined_word_level_256_emo")
 experiment_path2 = os.path.join(ROOT_FOLDER, "models//CV//12//CV_classify_word_level_fusion_joined_features")
-
 run_mcnemar(experiment_path1, experiment_path2)
