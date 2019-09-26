@@ -1,29 +1,32 @@
-from global_vars import *
+from utils.result_utils import get_all_info_str_from_CV
 from utils.experiments_util import *
 
-metadata = read_tsv_metadata(os.path.join(ROOT_FOLDER, 'datasets//IEMOCAP//labels.tsv'))
-labels = ["hap", "exc", "sad", "ang","neu"]
+def print_gender_seperated_statistics(experiment_path):
+    all_info = get_all_info_str_from_CV(experiment_path)
 
-def get_all_info_str_from_CV(experiment_path):
-    """
-    Returns a dictionary with Utterance Name as key with tuples (Predicted, Gold)
-    :param experiment_path:
-    :return:
-    """
-    all_results = {}
-    for i in range(0,10):
-        results = os.path.join(experiment_path, str(i), 'results.txt')
-        reached_res = False
-        for line in open(results).read().splitlines():
-            if line.startswith('Predicted	Gold	Name'):
-                reached_res = True
-                continue
-            if not reached_res:
-                continue
+    m_predicted = []
+    m_gold = []
+    f_predicted = []
+    f_gold = []
 
-            split = line.split('\t')
-            all_results[split[2]] = (split[0], split[1])
-    return all_results
+    for name in all_info.keys():
+        predicted = int(all_info[name][0])
+        gold = int(all_info[name][1])
+
+        if name.split('_')[-1].startswith('F'):
+            f_predicted.append(predicted)
+            f_gold.append(gold)
+        elif name.split('_')[-1].startswith('M'):
+            m_predicted.append(predicted)
+            m_gold.append(gold)
+        else:
+            print('Unexpected Name')
+
+    print('Male stats (' + str(len(m_gold)) + ' instances)')
+    print(get_metrics_str(m_gold, m_predicted))
+
+    print('Female stats (' + str(len(f_gold)) + ' instances)')
+    print(get_metrics_str(f_gold, f_predicted))
 
 def is_total_agreement(all_labels_str):
     lab = all_labels_str.split(';')[0]
@@ -33,7 +36,7 @@ def is_total_agreement(all_labels_str):
             total_agreement = False
     return total_agreement
 
-def get_stats(experiment_path, metadata):
+def print_agreement_seperated_statistics(experiment_path, metadata):
     experiment_info = get_all_info_str_from_CV(experiment_path)
 
     correct_with_full_agree = 0
@@ -62,7 +65,3 @@ def get_stats(experiment_path, metadata):
     print('Classified correct and no full agreement:' + str(correct_without_full_agree))
     print('Classified wrong and full agreement:' + str(wrong_with_full_agree))
     print('Classified wrong and no full agreement:' + str(wrong_without_full_agree))
-
-experiment_path = os.path.join(ROOT_FOLDER, "models//CV//12//CV_late_fusion_joined_model_output_svm")
-get_stats(experiment_path, metadata)
-

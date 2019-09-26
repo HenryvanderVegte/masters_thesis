@@ -1,5 +1,5 @@
 import os
-from stats.results.result_utils import get_all_info_str_from_CV
+from utils.result_utils import get_all_info_str_from_CV
 from global_vars import *
 from statsmodels.stats.contingency_tables import mcnemar
 
