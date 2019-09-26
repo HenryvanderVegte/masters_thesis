@@ -1,59 +1,36 @@
 import os
 from pydub import AudioSegment
 from global_vars import *
-import wave
-import contextlib
-import time
+import datetime
 
-wav_folder = os.path.join(ROOT_FOLDER, "datasets//IEMOCAP//wavs")
-wavs_folder = os.path.join(ROOT_FOLDER, "datasets//MS//audio//dev")
+def print_audio_duration_from_transcriptions_file(transcriptions_file_path):
+    transcriptions = open(transcriptions_file_path).read().splitlines()
+    full_duration_seconds = 0.
+    missing_count = 0
+    for transcription in transcriptions:
+        last = transcription.split('\t')[-1].split(';')
+        if len(last) != 2:
+            missing_count += 1
+            continue
+        length = float(last[0]) + float(last[1])
+        full_duration_seconds += length
 
-lengths_impro = []
-lengths_script = []
+    print('Duration in seconds:' + str(full_duration_seconds))
+    td = str(datetime.timedelta(seconds=int(full_duration_seconds)))
+    print('Duration formatted:' + td)
 
+def print_audio_duration_from_audiofiles(folder):
+    full_duration_seconds = 0.
 
-def print_audio_duration(folder):
-    full_duration = 0.
-
-    i = 0
     for r, d, f in os.walk(folder):
         for file in f:
             file_path = os.path.join(r, file)
 
             audio = AudioSegment.from_file(file_path)
             duration_seconds = audio.duration_seconds
-            full_duration += duration_seconds
-            i += 1
-            print(i)
+            full_duration_seconds += duration_seconds
 
-    duration_str = time.strftime('%H:%M:%S', time.gmtime(int(full_duration)))
-    print('Duration:' + duration_str)
+    print('Duration in seconds:' + full_duration_seconds)
+    td = datetime.timedelta(seconds=int(full_duration_seconds))
+    print('Duration formatted:' + td)
 
-
-print_audio_duration(wavs_folder)
-
-
-for r, d, f in os.walk(wav_folder):
-    for file in f:
-        file_path = os.path.join(r, file)
-
-        audio = AudioSegment.from_file(file_path)
-
-        with contextlib.closing(wave.open(file_path,'r')) as f:
-            frames = f.getnframes()
-            rate = f.getframerate()
-            duration = frames / float(rate)
-            if 'impro' in file:
-                lengths_impro.append(duration)
-            else:
-                lengths_script.append(duration)
-
-print('Impro lengths:' + str(len(lengths_impro)))
-print('Script lengths:' + str(len(lengths_script)))
-
-print('----')
-for e in lengths_impro:
-    print(e)
-print('----')
-for e in lengths_script:
-    print(e)
