@@ -139,17 +139,3 @@ def tsv_data_to_string(tsv_data):
             items.append(instance[key])
         tsv_str += '\t'.join(items) + '\n'
     return tsv_str
-
-
-
-
-#add_all_labels(tsv_data)
-#tsv_data = add_word_count(tsv_data)
-#tsv_data = add_all_labels(tsv_data)
-
-
-tsv_data = add_gender(tsv_data)
-tsv_str = tsv_data_to_string(tsv_data)
-
-with open(tsv_data_new, "w") as f:
-    f.write(tsv_str)
