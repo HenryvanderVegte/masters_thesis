@@ -70,3 +70,30 @@ def rename_wavs(wav_folder):
                 old_path = os.path.join(r, file)
                 new_path = os.path.join(wav_folder, file)
                 copyfile(old_path, new_path)
+
+def compare_wavs_and_forced_alignment(forced_alignment_folder, wav_folder):
+    """
+    Checks if there is a wavefile for which no preprocessed forced alignment with word level
+    timestamps exists. Prints out all cases in which no .wdseg-file could be found.
+
+        -> the missing ones that were identified on the IEMOCAP dataset are:
+        Ses03F_impro07_M030
+        Ses03M_impro03_M001
+
+    :param forced_alignment_folder:
+    :param wav_folder:
+    :return:
+    """
+    fa_names = []
+    for r, d, f in os.walk(forced_alignment_folder):
+        for file in f:
+            if '.wdseg' in file:
+                fa_name = file[:-6]
+                fa_names.append(fa_name)
+
+    for r, d, f in os.walk(wav_folder):
+        for file in f:
+            if '.wav' in file:
+                wav_name = file[:-4]
+                if wav_name not in fa_names:
+                    print(wav_name)
